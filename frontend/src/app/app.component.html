@@ -1,0 +1,11 @@
+<div id="msgbox">
+    <ul>
+        @for (msg of this.messages; track $index) {
+            <li>{{msg}}</li>
+        }
+    </ul>
+</div>
+<div id="uc">
+    <input type="text">
+    <input type="submit" value="send" (click)="sendClicked()">
+</div>
