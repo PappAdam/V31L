@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    // General Extensions
+    "dbaeumer.vscode-eslint",            // ESLint for JavaScript/TypeScript linting
+    "esbenp.prettier-vscode",            // Prettier for code formatting
+    
+    // Backend Node.js and Prisma
+    "Prisma.prisma",                    // Prisma support for schema syntax and intellisense
+    "wix.vscode-import-cost",           // Import cost extension to see the size of imports
+    
+    // Angular Frontend
+    "angular.ng-template",              // Angular HTML template support
+    "mrmlnc.vscode-scss",               // SCSS syntax highlighting and linting (if your frontend uses SCSS)
+
+    // For Better Git Support
+    "mhutchie.git-graph",               // Git Graph for visualization of git history and branch management
+  ]
+}
