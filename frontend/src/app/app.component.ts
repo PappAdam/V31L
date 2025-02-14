@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import {Message, Header} from "../../../types/type"
+
+import * as msgpack from "@msgpack/msgpack"
 
 @Component({
   selector: 'app-root',
@@ -13,14 +16,14 @@ export class AppComponent {
   messages: string[] = [];
 
   ngAfterViewInit() {
-    this.ws = new WebSocket('ws://localhost:8080');
-
+    this.ws = new WebSocket("ws://10.0.22.36:8080");
+        
     this.ws.onmessage = (msg) => {
-      if (msg.data.startsWith('newmsg:')) {
-        const parsed = msg.data.slice(7);
-        this.messages.push(parsed);
-      }
-    };
+        const message = msgpack.decode(msg.data) as Message;
+        if (message.header == Header.NewMsg) {
+          this.messages.push(message.data);
+        }
+    }
 
     this.ws.onopen = () => {
       // this.ws.send("initialized");
@@ -28,8 +31,14 @@ export class AppComponent {
   }
 
   sendClicked() {
-    let text = (document.querySelector('input[type=text]') as HTMLInputElement)
-      .value;
-    this.ws.send(text);
+    let text = (document.querySelector("input[type=text]") as HTMLInputElement).value;
+    
+    let message: Message = {
+      header: Header.NewMsg,
+      data: text,
+    };
+
+    let bin = msgpack.encode(message);
+    this.ws.send(bin);
   }
 }

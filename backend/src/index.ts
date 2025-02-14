@@ -1,5 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import WebSocket, { WebSocketServer } from "ws";
+import * as msgpack from "@msgpack/msgpack"
+
 
 //Example usage of prisma
 const prisma = new PrismaClient();
@@ -25,9 +27,9 @@ const connections: WebSocket[] = [];
 wss.on("connection", (ws) => {
   connections.push(ws);
 
-  ws.on("message", (msg) => {
-    connections.forEach((s) => {
-      s.send("newmsg:" + msg);
+    ws.on("message", (msg) => {
+        connections.forEach((s) => {
+            s.send(msg);
+        })
     });
   });
-});
