@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import {Message, Header} from "../../../types/type"
+import { ClientMessage, Header } from '../../../types';
 
-import * as msgpack from "@msgpack/msgpack"
+import * as msgpack from '@msgpack/msgpack';
+import { Connection } from '../socket_communication/socket';
+import { ConnectionService } from './connection/connection.service';
 
 @Component({
   selector: 'app-root',
@@ -12,33 +14,23 @@ import * as msgpack from "@msgpack/msgpack"
 })
 export class AppComponent {
   title = 'message_app';
-  ws!: WebSocket;
   messages: string[] = [];
 
-  ngAfterViewInit() {
-    this.ws = new WebSocket("ws://10.0.22.36:8080");
-        
-    this.ws.onmessage = (msg) => {
-        const message = msgpack.decode(msg.data) as Message;
-        if (message.header == Header.NewMsg) {
-          this.messages.push(message.data);
-        }
-    }
+  constructor(private connection: ConnectionService) {}
 
-    this.ws.onopen = () => {
-      // this.ws.send("initialized");
+  async ngAfterViewInit() {
+    this.connection.onMsgRecieved = (msg) => {
+      this.messages.push(msg);
     };
+    this.connection.event$.subscribe(this.onMsgRecieved);
   }
 
-  sendClicked() {
-    let text = (document.querySelector("input[type=text]") as HTMLInputElement).value;
-    
-    let message: Message = {
-      header: Header.NewMsg,
-      data: text,
-    };
+  onMsgRecieved(msg: string) {}
 
-    let bin = msgpack.encode(message);
-    this.ws.send(bin);
+  sendClicked() {
+    let text = (document.querySelector('input[type=text]') as HTMLInputElement)
+      .value;
+
+    this.connection.sendMsg(text);
   }
 }
