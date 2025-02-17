@@ -1,7 +1,7 @@
 import WebSocket, { WebSocketServer } from "ws";
 import { PrismaClient } from "@prisma/client";
 import express from "express";
-import authRouter from "./auth";
+import authRouter, { extractUserFromToken } from "./http/auth";
 import bodyParser from "body-parser";
 import {
   ClientMessage,
@@ -10,6 +10,7 @@ import {
   ServerHeader,
 } from "../../types";
 import * as msgpack from "@msgpack/msgpack";
+import logRouter from "./http/log";
 
 export const prisma = new PrismaClient();
 
@@ -46,6 +47,12 @@ socketServer.on("connection", (newClient) => {
 const httpServer = express();
 httpServer.use(bodyParser.json());
 httpServer.use("/auth", authRouter);
+
+// You can use req.user after this middleware runs
+const protectedRoutes = httpServer.use(extractUserFromToken);
+
+protectedRoutes.use("/log", logRouter);
+
 httpServer.listen(3000, () => {
   console.log("HTTP server listening on port 3000");
 });

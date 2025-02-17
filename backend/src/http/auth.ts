@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response, Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { createUser, findUserByName } from "./db/user";
+import { createUser, findUserByName } from "../db/user";
+import { prisma } from "..";
 
 const authRouter = Router();
 authRouter.post("/login", loginUser);
@@ -62,26 +63,32 @@ const generateToken = (userId: string): string => {
   return jwt.sign({ userId }, "your_secret_key", { expiresIn: "1h" });
 };
 
-const extractUserFromToken = (
+export async function extractUserFromToken(
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+) {
   // Get the token from the Authorization header
   const token = req.header("Authorization")?.replace("Bearer ", "");
 
   if (!token) {
-    return res.status(401).json({ message: "No token provided." });
+    res.status(401).json({ message: "No token provided." });
+    return;
   }
 
   try {
-    // Verify and decode the token using the secret key
     const decoded = jwt.verify(token, "your_secret_key");
+    if (typeof decoded !== "object") {
+      throw Error;
+    }
 
-    // Call next to pass control to the next middleware or route handler
+    const userId = decoded.userId as string;
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    req.user = user;
+
     next();
   } catch (error) {
-    // If token is invalid or expired, return an error response
-    return res.status(401).json({ message: "Invalid or expired token." });
+    res.status(401).json({ message: "Invalid or expired token." });
+    return;
   }
-};
+}
