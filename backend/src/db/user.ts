@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { prisma } from "../index.ts";
+import { prisma } from "../index";
 import { User } from "@prisma/client";
 
 /**
@@ -12,8 +12,6 @@ import { User } from "@prisma/client";
  * @param password The plaintext password to be hashed and stored.
  *
  * @returns The newly created user object, including the username and hashed password.
- *
- * @throws {Error} If there is an issue with database creation or password hashing.
  */
 export async function createUser(username: string, password: string) {
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -36,6 +34,10 @@ export async function createUser(username: string, password: string) {
  * @returns The user object if found, or `null` if no user with the given username exists.
  */
 export async function findUserByName(username: string): Promise<User | null> {
+  if (!username) {
+    return null;
+  }
+
   const user = await prisma.user.findUnique({
     where: {
       username, // searching by the unique username field

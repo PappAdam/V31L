@@ -2,6 +2,7 @@ import WebSocket, { WebSocketServer } from "ws";
 import { PrismaClient, Prisma } from "@prisma/client";
 import express from "express";
 import authRouter from "./auth";
+import bodyParser from "body-parser";
 
 export const prisma = new PrismaClient();
 
@@ -21,6 +22,7 @@ socketServer.on("connection", (newClient) => {
 });
 
 const httpServer = express();
+httpServer.use(bodyParser.json());
 httpServer.use("/auth", authRouter);
 httpServer.listen(3000, () => {
   console.log("HTTP server listening on port 3000");
