@@ -11,7 +11,7 @@ export class Connection {
       const message = msgpack.decode(
         await (msg.data as any).arrayBuffer()
       ) as types.ClientMessage;
-      if (message.header == types.Header.NewMsg) {
+      if (message.header == types.ClientHeader.NewMsg) {
         this.onMsgRecieved(message.data);
       }
     };
@@ -19,7 +19,7 @@ export class Connection {
 
   sendMsg(msg: string) {
     let client_message: types.ClientMessage = {
-      header: types.Header.NewMsg,
+      header: types.ClientHeader.NewMsg,
       data: msg,
     };
 
