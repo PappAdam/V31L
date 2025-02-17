@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { createUser, findUserByName } from "./db/user.ts";
+import { createUser, findUserByName } from "./db/user";
 
 const authRouter = Router();
 authRouter.post("/login", loginUser);
