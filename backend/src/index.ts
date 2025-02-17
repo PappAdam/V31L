@@ -1,34 +1,27 @@
-import { Prisma, PrismaClient } from "@prisma/client";
 import WebSocket, { WebSocketServer } from "ws";
-import * as msgpack from "@msgpack/msgpack";
+import { PrismaClient, Prisma } from "@prisma/client";
+import express from "express";
+import authRouter from "./auth";
 
-//Example usage of prisma
-const prisma = new PrismaClient();
-async function addUser(
-  //Type can be anything, but all fields in the schema without a @default property have to be supplied to the data field.
-  //In this example username and password are the two required fields
-  user: Prisma.XOR<Prisma.UserCreateInput, Prisma.UserUncheckedCreateInput>
-) {
-  //You have to await on create/update/delete for it to take effect.
-  //Will not execute without await
-  await prisma.user.create({ data: user });
-}
+export const prisma = new PrismaClient();
 
-// addUser({
-//   username: "asdasd",
-//   password: "asdasdsa",
-// });
+const socketServer = new WebSocketServer({ port: 8080 });
+const clients: WebSocket[] = [];
+socketServer.on("listening", () => {
+  console.log("WebSocket server listening on port 8080");
+});
+socketServer.on("connection", (newClient) => {
+  clients.push(newClient);
 
-const wss = new WebSocketServer({ port: 8080 });
-
-const connections: WebSocket[] = [];
-
-wss.on("connection", (ws) => {
-  connections.push(ws);
-
-  ws.on("message", (msg) => {
-    connections.forEach((s) => {
-      s.send(msg);
+  newClient.on("message", (message) => {
+    clients.forEach((client) => {
+      client.send(message);
     });
   });
+});
+
+const httpServer = express();
+httpServer.use("/auth", authRouter);
+httpServer.listen(3000, () => {
+  console.log("HTTP server listening on port 3000");
 });

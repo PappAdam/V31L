@@ -1,5 +1,5 @@
-import bcrypt from "bcryptjs/types";
-import { prisma } from "..";
+import bcrypt from "bcryptjs";
+import { prisma } from "../index.ts";
 import { User } from "@prisma/client";
 
 /**

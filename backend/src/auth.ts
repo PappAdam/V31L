@@ -1,10 +1,14 @@
-import { RequestHandler } from "express";
-import { prisma } from ".";
-import bcrypt from "bcryptjs/types";
+import { NextFunction, Request, Response, Router } from "express";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { createUser, findUserByName } from "./db/user";
+import { createUser, findUserByName } from "./db/user.ts";
 
-const registerUser: RequestHandler = async (req, res, next) => {
+const authRouter = Router();
+authRouter.post("/login", loginUser);
+authRouter.post("/register", registerUser);
+export default authRouter;
+
+async function registerUser(req: Request, res: Response, next: NextFunction) {
   const { username, password } = req.body;
 
   try {
@@ -23,9 +27,9 @@ const registerUser: RequestHandler = async (req, res, next) => {
     res.status(500).json({ message: "Error registering user" });
     console.error("Error during login: \n", error);
   }
-};
+}
 
-const loginUser: RequestHandler = async (req, res, next) => {
+async function loginUser(req: Request, res: Response, next: NextFunction) {
   const { username, password } = req.body;
 
   try {
@@ -51,7 +55,7 @@ const loginUser: RequestHandler = async (req, res, next) => {
     res.status(500).json({ message: "Error logging in" });
     console.error("Error during login: \n", error);
   }
-};
+}
 
 // Helper function to generate JWT
 const generateToken = (userId: string): string => {
