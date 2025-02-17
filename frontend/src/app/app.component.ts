@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ClientMessage, Header } from '../../../types';
+import { ClientMessage, ClientHeader } from '../../../types';
 
 import * as msgpack from '@msgpack/msgpack';
 import { Connection } from '../socket_communication/socket';
@@ -22,7 +22,6 @@ export class AppComponent {
     this.connection.onMsgRecieved = (msg) => {
       this.messages.push(msg);
     };
-    this.connection.event$.subscribe(this.onMsgRecieved);
   }
 
   onMsgRecieved(msg: string) {}

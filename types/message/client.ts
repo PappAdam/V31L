@@ -1,8 +1,10 @@
-export enum Header {
+export enum ClientHeader {
   NewMsg,
 }
 
+
 export interface ClientMessage {
-  header: Header;
+  header: ClientHeader;
   data: any;
 }
+
