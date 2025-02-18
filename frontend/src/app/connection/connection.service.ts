@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import * as msgpack from '@msgpack/msgpack';
-import { ClientMessage, ClientHeader, ServerMessage, ServerHeader } from '../../../../types';
-import { Subject } from 'rxjs';
+import {
+  ClientMessage,
+  ClientHeader,
+  ServerMessage,
+  ServerHeader,
+} from '../../../../types';
 
 const URL: string = 'ws://localhost:8080';
 
@@ -25,10 +29,27 @@ export class ConnectionService {
     };
   }
 
-  sendMsg(msg: string) {
+  connect(token: string) {
+    let client_message: ClientMessage = {
+      header: ClientHeader.Connection,
+      data: {
+        target: token,
+        content: '',
+      },
+    };
+
+    let bin = msgpack.encode(client_message);
+
+    this.ws.send(bin);
+  }
+
+  sendMsg(msg: string, target_chat: string) {
     let client_message: ClientMessage = {
       header: ClientHeader.NewMsg,
-      data: msg,
+      data: {
+        target: target_chat,
+        content: msg,
+      },
     };
 
     let bin = msgpack.encode(client_message);

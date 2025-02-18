@@ -3,7 +3,6 @@ import { RouterOutlet } from '@angular/router';
 import { ClientMessage, ClientHeader } from '../../../types';
 
 import * as msgpack from '@msgpack/msgpack';
-import { Connection } from '../socket_communication/socket';
 import { ConnectionService } from './connection/connection.service';
 
 @Component({
@@ -30,6 +29,6 @@ export class AppComponent {
     let text = (document.querySelector('input[type=text]') as HTMLInputElement)
       .value;
 
-    this.connection.sendMsg(text);
+    this.connection.sendMsg(text, '');
   }
 }

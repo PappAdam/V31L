@@ -9,7 +9,7 @@ import { prisma } from "..";
  * @param {string} content - The content of the message to be created.
  * @returns {Promise<Message | null>} The newly created `Message` object if successful, or `null` if an error occurs.
  */
-async function createMessage(
+export async function createMessage(
   chatId: string,
   userId: string,
   content: string

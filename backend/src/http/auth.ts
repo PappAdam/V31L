@@ -66,7 +66,7 @@ const generateToken = (userId: string): string => {
   return jwt.sign({ userId }, "your_secret_key", { expiresIn: "1h" });
 };
 
-export async function extractUserFromToken(
+export async function extractUserFromTokenMiddleWare(
   req: Request,
   res: Response,
   next: NextFunction
@@ -80,13 +80,11 @@ export async function extractUserFromToken(
   }
 
   try {
-    const decoded = jwt.verify(token, "your_secret_key");
-    if (typeof decoded !== "object") {
-      throw Error;
-    }
+    const userId = extractUserIdFromToken(token);
+    const user = await prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+    });
 
-    const userId = decoded.userId as string;
-    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     req.user = user;
 
     next();
@@ -94,4 +92,13 @@ export async function extractUserFromToken(
     res.status(401).json({ message: "Invalid or expired token." });
     return;
   }
+}
+
+export function extractUserIdFromToken(token: string): string {
+  const decoded = jwt.verify(token, "your_secret_key");
+  if (typeof decoded !== "object") {
+    throw Error;
+  }
+
+  return decoded.userId as string;
 }
