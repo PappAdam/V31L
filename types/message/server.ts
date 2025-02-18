@@ -4,5 +4,5 @@ export enum ServerHeader {
 
 export interface ServerMessage {
   header: ServerHeader;
-  data: any;
+  data: string;
 }

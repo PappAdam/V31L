@@ -8,7 +8,7 @@ import { prisma } from "..";
  * @param {string[]} userIds - An array of user IDs to be added as members to the new chat.
  * @returns {Promise<Chat | null>} `Chat` if successful, `null` if no users are provided or an error occurs.
  */
-async function createChat(
+export async function createChat(
   name: string,
   userIds: string[]
 ): Promise<Chat | null> {
@@ -42,7 +42,7 @@ async function createChat(
  * @param {string} chatId - The ID of the chat to be deleted.
  * @returns {Promise<Chat | null>} `Chat` if successful, `null` if the chat was not found or an error occurred.
  */
-async function deleteChat(chatId: string): Promise<Chat | null> {
+export async function deleteChat(chatId: string): Promise<Chat | null> {
   try {
     const existingChat = await prisma.chat.findUnique({
       where: { id: chatId },
