@@ -36,15 +36,18 @@ export async function createUser(
  * @returns `User` if found, `null` if no user with the given username exists.
  */
 export async function findUserByName(username: string): Promise<User | null> {
-  if (!username || username.length == 0) {
+  if (!username) {
     return null;
   }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      username, // searching by the unique username field
-    },
-  });
-
-  return user;
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        username, // searching by the unique username field
+      },
+    });
+    return user;
+  } catch (error) {
+    console.error("Error finding user:\n", error);
+    return null;
+  }
 }

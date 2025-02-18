@@ -8,7 +8,7 @@ import { prisma } from "..";
  * @param {string} chatId - The ID of the chat to which the user will be added.
  * @returns {Promise<ChatMember | null>} `ChatMember` if the user was successfully added, `null` if the user was already a member or an error occurred.
  */
-async function addUserToChat(
+export async function addUserToChat(
   userId: string,
   chatId: string
 ): Promise<ChatMember | null> {
