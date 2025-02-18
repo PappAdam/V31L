@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import express from "express";
 import authRouter, { extractUserFromTokenMiddleWare } from "./http/auth";
 import bodyParser from "body-parser";
+import cors from "cors";
 
 import logRouter from "./http/log";
 import { Client, clients } from "./socket/client";
@@ -20,6 +21,7 @@ socketServer.on("connection", (connection) => {
 });
 
 const httpServer = express();
+httpServer.use(cors());
 httpServer.use(bodyParser.json());
 httpServer.use("/auth", authRouter);
 
