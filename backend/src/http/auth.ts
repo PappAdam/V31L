@@ -21,6 +21,9 @@ async function registerUser(req: Request, res: Response) {
     }
 
     const newUser = await createUser(username, password);
+    if (!newUser) {
+      throw new Error("Error creating user in database");
+    }
 
     const token = generateToken(newUser.id);
     res.status(201).json({ message: "User registered successfully", token });

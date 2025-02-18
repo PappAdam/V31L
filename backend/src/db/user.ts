@@ -3,38 +3,40 @@ import { prisma } from "../index";
 import { User } from "@prisma/client";
 
 /**
- * Creates and stores a new user in the database with a hashed password.
+ * Creates a new user.
  *
- * This function hashes the provided password using bcrypt before saving
- * the user's details to the database.
- *
- * @param username The username of the new user. Must be unique.
- * @param password The plaintext password to be hashed and stored.
- *
- * @returns The newly created user object, including the username and hashed password.
+ * @param {string} username - The username of the user to be created.
+ * @param {string} password - The password of the user to be created. This will be hashed.
+ * @returns {Promise<User | null>} `User` if successful, `null` if there was an error.
  */
-export async function createUser(username: string, password: string) {
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const newUser = await prisma.user.create({
-    data: {
-      username,
-      password: hashedPassword,
-    },
-  });
-
-  return newUser;
+export async function createUser(
+  username: string,
+  password: string
+): Promise<User | null> {
+  try {
+    password = await bcrypt.hash(password, 10);
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        password,
+      },
+    });
+    return newUser;
+  } catch (error) {
+    console.error("Error creating user:\n", error);
+    return null;
+  }
 }
 
 /**
- * Finds and retrieves a user from the database by their username.
+ * Gets a user with the given username.
  *
- * @param username The username of the user to retrieve.
+ * @param username The username of the user to get.
  *
- * @returns The user object if found, or `null` if no user with the given username exists.
+ * @returns `User` if found, `null` if no user with the given username exists.
  */
 export async function findUserByName(username: string): Promise<User | null> {
-  if (!username) {
+  if (!username || username.length == 0) {
     return null;
   }
 
