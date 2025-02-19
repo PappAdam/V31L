@@ -26,10 +26,10 @@ async function registerUser(req: Request, res: Response) {
     }
 
     const token = generateToken(newUser.id);
-    res.status(201).json({ message: "User registered successfully", token });
+    res.status(201).json({ message: "Success", token });
   } catch (error) {
     console.error("Error during register: \n", error);
-    res.status(500).json({ message: "Error registering user" });
+    res.status(500).json({ message: "Server error" });
   }
 }
 
@@ -54,9 +54,9 @@ async function loginUser(req: Request, res: Response) {
 
     // Generate JWT token
     const token = generateToken(user.id);
-    res.json({ message: "Login successful", token });
+    res.json({ message: "Success", token });
   } catch (error) {
-    res.status(500).json({ message: "Error logging in" });
+    res.status(500).json({ message: "Server error" });
     console.error("Error during login: \n", error);
   }
 }

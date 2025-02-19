@@ -7,6 +7,9 @@ import cors from "cors";
 
 import logRouter from "./http/log";
 import { Client, clients } from "./socket/client";
+import swaggerUi from "swagger-ui-express";
+import path from "path";
+import YAML from "yamljs";
 
 export const prisma = new PrismaClient();
 
@@ -22,6 +25,10 @@ socketServer.on("connection", (connection) => {
 
 const httpServer = express();
 httpServer.use(cors());
+
+const swaggerDocument = YAML.load(path.join(__dirname, "./http/_doc.yml"));
+httpServer.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 httpServer.use(bodyParser.json());
 httpServer.use("/auth", authRouter);
 

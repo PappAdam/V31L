@@ -1,0 +1,132 @@
+openapi: "3.0.3"
+info:
+  title: SafeChat API Docs
+  version: "1.0"
+
+tags:
+  - name: Auth
+    description: Authenticating Users
+  - name: Logs
+    description: Logging for debug
+
+components:
+  securitySchemes:
+    BearerToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    UserCredentials:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: "testuser"
+        password:
+          type: string
+          example: "SecurePass123"
+    AuthSuccess:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Success"
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR..."
+    ServerError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Server error"
+
+  responses:
+    AuthSuccess:
+      description: Login successful
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AuthSuccess"
+    ServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ServerError"
+
+paths:
+  /auth/login:
+    post:
+      summary: Login an existing user
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCredentials"
+      responses:
+        200:
+          $ref: "#/components/responses/AuthSuccess"
+        400:
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid credentials"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /auth/register:
+    post:
+      summary: Register a new user
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCredentials"
+      responses:
+        200:
+          $ref: "#/components/responses/AuthSuccess"
+        400:
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User with username already exists"
+        500:
+          $ref: "#/components/responses/ServerError"
+  /log/auth:
+    get:
+      summary: Log authentication details (Supports all HTTP methods)
+      tags: [Logs]
+      security:
+        - BearerToken: []
+      responses:
+        200:
+          description: Authentication details logged
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logged auth details on server console."
