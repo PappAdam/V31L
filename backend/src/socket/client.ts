@@ -21,7 +21,9 @@ export class Client {
       const decoded = msgpack.decode(msg.data as Uint8Array) as ClientMessage;
       this.parseMsg(decoded)
         ?.validate()
-        .then((enc) => enc?.send());
+        .then((enc) => {
+         enc?.send();
+        })
     };
 
     this.ws.close = () => {
@@ -47,6 +49,7 @@ export class Client {
           console.log("Token is invalid or expired");
         }
         return undefined;
+        
 
       case ClientHeader.NewMsg:
         const servermsg: ServerMessage = {

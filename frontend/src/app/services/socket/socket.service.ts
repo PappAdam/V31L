@@ -5,14 +5,15 @@ import {
   ClientHeader,
   ServerMessage,
   ServerHeader,
-} from '../../../../types';
+} from '../../../../../types';
+import { AuthService } from '../http/auth.service';
 
 const URL: string = 'ws://localhost:8080';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ConnectionService {
+export class SocketService {
   ws: WebSocket;
 
   onMsgRecieved = (msg: string) => {};
@@ -29,7 +30,7 @@ export class ConnectionService {
     };
   }
 
-  connect(token: string) {
+  connect(token: string) {  
     let client_message: ClientMessage = {
       header: ClientHeader.Connection,
       data: {
@@ -39,7 +40,6 @@ export class ConnectionService {
     };
 
     let bin = msgpack.encode(client_message);
-
     this.ws.send(bin);
   }
 

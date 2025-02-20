@@ -10,6 +10,7 @@ import { Client, clients } from "./socket/client";
 import swaggerUi from "swagger-ui-express";
 import path from "path";
 import YAML from "yamljs";
+import { createChat, deleteChat } from "./db/chat";
 
 export const prisma = new PrismaClient();
 
