@@ -1,29 +1,31 @@
-<!-- <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-  <label for="email">Email:</label>
-  <input id="email" formControlName="email" type="email">
-  <div *ngIf="loginForm.controls.email?.invalid && loginForm.controls.email?.touched">
-    Valid email is required.
+<div class="login-container">
+  <div class="login-card">
+    <h1>{{ login ? "Log In" : "Register" }}</h1>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <input
+        id="username"
+        formControlName="username"
+        type="text"
+        placeholder="Username"
+      />
+      <input
+        id="password"
+        formControlName="password"
+        type="password"
+        placeholder="Password"
+      />
+
+      <button type="submit" [disabled]="loginForm.invalid">
+        {{ login ? "Log In" : "Register" }}
+      </button>
+
+      @if (errorMessage) {
+      <div class="error-message">{{ errorMessage }}</div>
+      }
+    </form>
+    <p>
+      {{ !login ? "Don't have an accout?" : "Already have an account?" }}
+      <a (click)="login = !login">{{ !login ? "Log In" : "Register" }}</a>
+    </p>
   </div>
-
-  <label for="password">Password:</label>
-  <input id="password" formControlName="password" type="password">
-  <div *ngIf="loginForm.controls.password?.invalid && loginForm.controls.password?.touched">
-    Password must be at least 6 characters.
-  </div>
-
-  <button type="submit" [disabled]="loginForm.invalid">Login</button>
-  <div *ngIf="errorMessage">{{ errorMessage }}</div>
-</form> -->
-
-<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-  <label for="username">Email:</label>
-  <input id="username" formControlName="username" type="username">
-
-  <label for="password">Password:</label>
-  <input id="password" formControlName="password" type="password">
-
-  <button type="submit" [disabled]="loginForm.invalid">Login</button>
-  @if (errorMessage) {
-    <div>{{ errorMessage }}</div> 
-  }
-</form>
+</div>
