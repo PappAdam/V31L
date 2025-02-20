@@ -71,11 +71,9 @@ export class AuthService {
   }
 
   logout() {
-    console.log('asd');
-
     this._token = null;
     localStorage.removeItem('jwt');
-    //Disconnect socket connection
+    console.log('TODO: Disconnect socket connection on logout');
     this.router.navigateByUrl('/login');
   }
 }

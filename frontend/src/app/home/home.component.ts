@@ -9,7 +9,4 @@ import { AuthService } from '../services/http/auth.service';
 })
 export class HomeComponent {
   constructor(protected authService: AuthService) {}
-  ngOnInit() {
-    console.log(this.authService.token);
-  }
 }
