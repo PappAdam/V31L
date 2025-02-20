@@ -1,6 +1,7 @@
 import { prisma } from "../../src/index";
 import bcrypt from "bcryptjs";
 import { createUser, findUserByName } from "../../src/db/user";
+import { User } from "@prisma/client";
 
 jest.mock("../../src/index", () => {
   return {
@@ -12,68 +13,82 @@ jest.mock("../../src/index", () => {
     },
   };
 });
-
-// Mock bcrypt.hash function
 jest.mock("bcryptjs", () => ({
   hash: jest.fn(),
 }));
 
-describe("createUser", () => {
+const mockUser: User = {
+  id: "id-123",
+  username: "name-123",
+  password: "pass-123",
+};
+
+describe("createUser(username: string, password: string): Promise<User | null>", () => {
   let mockCreateUser: jest.Mock;
   let mockHash: jest.Mock;
 
   beforeEach(() => {
     mockCreateUser = prisma.user.create as jest.Mock;
     mockHash = bcrypt.hash as jest.Mock;
+    mockHash.mockResolvedValue("hashedPassword");
   });
 
-  it("should create a user successfully", async () => {
-    mockHash.mockResolvedValue("hashedPassword");
+  it("should create a User successfully", createSuccessful);
+  it("should return null if username is empty", usernameEmpty);
+  it("should return null if password is empty", passwordEmpty);
+  it("should return null if prisma error occurs", prismaError);
+
+  async function createSuccessful() {
     mockCreateUser.mockResolvedValue({
-      id: "uuid",
-      username: "testuser",
+      id: mockUser.id,
+      username: mockUser.username,
       password: "hashedPassword",
     });
 
-    // Act: Call createUser function
-    const result = await createUser("testuser", "password123");
+    const result = await createUser(mockUser.username, mockUser.password);
 
-    // Assert: Check if the user was created successfully
     expect(result).toEqual({
-      id: "uuid",
-      username: "testuser",
+      id: mockUser.id,
+      username: mockUser.username,
       password: "hashedPassword",
     });
-    expect(mockHash).toHaveBeenCalledWith("password123", 10);
+    expect(mockHash).toHaveBeenCalledWith(mockUser.password, 10);
     expect(mockCreateUser).toHaveBeenCalledWith({
       data: {
-        username: "testuser",
+        username: mockUser.username,
         password: "hashedPassword",
       },
     });
-  });
+  }
 
-  it("should return null if an error occurs", async () => {
-    // Arrange: Mock bcrypt.hash to resolve and Prisma to throw an error
-    mockHash.mockResolvedValue("hashedPassword");
+  async function usernameEmpty() {
+    const result = await createUser("", mockUser.password);
+    expect(result).toBeNull();
+    expect(mockCreateUser).not.toHaveBeenCalled();
+  }
+
+  async function passwordEmpty() {
+    const result = await createUser(mockUser.username, "");
+    expect(result).toBeNull();
+    expect(mockCreateUser).not.toHaveBeenCalled();
+  }
+
+  async function prismaError() {
     mockCreateUser.mockRejectedValue(new Error("Database error"));
 
-    // Act: Call createUser function
-    const result = await createUser("testuser", "password123");
+    const result = await createUser(mockUser.username, mockUser.password);
 
-    // Assert: Check if null is returned when there's an error
     expect(result).toBeNull();
-    expect(mockHash).toHaveBeenCalledWith("password123", 10);
     expect(mockCreateUser).toHaveBeenCalledWith({
       data: {
-        username: "testuser",
+        username: mockUser.username,
         password: "hashedPassword",
       },
     });
-  });
+  }
 });
 
-describe("findUserByName", () => {
+describe("findUserByName(username: string): Promise<User | null>", () => {
   let mockFindUserByName: jest.Mock;
 
   beforeEach(() => {
@@ -81,59 +96,48 @@ describe("findUserByName", () => {
     jest.clearAllMocks();
   });
 
-  it("should return a user when a valid username is provided", async () => {
-    // Arrange: Mock the return value of findUnique
-    const mockUser = {
-      id: "uuid",
-      username: "testuser",
-      password: "hashedPassword",
-    };
+  it("should return a User successfully", findSuccessful);
+  it("should return null if username is empty", usernameEmpty);
+  it("should return null if user does not exist", userDoesNotExist);
+  it("should return null if prisma error occurs", prismaError);
+
+  async function findSuccessful() {
     mockFindUserByName.mockResolvedValue(mockUser);
 
-    // Act: Call the function with a valid username
-    const result = await findUserByName("testuser");
+    const result = await findUserByName(mockUser.username);
 
-    // Assert: The result should match the mock user
     expect(result).toEqual(mockUser);
     expect(mockFindUserByName).toHaveBeenCalledWith({
-      where: { username: "testuser" },
+      where: { username: mockUser.username },
     });
-  });
+  }
 
-  it("should return null when an empty username is provided", async () => {
-    // Act: Call the function with an empty username
+  async function usernameEmpty() {
     const result = await findUserByName("");
 
-    // Assert: The result should be null
     expect(result).toBeNull();
-    expect(mockFindUserByName).not.toHaveBeenCalled(); // Ensure the database was not queried
-  });
+    expect(mockFindUserByName).not.toHaveBeenCalled();
+  }
 
-  it("should return null when no user is found", async () => {
-    // Arrange: Mock findUnique to return null (no user found)
+  async function userDoesNotExist() {
     mockFindUserByName.mockResolvedValue(null);
 
-    // Act: Call the function with a username that does not exist
     const result = await findUserByName("nonexistentuser");
 
-    // Assert: The result should be null
     expect(result).toBeNull();
     expect(mockFindUserByName).toHaveBeenCalledWith({
       where: { username: "nonexistentuser" },
     });
-  });
+  }
 
-  it("should return null when there is a database error", async () => {
-    // Arrange: Mock findUnique to throw an error
+  async function prismaError() {
     mockFindUserByName.mockRejectedValue(new Error("Database error"));
 
-    // Act: Call the function with a valid username
-    const result = await findUserByName("testuser");
+    const result = await findUserByName(mockUser.username);
 
-    // Assert: The result should be null when an error occurs
     expect(result).toBeNull();
     expect(mockFindUserByName).toHaveBeenCalledWith({
-      where: { username: "testuser" },
+      where: { username: mockUser.username },
     });
-  });
+  }
 });

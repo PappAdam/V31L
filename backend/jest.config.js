@@ -6,4 +6,15 @@ module.exports = {
   },
   testMatch: ["**/*.test.ts", "**/*.spec.ts"],
   moduleFileExtensions: ["ts", "js", "json", "node"],
+  setupFilesAfterEnv: ["./jest.setup.js"],
+  reporters: [
+    "default",
+    [
+      "jest-html-reporters",
+      {
+        publicPath: "./__tests__/report",
+        filename: "index.html",
+      },
+    ],
+  ],
 };

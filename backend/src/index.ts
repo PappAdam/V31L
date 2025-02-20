@@ -29,6 +29,16 @@ httpServer.use(cors());
 const swaggerDocument = YAML.load(path.join(__dirname, "./http/_doc.yml"));
 httpServer.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+httpServer.use(
+  "/jest-html-reporters-attach",
+  express.static(
+    path.join(__dirname, "../__tests__/report/jest-html-reporters-attach")
+  )
+);
+httpServer.get("/tests", (req, res) => {
+  res.sendFile(path.join(__dirname, "../__tests__/report/index.html"));
+});
+
 httpServer.use(bodyParser.json());
 httpServer.use("/auth", authRouter);
 

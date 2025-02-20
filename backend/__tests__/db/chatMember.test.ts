@@ -1,6 +1,5 @@
-import { prisma } from "../../src/index"; // Adjust the import path accordingly
-import { addUserToChat } from "../../src/db/chatMember"; // Adjust the import path accordingly
-import { ChatMember } from "@prisma/client";
+import { prisma } from "../../src/index";
+import { addUserToChat } from "../../src/db/chatMember";
 
 jest.mock("../../src/index", () => {
   return {
@@ -12,87 +11,91 @@ jest.mock("../../src/index", () => {
     },
   };
 });
+const mockChatMember = {
+  userId: "user-123",
+  chatId: "chat-123",
+  key: "Not yet implemented.",
+};
 
-describe("addUserToChat", () => {
-  let mockFindFirst: jest.Mock;
-  let mockCreate: jest.Mock;
+describe("addUserToChat(userId: string, chatId: string): Promise<ChatMember | null>", () => {
+  let mockFindFirstChatMember: jest.Mock;
+  let mockCreateChatMember: jest.Mock;
 
   beforeEach(() => {
-    mockFindFirst = prisma.chatMember.findFirst as jest.Mock;
-    mockCreate = prisma.chatMember.create as jest.Mock;
-    jest.clearAllMocks();
+    mockFindFirstChatMember = prisma.chatMember.findFirst as jest.Mock;
+    mockCreateChatMember = prisma.chatMember.create as jest.Mock;
   });
 
-  it("should add the user to the chat if not already a member", async () => {
-    // Arrange: Mock the findFirst method to return null (user not found)
-    mockFindFirst.mockResolvedValue(null);
+  it("should create a ChatMember successfully", createSuccessful);
+  it("should return null if ChatMember already exists", chatMemberExists);
+  it("should return null if userId is empty", userIdEmpty);
+  it("should return null if chatId is empty", chatIdEmpty);
+  it("should return null if prisma error occurs", prismaError);
 
-    const mockChatMember: ChatMember = {
-      id: "uuid",
-      userId: "user-123",
-      chatId: "chat-123",
-      key: "Not yet implemented.",
-    };
+  async function createSuccessful() {
+    mockFindFirstChatMember.mockResolvedValue(null);
+    mockCreateChatMember.mockResolvedValue(mockChatMember);
 
-    mockCreate.mockResolvedValue(mockChatMember);
+    const result = await addUserToChat(
+      mockChatMember.userId,
+      mockChatMember.chatId
+    );
 
-    // Act: Call addUserToChat with test data
-    const result = await addUserToChat("user-123", "chat-123");
-
-    // Assert: The result should match the mock chat member and the create method should be called
     expect(result).toEqual(mockChatMember);
-    expect(mockFindFirst).toHaveBeenCalledWith({
-      where: { userId: "user-123", chatId: "chat-123" },
+    expect(mockFindFirstChatMember).toHaveBeenCalledWith({
+      where: { userId: mockChatMember.userId, chatId: mockChatMember.chatId },
     });
-    expect(mockCreate).toHaveBeenCalledWith({
+    expect(mockCreateChatMember).toHaveBeenCalledWith({
       data: {
-        userId: "user-123",
-        chatId: "chat-123",
+        userId: mockChatMember.userId,
+        chatId: mockChatMember.chatId,
         key: "Not yet implemented.",
       },
     });
-  });
+  }
 
-  it("should return null if the user is already a member of the chat", async () => {
-    // Arrange: Mock findFirst to return an existing member (user already a member)
-    const existingChatMember: ChatMember = {
-      id: "existing-member-id",
-      userId: "user-123",
-      chatId: "chat-123",
-      key: "Not yet implemented.",
-    };
-    mockFindFirst.mockResolvedValue(existingChatMember);
+  async function chatMemberExists() {
+    mockFindFirstChatMember.mockResolvedValue(mockChatMember);
 
-    // Act: Call addUserToChat
-    const result = await addUserToChat("user-123", "chat-123");
+    const result = await addUserToChat(
+      mockChatMember.userId,
+      mockChatMember.chatId
+    );
 
-    // Assert: The result should be null (user is already a member)
     expect(result).toBeNull();
-    expect(mockFindFirst).toHaveBeenCalledWith({
-      where: { userId: "user-123", chatId: "chat-123" },
+    expect(mockFindFirstChatMember).toHaveBeenCalledWith({
+      where: { userId: mockChatMember.userId, chatId: mockChatMember.chatId },
     });
-    expect(mockCreate).not.toHaveBeenCalled();
-  });
+    expect(mockCreateChatMember).not.toHaveBeenCalled();
+  }
 
-  it("should return null if there is an error during the process", async () => {
-    // Arrange: Mock findFirst to return null, and create to throw an error
-    mockFindFirst.mockResolvedValue(null);
-    mockCreate.mockRejectedValue(new Error("Database error"));
-
-    // Act: Call addUserToChat
-    const result = await addUserToChat("user-123", "chat-123");
-
-    // Assert: The result should be null when there is an error
+  async function userIdEmpty() {
+    const result = await addUserToChat("", mockChatMember.chatId);
     expect(result).toBeNull();
-    expect(mockFindFirst).toHaveBeenCalledWith({
-      where: { userId: "user-123", chatId: "chat-123" },
+    expect(mockFindFirstChatMember).not.toHaveBeenCalled();
+  }
+
+  async function chatIdEmpty() {
+    const result = await addUserToChat(mockChatMember.userId, "");
+    expect(result).toBeNull();
+    expect(mockFindFirstChatMember).not.toHaveBeenCalled();
+  }
+
+  async function prismaError() {
+    mockFindFirstChatMember.mockResolvedValue(null);
+    mockCreateChatMember.mockRejectedValue(new Error("Database error"));
+
+    const result = await addUserToChat(
+      mockChatMember.userId,
+      mockChatMember.chatId
+    );
+
+    expect(result).toBeNull();
+    expect(mockFindFirstChatMember).toHaveBeenCalledWith({
+      where: { userId: mockChatMember.userId, chatId: mockChatMember.chatId },
     });
-    expect(mockCreate).toHaveBeenCalledWith({
-      data: {
-        userId: "user-123",
-        chatId: "chat-123",
-        key: "Not yet implemented.",
-      },
+    expect(mockCreateChatMember).toHaveBeenCalledWith({
+      data: mockChatMember,
     });
-  });
+  }
 });

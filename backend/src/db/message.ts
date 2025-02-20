@@ -14,6 +14,9 @@ export async function createMessage(
   userId: string,
   content: string
 ): Promise<Message | null> {
+  if (!chatId || !userId || !content) {
+    return null;
+  }
   try {
     const newMessage = await prisma.message.create({
       data: {

@@ -12,6 +12,9 @@ export async function addUserToChat(
   userId: string,
   chatId: string
 ): Promise<ChatMember | null> {
+  if (!userId || !chatId) {
+    return null;
+  }
   try {
     const existingMember = await prisma.chatMember.findFirst({
       where: {

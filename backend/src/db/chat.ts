@@ -12,7 +12,7 @@ export async function createChat(
   name: string,
   userIds: string[]
 ): Promise<Chat | null> {
-  if (userIds.length == 0) {
+  if (!name || userIds.length == 0) {
     return null;
   }
 

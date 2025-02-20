@@ -13,6 +13,9 @@ export async function createUser(
   username: string,
   password: string
 ): Promise<User | null> {
+  if (!username || !password) {
+    return null;
+  }
   try {
     password = await bcrypt.hash(password, 10);
     const newUser = await prisma.user.create({
