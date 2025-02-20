@@ -93,3 +93,27 @@ export async function getChatMembersByUser(
     return null;
   }
 }
+
+
+/**
+ * Retrieves all chat memberships for a given user.
+ *
+ * @param {string} chatId - The ID of the chat which user memberships are being retrieved.
+ * @returns {Promise<ChatMember[] | null>} An array of `ChatMember` objects if found, or `null` if an error occurs.
+ */
+export async function getChatMembersByChat(
+  chatId: string
+): Promise<ChatMember[] | null> {
+  try {
+    const chatMembers = await prisma.chatMember.findMany({
+      where: {
+        chatId: chatId,
+      },
+    });
+
+    return chatMembers;
+  } catch (error) {
+    console.error("Error retrieving chats:\n", error);
+    return null;
+  }
+}

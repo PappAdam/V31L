@@ -3,7 +3,8 @@ import { RouterOutlet } from '@angular/router';
 import { ClientMessage, ClientHeader } from '../../../types';
 
 import * as msgpack from '@msgpack/msgpack';
-import { ConnectionService } from './connection/connection.service';
+import { SocketService } from './services/socket/socket.service';
+import { AuthService } from './services/http/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -15,20 +16,23 @@ export class AppComponent {
   title = 'message_app';
   messages: string[] = [];
 
-  constructor(private connection: ConnectionService) {}
+  constructor(private socket: SocketService, private auth: AuthService) {}
 
   async ngAfterViewInit() {
-    this.connection.onMsgRecieved = (msg) => {
+    this.socket.onMsgRecieved = (msg) => {
       this.messages.push(msg);
     };
   }
 
   onMsgRecieved(msg: string) {}
 
-  sendClicked() {
+  async sendClicked() {
     let text = (document.querySelector('input[type=text]') as HTMLInputElement)
       .value;
 
-    this.connection.sendMsg(text, '');
+    await this.auth.login("asd", "asd");
+    this.socket.sendMsg(text, "6ab2f92e-1ce8-4ec8-ad14-68a9b85baa87");
+
+    console.log(this.auth.token); 
   }
 }
