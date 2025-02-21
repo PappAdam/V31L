@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import * as msgpack from '@msgpack/msgpack';
 import {
-  ClientMessage,
-  ClientHeader,
-  ServerMessage,
+  ClientPackage,
   ServerHeader,
+  ServerPackage,
 } from '../../../../../types';
 import { AuthService } from '../http/auth.service';
 
@@ -23,33 +22,28 @@ export class SocketService {
     this.ws.onmessage = async (msg) => {
       const message = msgpack.decode(
         await (msg.data as any).arrayBuffer()
-      ) as ServerMessage;
+      ) as ServerPackage;
       if (message.header == ServerHeader.NewMsg) {
         this.onMsgRecieved(message.data);
       }
     };
   }
 
-  connect(token: string) {  
-    let client_message: ClientMessage = {
-      header: ClientHeader.Connection,
-      data: {
-        target: token,
-        content: '',
-      },
+  connect(token: string) {
+    let client_message: ClientPackage = {
+      header: 'Connection',
+      token,
     };
 
     let bin = msgpack.encode(client_message);
     this.ws.send(bin);
   }
 
-  sendMsg(msg: string, target_chat: string) {
-    let client_message: ClientMessage = {
-      header: ClientHeader.NewMsg,
-      data: {
-        target: target_chat,
-        content: msg,
-      },
+  sendMsg(messageContent: string, chatId: string) {
+    let client_message: ClientPackage = {
+      header: 'NewMessage',
+      messageContent,
+      chatId,
     };
 
     let bin = msgpack.encode(client_message);

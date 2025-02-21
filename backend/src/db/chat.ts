@@ -2,6 +2,30 @@ import { Chat } from "@prisma/client";
 import prisma from "./_db";
 
 /**
+ * Gets a chat with the given id.
+ *
+ * @param chatId The id of the chat to get.
+ *
+ * @returns `Chat` if found, `null` if no chat with the given id exists.
+ */
+export async function findChatById(chatId: string): Promise<Chat | null> {
+  if (!chatId) {
+    return null;
+  }
+  try {
+    const chat = await prisma.chat.findUnique({
+      where: {
+        id: chatId,
+      },
+    });
+    return chat;
+  } catch (error) {
+    console.error("Error finding chat:\n", error);
+    return null;
+  }
+}
+
+/**
  * Creates a new chat and adds the specified users as members.
  *
  * @param {string} name - The name of the chat to be created.

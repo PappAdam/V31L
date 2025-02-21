@@ -1,8 +1,14 @@
-export enum ServerHeader {
-  NewMsg,
-}
+export type ServerPackage = ServerNewMessagePackage | ServerErrorPackage;
 
-export interface ServerMessage {
-  header: ServerHeader;
-  data: string;
-}
+type ServerNewMessagePackage = {
+  header: "NewMessage";
+  //Author of message
+  username: string;
+  chatId: string;
+  messageContent: string;
+};
+
+type ServerErrorPackage = {
+  header: "Error";
+  errorMessage: string;
+};

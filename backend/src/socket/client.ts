@@ -1,67 +1,91 @@
-import { WebSocket } from "ws";
-import {
-  ClientHeader,
-  ClientMessage,
-  ServerHeader,
-  ServerMessage,
-} from "../../../types";
-import { ServerMessageDescription } from "./server";
+import { WebSocket, MessageEvent, CloseEvent } from "ws";
+import { ClientPackage } from "../../../types";
 import * as msgpack from "@msgpack/msgpack";
 import { extractUserIdFromToken } from "../http/auth";
+import { findUserById } from "../db/user";
+import { findChatMember } from "../db/chatMember";
+import processPackage from "./processor";
 
 export const clients: Client[] = [];
 
+/**
+ * Represents a client WebSocket connection
+ *
+ * This class manages the WebSocket connection, validates incoming packages, and processes them based on their type
+ * - Upon receiving a message, the class decodes the incoming data, validates the package, and processes it if valid
+ * - The client is automatically removed from the list of clients when the connection is closed
+ *
+ * @property {WebSocket} ws - The WebSocket connection for the client
+ * @property {string} userId - The ID of the user associated with the client
+ */
 export class Client {
   ws: WebSocket;
   userId: string = "";
 
   constructor(connection: WebSocket) {
     this.ws = connection;
-    this.ws.onmessage = (msg) => {
-      const decoded = msgpack.decode(msg.data as Uint8Array) as ClientMessage;
-      this.parseMsg(decoded)
-        ?.validate()
-        .then((enc) => {
-         enc?.send();
-        })
-    };
 
-    this.ws.close = () => {
-      const client_index = clients.findIndex((c) => c.ws == this.ws);
-      clients.splice(client_index, 1);
-    };
+    this.ws.onmessage = this.onMessage;
+    this.ws.onclose = this.onClose;
 
     clients.push(this);
   }
 
   /**
-   * Parses a client message and converts it into a server message description if applicable.
+   * This method is triggered when a message is received through the WebSocket connection
    *
-   * @param {ClientMessage} msg - The client message to be parsed.
-   * @returns {ServerMessageDescription | undefined} A `ServerMessageDescription` if the message is processed, or `undefined` if no response is needed.
+   * @param {MessageEvent} event - The event object containing the incoming message data
    */
-  parseMsg(msg: ClientMessage): ServerMessageDescription | undefined {
-    switch (msg.header) {
-      case ClientHeader.Connection:
-        try {
-          this.userId = extractUserIdFromToken(msg.data.target);
-        } catch {
-          console.log("Token is invalid or expired");
+  async onMessage(event: MessageEvent) {
+    try {
+      const decoded = msgpack.decode(event.data as Uint8Array) as ClientPackage;
+      const packageValid = await this.validateIncomingPackage(decoded);
+      if (packageValid) {
+        processPackage(this, decoded);
+      }
+    } catch {
+      console.error("Error while processing incoming package: \n", event);
+    }
+  }
+
+  /**
+   * This method is triggered when the WebSocket connection is closed
+   *
+   * @param {MessageEvent} event - The event object containing the incoming message data
+   */
+  onClose(event: CloseEvent) {
+    const client_index = clients.findIndex((c) => c.ws == this.ws);
+    clients.splice(client_index, 1);
+  }
+
+  /**
+   * Validates a package based on its header type
+   *
+   * It queries the database, validates that the required data for the package exists
+   *
+   * @param incoming The incoming package to validate
+   * @returns {Promise<boolean>} `true` if the package is valid, `false` otherwise
+   */
+  async validateIncomingPackage(incoming: ClientPackage): Promise<boolean> {
+    switch (incoming.header) {
+      case "Connection":
+        const token = extractUserIdFromToken(incoming.token);
+        if (!token.userId || token.expired) {
+          return false;
         }
-        return undefined;
-        
+        const user = await findUserById(token.userId);
+        return user ? true : false;
 
-      case ClientHeader.NewMsg:
-        const servermsg: ServerMessage = {
-          header: ServerHeader.NewMsg,
-          data: msg.data.content,
-        };
+      case "NewMessage":
+        if (!incoming.chatId || !incoming.messageContent || !this.userId) {
+          return false;
+        }
+        const chatMember = await findChatMember(this.userId, incoming.chatId);
+        return chatMember ? true : false;
 
-        return new ServerMessageDescription(
-          this.userId,
-          msg.data.target,
-          servermsg
-        );
+      default:
+        console.error("This package type has not been implemented.");
+        return false;
     }
   }
 }

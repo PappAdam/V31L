@@ -1,15 +1,12 @@
-export enum ClientHeader {
-  NewMsg,
-  // TODO change MessageData on connection
-  Connection,
-}
+export type ClientPackage = ClientConnectionPackage | ClientNewMessagePackage;
 
-export interface MessageData {
-  target: string;
-  content: string;
-}
+type ClientNewMessagePackage = {
+  header: "NewMessage";
+  chatId: string;
+  messageContent: string;
+};
 
-export interface ClientMessage {
-  header: ClientHeader;
-  data: MessageData;
-}
+type ClientConnectionPackage = {
+  header: "Connection";
+  token: string;
+};

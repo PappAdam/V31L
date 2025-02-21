@@ -41,5 +41,7 @@ model ChatMember {
   chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade) // Delete members if chat is deleted
   chatId String
 
+  @@unique([userId, chatId])
+
   key String
 }
