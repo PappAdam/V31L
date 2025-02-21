@@ -1,16 +1,15 @@
-import { prisma } from "../../src/index";
+import prisma from "../../src/db/_db";
 import { addUserToChat } from "../../src/db/chatMember";
 
-jest.mock("../../src/index", () => {
-  return {
-    prisma: {
-      chatMember: {
-        findFirst: jest.fn(),
-        create: jest.fn(),
-      },
+jest.mock("../../src/db/_db", () => ({
+  __esModule: true,
+  default: {
+    chatMember: {
+      findFirst: jest.fn(),
+      create: jest.fn(),
     },
-  };
-});
+  },
+}));
 const mockChatMember = {
   userId: "user-123",
   chatId: "chat-123",

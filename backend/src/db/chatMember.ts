@@ -1,5 +1,5 @@
-import { Chat, ChatMember } from "@prisma/client";
-import { prisma } from "..";
+import { ChatMember } from "@prisma/client";
+import prisma from "./_db";
 
 /**
  * Adds a user to a chat if they are not already a member.
@@ -96,7 +96,6 @@ export async function getChatMembersByUser(
     return null;
   }
 }
-
 
 /**
  * Retrieves all chat memberships for a given user.

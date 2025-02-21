@@ -2,7 +2,7 @@ import { NextFunction, Request, Response, Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { createUser, findUserByName } from "../db/user";
-import { prisma } from "..";
+import prisma from "../db/_db";
 
 const authRouter = Router();
 authRouter.post("/register", registerUser);

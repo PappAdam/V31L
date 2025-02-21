@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
-import { prisma } from "../index";
 import { User } from "@prisma/client";
+import prisma from "./_db";
 
 /**
  * Creates a new user.
