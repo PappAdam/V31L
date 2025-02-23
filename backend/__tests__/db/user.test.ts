@@ -1,17 +1,8 @@
-import prisma from "../../src/db/_db";
+import prismaMock from "../_setup/prismaMock";
 import bcrypt from "bcryptjs";
 import { createUser, findUserById, findUserByName } from "../../src/db/user";
 import { User } from "@prisma/client";
 
-jest.mock("../../src/db/_db", () => ({
-  __esModule: true,
-  default: {
-    user: {
-      create: jest.fn(),
-      findUnique: jest.fn(),
-    },
-  },
-}));
 jest.mock("bcryptjs", () => ({
   hash: jest.fn(),
 }));
@@ -23,11 +14,9 @@ const mockUser: User = {
 };
 
 describe("createUser(username: string, password: string): Promise<User | null>", () => {
-  let mockCreateUser: jest.Mock;
   let mockHash: jest.Mock;
 
-  beforeEach(() => {
-    mockCreateUser = prisma.user.create as jest.Mock;
+  beforeAll(() => {
     mockHash = bcrypt.hash as jest.Mock;
     mockHash.mockResolvedValue("hashedPassword");
   });
@@ -38,7 +27,7 @@ describe("createUser(username: string, password: string): Promise<User | null>",
   it("should return null if prisma error occurs", prismaError);
 
   async function createSuccessful() {
-    mockCreateUser.mockResolvedValue({
+    prismaMock.user.create.mockResolvedValue({
       id: mockUser.id,
       username: mockUser.username,
       password: "hashedPassword",
@@ -52,7 +41,7 @@ describe("createUser(username: string, password: string): Promise<User | null>",
       password: "hashedPassword",
     });
     expect(mockHash).toHaveBeenCalledWith(mockUser.password, 10);
-    expect(mockCreateUser).toHaveBeenCalledWith({
+    expect(prismaMock.user.create).toHaveBeenCalledWith({
       data: {
         username: mockUser.username,
         password: "hashedPassword",
@@ -63,22 +52,22 @@ describe("createUser(username: string, password: string): Promise<User | null>",
   async function usernameEmpty() {
     const result = await createUser("", mockUser.password);
     expect(result).toBeNull();
-    expect(mockCreateUser).not.toHaveBeenCalled();
+    expect(prismaMock.user.create).not.toHaveBeenCalled();
   }
 
   async function passwordEmpty() {
     const result = await createUser(mockUser.username, "");
     expect(result).toBeNull();
-    expect(mockCreateUser).not.toHaveBeenCalled();
+    expect(prismaMock.user.create).not.toHaveBeenCalled();
   }
 
   async function prismaError() {
-    mockCreateUser.mockRejectedValue(new Error("Database error"));
+    prismaMock.user.create.mockRejectedValue(new Error("Database error"));
 
     const result = await createUser(mockUser.username, mockUser.password);
 
     expect(result).toBeNull();
-    expect(mockCreateUser).toHaveBeenCalledWith({
+    expect(prismaMock.user.create).toHaveBeenCalledWith({
       data: {
         username: mockUser.username,
         password: "hashedPassword",
@@ -88,25 +77,18 @@ describe("createUser(username: string, password: string): Promise<User | null>",
 });
 
 describe("findUserByName(username: string): Promise<User | null>", () => {
-  let mockFindUnique: jest.Mock;
-
-  beforeEach(() => {
-    mockFindUnique = prisma.user.findUnique as jest.Mock;
-    jest.clearAllMocks();
-  });
-
   it("should return a User successfully", findSuccessful);
   it("should return null if username is empty", usernameEmpty);
   it("should return null if user does not exist", userDoesNotExist);
   it("should return null if prisma error occurs", prismaError);
 
   async function findSuccessful() {
-    mockFindUnique.mockResolvedValue(mockUser);
+    prismaMock.user.findUnique.mockResolvedValue(mockUser);
 
     const result = await findUserByName(mockUser.username);
 
     expect(result).toEqual(mockUser);
-    expect(mockFindUnique).toHaveBeenCalledWith({
+    expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
       where: { username: mockUser.username },
     });
   }
@@ -115,52 +97,45 @@ describe("findUserByName(username: string): Promise<User | null>", () => {
     const result = await findUserByName("");
 
     expect(result).toBeNull();
-    expect(mockFindUnique).not.toHaveBeenCalled();
+    expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
   }
 
   async function userDoesNotExist() {
-    mockFindUnique.mockResolvedValue(null);
+    prismaMock.user.findUnique.mockResolvedValue(null);
 
     const result = await findUserByName("nonexistentuser");
 
     expect(result).toBeNull();
-    expect(mockFindUnique).toHaveBeenCalledWith({
+    expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
       where: { username: "nonexistentuser" },
     });
   }
 
   async function prismaError() {
-    mockFindUnique.mockRejectedValue(new Error("Database error"));
+    prismaMock.user.findUnique.mockRejectedValue(new Error("Database error"));
 
     const result = await findUserByName(mockUser.username);
 
     expect(result).toBeNull();
-    expect(mockFindUnique).toHaveBeenCalledWith({
+    expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
       where: { username: mockUser.username },
     });
   }
 });
 
 describe("findUserById(userId: string): Promise<User | null>", () => {
-  let mockFindUnique: jest.Mock;
-
-  beforeEach(() => {
-    mockFindUnique = prisma.user.findUnique as jest.Mock;
-    jest.clearAllMocks();
-  });
-
   it("should return a User successfully", findSuccessful);
   it("should return null if id is empty", idEmpty);
   it("should return null if user does not exist", userDoesNotExist);
   it("should return null if prisma error occurs", prismaError);
 
   async function findSuccessful() {
-    mockFindUnique.mockResolvedValue(mockUser);
+    prismaMock.user.findUnique.mockResolvedValue(mockUser);
 
     const result = await findUserById(mockUser.id);
 
     expect(result).toEqual(mockUser);
-    expect(mockFindUnique).toHaveBeenCalledWith({
+    expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
       where: { id: mockUser.id },
     });
   }
@@ -169,27 +144,27 @@ describe("findUserById(userId: string): Promise<User | null>", () => {
     const result = await findUserById("");
 
     expect(result).toBeNull();
-    expect(mockFindUnique).not.toHaveBeenCalled();
+    expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
   }
 
   async function userDoesNotExist() {
-    mockFindUnique.mockResolvedValue(null);
+    prismaMock.user.findUnique.mockResolvedValue(null);
 
     const result = await findUserById("nonexistentid");
 
     expect(result).toBeNull();
-    expect(mockFindUnique).toHaveBeenCalledWith({
+    expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
       where: { id: "nonexistentid" },
     });
   }
 
   async function prismaError() {
-    mockFindUnique.mockRejectedValue(new Error("Database error"));
+    prismaMock.user.findUnique.mockRejectedValue(new Error("Database error"));
 
     const result = await findUserById(mockUser.id);
 
     expect(result).toBeNull();
-    expect(mockFindUnique).toHaveBeenCalledWith({
+    expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
       where: { id: mockUser.id },
     });
   }

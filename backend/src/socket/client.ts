@@ -1,7 +1,7 @@
 import { WebSocket, MessageEvent, CloseEvent } from "ws";
 import { ClientPackage } from "../../../types";
 import * as msgpack from "@msgpack/msgpack";
-import { extractUserIdFromToken } from "../http/auth";
+import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { findUserById } from "../db/user";
 import { findChatMember } from "../db/chatMember";
 import processPackage from "./processor";

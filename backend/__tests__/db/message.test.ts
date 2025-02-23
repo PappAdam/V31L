@@ -1,28 +1,16 @@
-import prisma from "../../src/db/_db";
+import { Message } from "@prisma/client";
+import prismaMock from "../_setup/prismaMock";
 import { createMessage } from "../../src/db/message";
 
-jest.mock("../../src/db/_db", () => ({
-  __esModule: true,
-  default: {
-    message: {
-      create: jest.fn(),
-    },
-  },
-}));
-const mockMessage = {
+const mockMessage: Message = {
   id: "uuid",
   chatId: "chat-123",
   userId: "user-123",
   content: "Hello, World!",
+  timeStamp: new Date(),
 };
 
 describe("createMessage(chatId: string, userId: string, content: string): Promise<Message | null>", () => {
-  let mockCreateMessage: jest.Mock;
-
-  beforeEach(() => {
-    mockCreateMessage = prisma.message.create as jest.Mock;
-  });
-
   it("should create a Message successfully", createSuccessful);
   it("should return null if chatId is empty", chatIdEmpty);
   it("should return null if userId is empty", userIdEmpty);
@@ -30,7 +18,7 @@ describe("createMessage(chatId: string, userId: string, content: string): Promis
   it("should return null if prisma error occurs", prismaError);
 
   async function createSuccessful() {
-    mockCreateMessage.mockResolvedValue(mockMessage);
+    prismaMock.message.create.mockResolvedValue(mockMessage);
 
     const result = await createMessage(
       mockMessage.chatId,
@@ -39,7 +27,7 @@ describe("createMessage(chatId: string, userId: string, content: string): Promis
     );
 
     expect(result).toEqual(mockMessage);
-    expect(mockCreateMessage).toHaveBeenCalledWith({
+    expect(prismaMock.message.create).toHaveBeenCalledWith({
       data: {
         chatId: mockMessage.chatId,
         userId: mockMessage.userId,
@@ -56,7 +44,7 @@ describe("createMessage(chatId: string, userId: string, content: string): Promis
     );
 
     expect(result).toEqual(null);
-    expect(mockCreateMessage).not.toBeNull();
+    expect(prismaMock.message.create).not.toBeNull();
   }
 
   async function userIdEmpty() {
@@ -67,7 +55,7 @@ describe("createMessage(chatId: string, userId: string, content: string): Promis
     );
 
     expect(result).toEqual(null);
-    expect(mockCreateMessage).not.toBeNull();
+    expect(prismaMock.message.create).not.toBeNull();
   }
 
   async function contentEmpty() {
@@ -78,11 +66,11 @@ describe("createMessage(chatId: string, userId: string, content: string): Promis
     );
 
     expect(result).toEqual(null);
-    expect(mockCreateMessage).not.toBeNull();
+    expect(prismaMock.message.create).not.toBeNull();
   }
 
   async function prismaError() {
-    mockCreateMessage.mockRejectedValue(new Error("Database error"));
+    prismaMock.message.create.mockRejectedValue(new Error("Database error"));
 
     const result = await createMessage(
       mockMessage.chatId,
@@ -91,7 +79,7 @@ describe("createMessage(chatId: string, userId: string, content: string): Promis
     );
 
     expect(result).toBeNull();
-    expect(mockCreateMessage).toHaveBeenCalledWith({
+    expect(prismaMock.message.create).toHaveBeenCalledWith({
       data: {
         chatId: mockMessage.chatId,
         userId: mockMessage.userId,

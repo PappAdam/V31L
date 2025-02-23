@@ -3,7 +3,7 @@ import { ClientPackage, ServerPackage } from "../../../types";
 import { findChatMembersByChat } from "../db/chatMember";
 import { createMessage } from "../db/message";
 import { findUserById } from "../db/user";
-import { extractUserIdFromToken } from "../http/auth";
+import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import { ServerPackageSender } from "./server";
 
