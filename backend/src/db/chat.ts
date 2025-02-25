@@ -1,5 +1,5 @@
 import { Chat } from "@prisma/client";
-import { prisma } from "..";
+import prisma from "./_db";
 
 /**
  * Creates a new chat and adds the specified users as members.

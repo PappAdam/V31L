@@ -1,5 +1,5 @@
 import { Message } from "@prisma/client";
-import { prisma } from "..";
+import prisma from "./_db";
 
 /**
  * Creates a new message in a specified chat from a given user.

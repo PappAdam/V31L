@@ -1,18 +1,17 @@
-import { prisma } from "../../src/index";
+import prisma from "../../src/db/_db";
 import bcrypt from "bcryptjs";
 import { createUser, findUserByName } from "../../src/db/user";
 import { User } from "@prisma/client";
 
-jest.mock("../../src/index", () => {
-  return {
-    prisma: {
-      user: {
-        create: jest.fn(),
-        findUnique: jest.fn(),
-      },
+jest.mock("../../src/db/_db", () => ({
+  __esModule: true,
+  default: {
+    user: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
     },
-  };
-});
+  },
+}));
 jest.mock("bcryptjs", () => ({
   hash: jest.fn(),
 }));

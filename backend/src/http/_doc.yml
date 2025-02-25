@@ -113,6 +113,34 @@ paths:
                     example: "User with username already exists"
         500:
           $ref: "#/components/responses/ServerError"
+  /auth/refresh:
+    post:
+      summary: Refresh a user's token
+      tags: [Auth]
+      security:
+        - BearerToken: []
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "A valid token"
+        401:
+          description: Token error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid or expired token | No token provided"
+
   /log/auth:
     get:
       summary: Log authentication details (Supports all HTTP methods)

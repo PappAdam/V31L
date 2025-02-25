@@ -1,16 +1,15 @@
 import { Chat } from "@prisma/client";
-import { prisma } from "../../src";
+import prisma from "../../src/db/_db";
 import { createChat } from "../../src/db/chat";
 
-jest.mock("../../src/index", () => {
-  return {
-    prisma: {
-      chat: {
-        create: jest.fn(),
-      },
+jest.mock("../../src/db/_db", () => ({
+  __esModule: true,
+  default: {
+    chat: {
+      create: jest.fn(),
     },
-  };
-});
+  },
+}));
 
 const mockChat: Chat = {
   id: "id-123",
