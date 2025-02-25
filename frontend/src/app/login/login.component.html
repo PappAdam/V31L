@@ -8,8 +8,12 @@
         <mat-label>Username</mat-label>
         <input matInput formControlName="username" />
         <mat-error>
-          @if (loginForm.controls.username.errors?.['required']) { This field is
-          required }
+          @if (loginForm.controls.username.hasError('required')) { Username
+          field is required } @else if
+          (loginForm.controls.username.hasError('minlength')) { Username has to
+          be at least 8 characters long }@else if
+          (loginForm.controls.username.hasError('pattern')) {Username can only
+          contain letters, numbers, underscores, and dashes}
         </mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline">
@@ -20,8 +24,13 @@
           formControlName="password"
         />
         <mat-error>
-          @if (loginForm.controls.password.errors?.['required']) { This field is
-          required }
+          @if (loginForm.controls.password.hasError('required')) { Password
+          field is required } @else if
+          (loginForm.controls.password.hasError('minlength')) { Password has to
+          be at least 8 characters long }@else if
+          (loginForm.controls.password.hasError('passwordStrength')) {
+          {{loginForm.controls.password.errors?.["passwordStrength"]}}
+          }
         </mat-error>
         <button
           mat-icon-button
@@ -29,6 +38,7 @@
           (click)="toggleShowPassword($event)"
           [attr.aria-label]="'Hide password'"
           [attr.aria-pressed]="!showPassord"
+          type="button"
         >
           <mat-icon>{{
             !showPassord ? "visibility_off" : "visibility"
@@ -36,10 +46,10 @@
         </button>
       </mat-form-field>
       <div class="button-container">
-        <button mat-flat-button [disabled]="!loginForm.valid">
+        <button mat-flat-button [disabled]="!loginForm.valid" type="submit">
           {{ promptText }}
         </button>
-        <button mat-button (click)="togglePromptText($event)">
+        <button mat-button (click)="togglePromptText($event)" type="button">
           {{ signIn ? "Don't have an account?" : "Have an account?" }}
         </button>
       </div>
