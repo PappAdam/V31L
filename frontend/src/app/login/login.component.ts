@@ -42,9 +42,17 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
-      const { username, password } = this.loginForm.value;
+    if (!this.loginForm.valid) {
+      return;
+    }
+    const { username, password } = this.loginForm.value;
+    if (this.signIn) {
       this.authService.login(username!, password!).then(() => {
+        this.router.navigate(['/']);
+      });
+      // .catch(() => (this.errorMessage = 'Invalid username or password'));
+    } else {
+      this.authService.register(username!, password!).then(() => {
         this.router.navigate(['/']);
       });
       // .catch(() => (this.errorMessage = 'Invalid username or password'));
@@ -58,7 +66,7 @@ export class LoginComponent {
   }
 
   signIn: boolean = true;
-  togglePromptText() {
+  togglePromptText(event: MouseEvent) {
     this.signIn = !this.signIn;
   }
   get promptText() {

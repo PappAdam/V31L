@@ -39,7 +39,7 @@
         <button mat-flat-button [disabled]="!loginForm.valid">
           {{ promptText }}
         </button>
-        <button mat-button (click)="togglePromptText()">
+        <button mat-button (click)="togglePromptText($event)">
           {{ signIn ? "Don't have an account?" : "Have an account?" }}
         </button>
       </div>
