@@ -1,29 +1,48 @@
-<!-- <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-  <label for="email">Email:</label>
-  <input id="email" formControlName="email" type="email">
-  <div *ngIf="loginForm.controls.email?.invalid && loginForm.controls.email?.touched">
-    Valid email is required.
-  </div>
-
-  <label for="password">Password:</label>
-  <input id="password" formControlName="password" type="password">
-  <div *ngIf="loginForm.controls.password?.invalid && loginForm.controls.password?.touched">
-    Password must be at least 6 characters.
-  </div>
-
-  <button type="submit" [disabled]="loginForm.invalid">Login</button>
-  <div *ngIf="errorMessage">{{ errorMessage }}</div>
-</form> -->
-
-<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-  <label for="username">Email:</label>
-  <input id="username" formControlName="username" type="username">
-
-  <label for="password">Password:</label>
-  <input id="password" formControlName="password" type="password">
-
-  <button type="submit" [disabled]="loginForm.invalid">Login</button>
-  @if (errorMessage) {
-    <div>{{ errorMessage }}</div> 
-  }
-</form>
+<mat-card id="auth-card">
+  <mat-card-header>
+    <h3>{{ promptText }}</h3>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username" />
+        <mat-error>
+          @if (loginForm.controls.username.errors?.['required']) { This field is
+          required }
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          [type]="!showPassord ? 'password' : 'text'"
+          formControlName="password"
+        />
+        <mat-error>
+          @if (loginForm.controls.password.errors?.['required']) { This field is
+          required }
+        </mat-error>
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="toggleShowPassword($event)"
+          [attr.aria-label]="'Hide password'"
+          [attr.aria-pressed]="!showPassord"
+        >
+          <mat-icon>{{
+            !showPassord ? "visibility_off" : "visibility"
+          }}</mat-icon>
+        </button>
+      </mat-form-field>
+      <div class="button-container">
+        <button mat-flat-button [disabled]="!loginForm.valid">
+          {{ promptText }}
+        </button>
+        <button mat-button (click)="togglePromptText()">
+          {{ signIn ? "Don't have an account?" : "Have an account?" }}
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
