@@ -1,4 +1,7 @@
-export type ClientPackage = ClientConnectionPackage | ClientNewMessagePackage;
+export type ClientPackage =
+  | ClientConnectionPackage
+  | ClientNewMessagePackage
+  | ClientBodyLessPackage;
 
 export type ClientNewMessagePackage = {
   header: "NewMessage";
@@ -9,4 +12,8 @@ export type ClientNewMessagePackage = {
 export type ClientConnectionPackage = {
   header: "Connection";
   token: string;
+};
+
+export type ClientBodyLessPackage = {
+  header: "DeAuthorization";
 };

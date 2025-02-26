@@ -29,7 +29,8 @@ export class HomeComponent {
         document.querySelector('input[type=text]') as HTMLInputElement
       ).value;
 
-      this.socketService.sendMessage(text, this.authService.token);
+      throw new Error('Sending messages is not available because ChatId is not implemented yet.');
+      // this.socketService.sendMessage(text, CHATID HERE);
     }
   }
 }

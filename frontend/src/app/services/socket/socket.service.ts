@@ -46,13 +46,13 @@ export class SocketService {
   }
 
   sendMessage(messageContent: string, chatId: string) {
-    let client_message: ClientPackage = {
+    let outgouing: ClientPackage = {
       header: 'NewMessage',
       messageContent,
       chatId,
     };
 
-    let bin = msgpack.encode(client_message);
+    let bin = msgpack.encode(outgouing);
 
     this.ws.send(bin);
   }
@@ -62,16 +62,31 @@ export class SocketService {
       return;
     }
 
-    let client_message: ClientPackage = {
+    let outgoing: ClientPackage = {
       header: 'Connection',
       token,
     };
 
-    let bin = msgpack.encode(client_message);
+    let bin = msgpack.encode(outgoing);
     this.ws.send(bin);
+
+    console.log(
+      'Place this after auth acknowledgement once acknowledgements are finished'
+    );
+    this.authorized = true;
   }
 
   private deAuth() {
-    throw new Error('DeAuth not implemented in socket.service.ts');
+    if (!this.authorized) {
+      return;
+    }
+
+    let outgoing: ClientPackage = {
+      header: 'DeAuthorization',
+    };
+
+    let bin = msgpack.encode(outgoing);
+    this.ws.send(bin);
+    this.authorized = false;
   }
 }

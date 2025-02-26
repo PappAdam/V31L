@@ -36,19 +36,17 @@ export class Client {
    *
    * @param {MessageEvent} event - The event object containing the incoming package data
    */
-  async onIncomingPackage(event: MessageEvent) {
+  onIncomingPackage = async (event: MessageEvent) => {
     try {
       const decoded = msgpack.decode(event.data as Uint8Array) as ClientPackage;
-      console.log("Decoded: ", decoded.header);
       const userId = await this.validateIncomingPackage(decoded);
-      console.log("Got userId");
       if (userId) {
-        processPackage(userId, decoded);
+        processPackage(this, decoded);
       }
-    } catch {
-      console.error("Error while processing incoming package: \n");
+    } catch (error) {
+      console.error("Error while processing incoming package: \n", error);
     }
-  }
+  };
 
   /**
    * This method is triggered when the WebSocket connection is closed
@@ -68,13 +66,11 @@ export class Client {
    * @param incoming The incoming package to validate
    * @returns {Promise<string | null>} `userId` if the package is valid, `null` otherwise
    */
-  async validateIncomingPackage(
+  validateIncomingPackage = async (
     incoming: ClientPackage
-  ): Promise<string | null> {
-    console.log(incoming.header);
+  ): Promise<string | null> => {
     switch (incoming.header) {
       case "Connection":
-        console.log("here1");
         const token = extractUserIdFromToken(incoming.token);
         if (!token.userId || token.expired) {
           return null;
@@ -83,16 +79,19 @@ export class Client {
         return user ? user.id : null;
 
       case "NewMessage":
-        console.log("here2");
         if (!incoming.chatId || !incoming.messageContent || !this.userId) {
           return null;
         }
         const chatMember = await findChatMember(this.userId, incoming.chatId);
         return chatMember ? this.userId : null;
 
+      case "DeAuthorization":
+        return this.userId;
+
       default:
-        console.log("here3");
-        throw new Error("This package type has not been implemented.");
+        throw new Error(
+          "Validation for this package type has not been implemented."
+        );
     }
-  }
+  };
 }

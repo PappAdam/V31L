@@ -17,18 +17,22 @@ import { ServerPackageSender } from "./server";
  * @param incoming The package the client sent
  */
 async function processPackage(
-  userId: string,
+  client: Client,
   incoming: ClientPackage
 ): Promise<void> {
   switch (incoming.header) {
     case "Connection":
       const token = extractUserIdFromToken(incoming.token);
-      userId = token.userId as string;
+      client.userId = token.userId as string;
       break;
 
     case "NewMessage":
-      await createMessage(incoming.chatId, userId, incoming.messageContent);
-      const author = (await findUserById(userId)) as User;
+      await createMessage(
+        incoming.chatId,
+        client.userId,
+        incoming.messageContent
+      );
+      const author = (await findUserById(client.userId)) as User;
       const newMessagePackage: ServerPackage = {
         header: "NewMessage",
         chatId: incoming.chatId,
@@ -44,8 +48,14 @@ async function processPackage(
         packageDescription.sendPackage();
       });
 
+    case "DeAuthorization":
+      client.userId = "";
+      break;
+
     default:
-      console.error("This package type has not been implemented.");
+      console.error(
+        "Processing for this package type has not been implemented."
+      );
   }
 }
 
