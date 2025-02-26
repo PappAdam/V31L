@@ -1,12 +1,12 @@
 export type ClientPackage = ClientConnectionPackage | ClientNewMessagePackage;
 
-type ClientNewMessagePackage = {
+export type ClientNewMessagePackage = {
   header: "NewMessage";
   chatId: string;
   messageContent: string;
 };
 
-type ClientConnectionPackage = {
+export type ClientConnectionPackage = {
   header: "Connection";
   token: string;
 };

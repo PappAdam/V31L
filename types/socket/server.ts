@@ -1,6 +1,6 @@
 export type ServerPackage = ServerNewMessagePackage | ServerErrorPackage;
 
-type ServerNewMessagePackage = {
+export type ServerNewMessagePackage = {
   header: "NewMessage";
   //Author of message
   username: string;
@@ -8,7 +8,7 @@ type ServerNewMessagePackage = {
   messageContent: string;
 };
 
-type ServerErrorPackage = {
+export type ServerErrorPackage = {
   header: "Error";
   errorMessage: string;
 };

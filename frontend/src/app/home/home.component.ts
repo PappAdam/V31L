@@ -18,9 +18,9 @@ export class HomeComponent {
   ) {}
 
   async ngAfterViewInit() {
-    this.socketService.onMsgRecieved = (msg) => {
-      this.messages.push(msg);
-    };
+    this.socketService.newMessageRecieved$.subscribe((message) => {
+      this.messages.push(message.messageContent);
+    });
   }
 
   async sendClicked() {
@@ -29,7 +29,7 @@ export class HomeComponent {
         document.querySelector('input[type=text]') as HTMLInputElement
       ).value;
 
-      this.socketService.sendMsg(text, this.authService.token);
+      this.socketService.sendMessage(text, this.authService.token);
     }
   }
 }

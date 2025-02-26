@@ -25,26 +25,28 @@ export class Client {
   constructor(connection: WebSocket) {
     this.ws = connection;
 
-    this.ws.onmessage = this.onMessage;
+    this.ws.onmessage = this.onIncomingPackage;
     this.ws.onclose = this.onClose;
 
     clients.push(this);
   }
 
   /**
-   * This method is triggered when a message is received through the WebSocket connection
+   * This method is triggered when a package is received through the WebSocket connection
    *
-   * @param {MessageEvent} event - The event object containing the incoming message data
+   * @param {MessageEvent} event - The event object containing the incoming package data
    */
-  async onMessage(event: MessageEvent) {
+  async onIncomingPackage(event: MessageEvent) {
     try {
       const decoded = msgpack.decode(event.data as Uint8Array) as ClientPackage;
-      const packageValid = await this.validateIncomingPackage(decoded);
-      if (packageValid) {
-        processPackage(this, decoded);
+      console.log("Decoded: ", decoded.header);
+      const userId = await this.validateIncomingPackage(decoded);
+      console.log("Got userId");
+      if (userId) {
+        processPackage(userId, decoded);
       }
     } catch {
-      console.error("Error while processing incoming package: \n", event);
+      console.error("Error while processing incoming package: \n");
     }
   }
 
@@ -64,28 +66,33 @@ export class Client {
    * It queries the database, validates that the required data for the package exists
    *
    * @param incoming The incoming package to validate
-   * @returns {Promise<boolean>} `true` if the package is valid, `false` otherwise
+   * @returns {Promise<string | null>} `userId` if the package is valid, `null` otherwise
    */
-  async validateIncomingPackage(incoming: ClientPackage): Promise<boolean> {
+  async validateIncomingPackage(
+    incoming: ClientPackage
+  ): Promise<string | null> {
+    console.log(incoming.header);
     switch (incoming.header) {
       case "Connection":
+        console.log("here1");
         const token = extractUserIdFromToken(incoming.token);
         if (!token.userId || token.expired) {
-          return false;
+          return null;
         }
         const user = await findUserById(token.userId);
-        return user ? true : false;
+        return user ? user.id : null;
 
       case "NewMessage":
+        console.log("here2");
         if (!incoming.chatId || !incoming.messageContent || !this.userId) {
-          return false;
+          return null;
         }
         const chatMember = await findChatMember(this.userId, incoming.chatId);
-        return chatMember ? true : false;
+        return chatMember ? this.userId : null;
 
       default:
-        console.error("This package type has not been implemented.");
-        return false;
+        console.log("here3");
+        throw new Error("This package type has not been implemented.");
     }
   }
 }

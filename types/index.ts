@@ -1,2 +1,2 @@
-export * from "./message/client";
-export * from "./message/server";
+export * from "./socket/client";
+export * from "./socket/server";

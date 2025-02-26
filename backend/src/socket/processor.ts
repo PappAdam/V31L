@@ -17,22 +17,18 @@ import { ServerPackageSender } from "./server";
  * @param incoming The package the client sent
  */
 async function processPackage(
-  client: Client,
+  userId: string,
   incoming: ClientPackage
 ): Promise<void> {
   switch (incoming.header) {
     case "Connection":
       const token = extractUserIdFromToken(incoming.token);
-      client.userId = token.userId as string;
+      userId = token.userId as string;
       break;
 
     case "NewMessage":
-      await createMessage(
-        incoming.chatId,
-        client.userId,
-        incoming.messageContent
-      );
-      const author = (await findUserById(client.userId)) as User;
+      await createMessage(incoming.chatId, userId, incoming.messageContent);
+      const author = (await findUserById(userId)) as User;
       const newMessagePackage: ServerPackage = {
         header: "NewMessage",
         chatId: incoming.chatId,

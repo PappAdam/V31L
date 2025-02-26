@@ -13,11 +13,7 @@ export class AuthService {
     string | null
   >(null);
 
-  constructor(
-    private http: HttpClient,
-    private socket: SocketService,
-    private router: Router
-  ) {
+  constructor(private http: HttpClient, private router: Router) {
     this._token$.next(localStorage.getItem('jwt'));
   }
 
@@ -80,7 +76,6 @@ export class AuthService {
   async onSuccessfulAuth(token: string) {
     this._token$.next(token);
     localStorage.setItem('jwt', token);
-    this.socket.connect(token);
   }
 
   logout() {
