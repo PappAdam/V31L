@@ -8,6 +8,11 @@ export type ServerNewMessagePackage = {
   messageContent: string;
 };
 
+export type ServerSyncResponsePackage = {
+  header: "SyncResponse";
+  //TODO
+};
+
 export type ServerErrorPackage = {
   header: "Error";
   errorMessage: string;

@@ -1,7 +1,7 @@
 import { User } from "@prisma/client";
 import { ClientPackage, ServerPackage } from "../../../types";
 import { findChatMembersByChat } from "../db/chatMember";
-import { createMessage } from "../db/message";
+import { createMessage, findSyncMessages } from "../db/message";
 import { findUserById } from "../db/user";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
@@ -24,6 +24,8 @@ async function processPackage(
     case "Connection":
       const token = extractUserIdFromToken(incoming.token);
       client.userId = token.userId as string;
+      console.log("Connect");
+
       break;
 
     case "NewMessage":
@@ -50,7 +52,9 @@ async function processPackage(
 
     case "DeAuthorization":
       client.userId = "";
+      console.log("Deauth");
       break;
+    case "Sync":
 
     default:
       console.error(

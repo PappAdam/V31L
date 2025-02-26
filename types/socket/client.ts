@@ -1,7 +1,8 @@
 export type ClientPackage =
   | ClientConnectionPackage
   | ClientNewMessagePackage
-  | ClientBodyLessPackage;
+  | ClientBodyLessPackage
+  | ClientSync;
 
 export type ClientNewMessagePackage = {
   header: "NewMessage";
@@ -16,4 +17,10 @@ export type ClientConnectionPackage = {
 
 export type ClientBodyLessPackage = {
   header: "DeAuthorization";
+};
+
+export type ClientSync = {
+  header: "Sync";
+  displayedGroupCount: number;
+  maxDisplayableMessagCount: number;
 };
