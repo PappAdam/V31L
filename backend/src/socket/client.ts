@@ -70,7 +70,7 @@ export class Client {
     incoming: ClientPackage
   ): Promise<string | null> => {
     switch (incoming.header) {
-      case "Connection":
+      case "Authorization":
         const token = extractUserIdFromToken(incoming.token);
         if (!token.userId || token.expired) {
           return null;

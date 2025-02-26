@@ -11,7 +11,7 @@ export type ClientNewMessagePackage = {
 };
 
 export type ClientConnectionPackage = {
-  header: "Connection";
+  header: "Authorization";
   token: string;
 };
 

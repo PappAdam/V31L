@@ -21,10 +21,9 @@ async function processPackage(
   incoming: ClientPackage
 ): Promise<void> {
   switch (incoming.header) {
-    case "Connection":
+    case "Authorization":
       const token = extractUserIdFromToken(incoming.token);
       client.userId = token.userId as string;
-      console.log("Connect");
 
       break;
 
@@ -52,7 +51,6 @@ async function processPackage(
 
     case "DeAuthorization":
       client.userId = "";
-      console.log("Deauth");
       break;
     case "Sync":
 

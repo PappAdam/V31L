@@ -63,7 +63,7 @@ export class SocketService {
     }
 
     let outgoing: ClientPackage = {
-      header: 'Connection',
+      header: 'Authorization',
       token,
     };
 
