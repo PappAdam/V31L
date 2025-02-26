@@ -1,10 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as msgpack from '@msgpack/msgpack';
-import {
-  ClientPackage,
-  ServerHeader,
-  ServerPackage,
-} from '../../../../../types';
+import { ClientPackage, ServerPackage } from '../../../../../types';
 import { AuthService } from '../http/auth.service';
 
 const URL: string = 'ws://localhost:8080';
@@ -14,22 +10,25 @@ const URL: string = 'ws://localhost:8080';
 })
 export class SocketService {
   ws: WebSocket;
+  private authorized: boolean = false;
 
   onMsgRecieved = (msg: string) => {};
 
-  constructor() {
+  constructor(private authService: AuthService) {
+    authService.token$.subscribe((token) => {
+      token ? this.auth(token) : this.deAuth();
+    });
+
+    authService.token$.subscribe();
     this.ws = new WebSocket(URL);
-    this.ws.onmessage = async (msg) => {
-      const message = msgpack.decode(
-        await (msg.data as any).arrayBuffer()
-      ) as ServerPackage;
-      if (message.header == ServerHeader.NewMsg) {
-        this.onMsgRecieved(message.data);
-      }
-    };
+    this.ws.onmessage = this.onMessage;
   }
 
-  connect(token: string) {
+  private auth(token: string) {
+    if (this.authorized) {
+      return;
+    }
+
     let client_message: ClientPackage = {
       header: 'Connection',
       token,
@@ -37,6 +36,29 @@ export class SocketService {
 
     let bin = msgpack.encode(client_message);
     this.ws.send(bin);
+  }
+
+  private deAuth() {
+    throw new Error('DeAuth not implemented. socket.service.ts:45');
+  }
+
+  private async onMessage(msg: MessageEvent) {
+    const incoming = msgpack.decode(
+      await (msg.data as any).arrayBuffer()
+    ) as ServerPackage;
+    switch (
+      incoming.header
+      // case value:
+
+      //   break;
+
+      // default:
+      //   break;
+    ) {
+    }
+    // if (incoming.header == ServerHeader.NewMsg) {
+    //   this.onMsgRecieved(incoming.data);
+    // }
   }
 
   sendMsg(messageContent: string, chatId: string) {

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { SocketService } from '../socket/socket.service';
 import { Router } from '@angular/router';
 
@@ -9,17 +9,30 @@ import { Router } from '@angular/router';
 })
 export class AuthService {
   baseUrl: string = 'http://localhost:3000/auth/';
-  private _token: string | null = null;
-  public get token(): string | null {
-    return this._token;
-  }
+  private _token$: BehaviorSubject<string | null> = new BehaviorSubject<
+    string | null
+  >(null);
 
   constructor(
     private http: HttpClient,
     private socket: SocketService,
     private router: Router
   ) {
-    this._token = localStorage.getItem('jwt');
+    this._token$.next(localStorage.getItem('jwt'));
+  }
+
+  /**
+   * Gets the plain value of the JWT token
+   */
+  public get token(): string | null {
+    return this._token$.getValue();
+  }
+
+  /**
+   * Gets a token RxJS observable
+   */
+  public get token$(): Observable<string | null> {
+    return this._token$.asObservable();
   }
 
   async login(username: string, password: string) {
@@ -50,14 +63,14 @@ export class AuthService {
   }
 
   async refreshToken() {
-    if (!this._token) {
+    if (!this.token) {
       return null;
     }
 
     const loginRequest = this.http.post<{ token: string }>(
       this.baseUrl + 'refresh',
       {},
-      { headers: { Authorization: this._token } }
+      { headers: { Authorization: this.token } }
     );
     const res = await firstValueFrom(loginRequest);
     this.onSuccessfulAuth(res.token);
@@ -65,13 +78,13 @@ export class AuthService {
   }
 
   async onSuccessfulAuth(token: string) {
-    this._token = token;
+    this._token$.next(token);
     localStorage.setItem('jwt', token);
     this.socket.connect(token);
   }
 
   logout() {
-    this._token = null;
+    this._token$.next(null);
     localStorage.removeItem('jwt');
     console.log('TODO: Disconnect socket connection on logout');
     this.router.navigateByUrl('/login');
