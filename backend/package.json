@@ -7,7 +7,8 @@
     "test": "jest --verbose",
     "install": "prisma migrate reset -f",
     "start": "tsx src/index.ts",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "load:test-data": "tsx src/db/_dbTestData/loadTestData.ts"
   },
   "author": "",
   "license": "ISC",
