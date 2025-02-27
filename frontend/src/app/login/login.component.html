@@ -6,8 +6,8 @@
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <mat-form-field appearance="outline">
         <mat-label>Username</mat-label>
-        <input matInput formControlName="username" />
-        <mat-error>
+        <input matInput formControlName="username" data-cy="username-input" />
+        <mat-error data-cy="username-error">
           @if (loginForm.controls.username.hasError('required')) { Username
           field is required } @else if
           (loginForm.controls.username.hasError('minlength')) { Username has to
@@ -22,8 +22,9 @@
           matInput
           [type]="!showPassord ? 'password' : 'text'"
           formControlName="password"
+          data-cy="password-input"
         />
-        <mat-error>
+        <mat-error data-cy="password-error">
           @if (loginForm.controls.password.hasError('required')) { Password
           field is required } @else if
           (loginForm.controls.password.hasError('minlength')) { Password has to
@@ -39,6 +40,7 @@
           [attr.aria-label]="'Hide password'"
           [attr.aria-pressed]="!showPassord"
           type="button"
+          data-cy="toggle-password-button"
         >
           <mat-icon>{{
             !showPassord ? "visibility_off" : "visibility"
@@ -46,10 +48,20 @@
         </button>
       </mat-form-field>
       <div class="button-container">
-        <button mat-flat-button [disabled]="!loginForm.valid" type="submit">
+        <button
+          mat-flat-button
+          [disabled]="!loginForm.valid"
+          type="submit"
+          data-cy="submit-button"
+        >
           {{ promptText }}
         </button>
-        <button mat-button (click)="togglePromptText($event)" type="button">
+        <button
+          mat-button
+          (click)="togglePromptText($event)"
+          type="button"
+          data-cy="toggle-signin-button"
+        >
           {{ signIn ? "Don't have an account?" : "Have an account?" }}
         </button>
       </div>

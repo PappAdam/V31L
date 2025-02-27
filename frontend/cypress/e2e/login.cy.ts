@@ -7,128 +7,100 @@ describe('Login Page', () => {
   it('should validate password', validatePassword);
   it('should validate username', validateUsername);
   it('should enable submit button', enableSubmitButton);
-  it(
-    'should show/hide password when toggle button is clicked',
-    toggleShowPassword
-  );
+  it('should toggle password', toggleShowPassword);
   it('should switch between login and signup prompts', toggleSignIn);
   it('should attempt to submit the form', sendRequest);
 
   function displayLoginForm() {
     //Elements should exist
     cy.get('#auth-card').should('exist');
-    cy.get('input[formControlName="username"]').should('exist');
-    cy.get('input[formControlName="password"]').should('exist');
-    cy.get('button[type=submit]').contains('Sign In').should('exist');
-    cy.contains("Don't have an account?").should('exist');
+    cy.get('[data-cy="username-input"]').should('exist');
+    cy.get('[data-cy="password-input"]').should('exist');
+    cy.get('button[data-cy="submit-button"]')
+      .contains('Sign In')
+      .should('exist');
+    cy.get('[data-cy="toggle-signin-button"]').contains(
+      "Don't have an account?"
+    );
   }
 
   function validatePassword() {
     // Required validator
-    cy.get('input[formControlName="password"]').click().blur();
-    cy.contains('Password field is required').should('exist');
-
-    // Error shows up in the mat-error of the input
-    cy.get('input[formControlName="password"]')
-      .parents('mat-form-field')
-      .find('mat-error')
-      .should('exist');
+    cy.get('[data-cy="password-input"]').click().blur();
+    cy.get('[data-cy="password-error"]').contains('Password field is required');
 
     // MinLength validator
-    cy.get('input[formControlName="password"]').type('short').blur();
-    cy.contains('Password has to be at least 8 characters long').should(
-      'exist'
+    cy.get('[data-cy="password-input"]').type('short').blur();
+    cy.get('[data-cy="password-error"]').contains(
+      'Password has to be at least 8 characters long'
     );
 
     // Custom Password Validator
-    cy.get('input[formControlName="password"]')
-      .clear()
-      .type('PASSWORD1')
-      .blur();
-    cy.contains('Password must contain at least one lowercase letter').should(
-      'exist'
+    cy.get('[data-cy="password-input"]').clear().type('PASSWORD1').blur();
+    cy.get('[data-cy="password-error"]').contains(
+      'Password must contain at least one lowercase letter'
     );
 
     // Custom Password Validator
-    cy.get('input[formControlName="password"]')
-      .clear()
-      .type('password1')
-      .blur();
-    cy.contains('Password must contain at least one uppercase letter').should(
-      'exist'
+    cy.get('[data-cy="password-input"]').clear().type('password1').blur();
+    cy.get('[data-cy="password-error"]').contains(
+      'Password must contain at least one uppercase letter'
     );
 
     // Custom Password Validator
-    cy.get('input[formControlName="password"]').clear().type('Password').blur();
-    cy.contains('Password must contain at least one number').should('exist');
+    cy.get('[data-cy="password-input"]').clear().type('Password').blur();
+    cy.get('[data-cy="password-error"]').contains(
+      'Password must contain at least one number'
+    );
 
     // Mat-error should not exist if valid password is given
-    cy.get('input[formControlName="password"]')
-      .clear()
-      .type('Password1')
-      .blur();
-    cy.get('input[formControlName="password"]')
-      .parents('mat-form-field')
-      .find('mat-error')
-      .should('not.exist');
+    cy.get('[data-cy="password-input"]').clear().type('Password1').blur();
+    cy.get('[data-cy="password-error"]').should('not.exist');
   }
 
   function validateUsername() {
     // Required validator
-    cy.get('input[formControlName="username"]').click().blur();
-    cy.contains('Username field is required');
-
-    // Error shows up in the mat-error of the input
-    cy.get('input[formControlName="username"]')
-      .parents('mat-form-field')
-      .find('mat-error')
-      .should('exist');
+    cy.get('[data-cy="username-input"]').click().blur();
+    cy.get('[data-cy="username-error"]').contains('Username field is required');
 
     // MinLength validator
-    cy.get('input[formControlName="username"]').type('a').blur();
-    cy.contains('Username has to be at least 8 characters long').should(
-      'exist'
+    cy.get('[data-cy="username-input"]').type('a').blur();
+    cy.get('[data-cy="username-error"]').contains(
+      'Username has to be at least 8 characters long'
     );
 
     // Username Pattern (regEx) Validator
-    cy.get('input[formControlName="username"]').clear().type('aaaaaaa@').blur();
-    cy.contains(
+    cy.get('[data-cy="username-input"]').clear().type('aaaaaaa@').blur();
+    cy.get('[data-cy="username-error"]').contains(
       'Username can only contain letters, numbers, underscores, and dashes'
-    ).should('exist');
+    );
 
     // Mat-error should not exist if valid username is given
-    cy.get('input[formControlName="username"]').clear().type('aaaaaaaa').blur();
-    cy.get('input[formControlName="username"]')
-      .parents('mat-form-field')
-      .find('mat-error')
-      .should('not.exist');
+    cy.get('[data-cy="username-input"]').clear().type('aaaaaaaa').blur();
+    cy.get('[data-cy="username-error"]').should('not.exist');
   }
 
   function enableSubmitButton() {
-    cy.get('button[type="submit"]').should('be.disabled');
+    cy.get('[data-cy="submit-button"]').should('be.disabled');
 
-    cy.get('input[formControlName="username"]').type('validUser');
-    cy.get('input[formControlName="password"]').type('validPass123@_');
+    cy.get('[data-cy="username-input"]').type('validUser');
+    cy.get('[data-cy="password-input"]').type('validPass123@_');
 
-    cy.get('button[type="submit"]').should('not.be.disabled');
+    cy.get('[data-cy="submit-button"]').should('not.be.disabled');
   }
 
   function toggleShowPassword() {
-    cy.get('input[formControlName="password"]').should(
+    cy.get('[data-cy="password-input"]').should(
       'have.attr',
       'type',
       'password'
     );
 
-    cy.get('button[aria-label="Hide password"]').click();
-    cy.get('input[formControlName="password"]').should(
-      'have.attr',
-      'type',
-      'text'
-    );
+    cy.get('[data-cy="toggle-password-button"]').click();
+    cy.get('[data-cy="password-input"]').should('have.attr', 'type', 'text');
 
-    cy.get('button[aria-label="Hide password"]').click();
-    cy.get('input[formControlName="password"]').should(
+    cy.get('[data-cy="toggle-password-button"]').click();
+    cy.get('[data-cy="password-input"]').should(
       'have.attr',
       'type',
       'password'
@@ -136,25 +108,35 @@ describe('Login Page', () => {
   }
 
   function toggleSignIn() {
-    cy.contains("Don't have an account?").should('exist');
-    cy.contains('Sign In').should('exist');
-    cy.contains("Don't have an account?").click();
+    // Initial state
+    cy.get('[data-cy="toggle-signin-button"]').contains(
+      "Don't have an account?"
+    );
+    cy.get('[data-cy="submit-button"]').contains('Sign In');
 
-    cy.contains('Have an account?').should('exist');
-    cy.contains('Sign Up').should('exist');
+    // Switching to sign up
+    cy.get('[data-cy="toggle-signin-button"]').click();
 
-    cy.contains('Have an account?').click();
-    cy.contains("Don't have an account?").should('exist');
-    cy.contains('Sign In').should('exist');
+    cy.get('[data-cy="toggle-signin-button"]').contains('Have an account?');
+    cy.get('[data-cy="submit-button"]').contains('Sign Up');
+
+    //Switching back to sign in
+    cy.get('[data-cy="toggle-signin-button"]').click();
+
+    cy.get('[data-cy="toggle-signin-button"]').contains(
+      "Don't have an account?"
+    );
+    cy.get('[data-cy="submit-button"]').contains('Sign In');
   }
 
   function sendRequest() {
     cy.intercept('POST', '/auth/login').as('loginRequest');
 
-    cy.get('input[formControlName="username"]').type('validUser');
-    cy.get('input[formControlName="password"]').type('validPass123@_');
-    cy.get('button[type="submit"]').should('not.be.disabled');
-    cy.get('button[type="submit"]').click();
+    cy.get('[data-cy="username-input"]').type('validUser');
+    cy.get('[data-cy="password-input"]').type('validPass123@_');
+
+    cy.get('[data-cy="submit-button"]').should('not.be.disabled');
+    cy.get('[data-cy="submit-button"]').click();
 
     cy.wait('@loginRequest').its('request.body').should('deep.equal', {
       username: 'validUser',
