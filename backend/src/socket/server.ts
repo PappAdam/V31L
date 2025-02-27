@@ -7,7 +7,11 @@ function isStringArray(arr: any[]): arr is string[] {
   return typeof arr[0] === "string";
 }
 
-export class ServerPackageSender {
+/**
+ * A utility class for sevending serr packages to multiple clients, either via WebSocket instances or user IDs.
+ * The packages are encoded using MessagePack for efficient data transfer.
+ */
+export default class ServerPackageSender {
   private package: ServerPackage;
   private clients: WebSocket[];
 
@@ -30,11 +34,23 @@ export class ServerPackageSender {
     }
   }
 
+  /**
+   * Sends a server package to multiple clients.
+   * @param {WebSocket[]} wsArray - An array of WebSocket instances to send the package to.
+   * @param {ServerPackage} outgoing - The server package to send.
+   * @returns {Promise<void>} A promise that resolves when the package has been sent to all clients.
+   */
   static async send(
     wsArray: WebSocket[],
     outgoing: ServerPackage
   ): Promise<void>;
 
+  /**
+   * Sends a server package to multiple clients identified by their user IDs.
+   * @param {string[]} userIds - An array of user IDs to send the package to.
+   * @param {ServerPackage} outgoing - The server package to send.
+   * @returns {Promise<void>} A promise that resolves when the package has been sent to all clients.
+   */
   static async send(userIds: string[], outgoing: ServerPackage): Promise<void>;
 
   static async send(

@@ -51,12 +51,8 @@ export class SocketService {
         maxDisplayableMessagCount: -1,
       },
       () => {
-        console.log('Acknowledged, sync sent');
+        this.authorized = true;
       }
-    );
-
-    console.log(
-      'Place this after auth acknowledgement once acknowledgements are finished'
     );
   }
 
@@ -65,13 +61,12 @@ export class SocketService {
       return;
     }
 
-    let outgoing: ClientPackage = {
-      id: crypto.randomUUID(),
+    const deauthPackageId = PackageSender.sendPackage({
       header: 'DeAuthorization',
-    };
+    });
 
-    let bin = msgpack.encode(outgoing);
-
-    this.authorized = false;
+    PackageSender.createPending(deauthPackageId, () => {
+      this.authorized = false;
+    });
   }
 }

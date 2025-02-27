@@ -9,7 +9,7 @@ import { createMessage, findSyncMessages } from "../db/message";
 import { findUserById } from "../db/user";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
-import { ServerPackageSender } from "./server";
+import ServerPackageSender from "./server";
 
 /**
  * Processes the incoming `ClientPackage` based on its header type
@@ -58,6 +58,11 @@ async function processPackage(
 
     case "DeAuthorization":
       client.userId = "";
+      await ServerPackageSender.send([client.ws], {
+        header: "Acknowledgement",
+        ackMessageId: incoming.id,
+        details: "DeAuth Succesful",
+      });
       break;
 
     case "Sync":
