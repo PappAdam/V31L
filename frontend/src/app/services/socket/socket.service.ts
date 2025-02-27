@@ -1,15 +1,6 @@
 import { Injectable } from '@angular/core';
-import {
-  ClientPackage,
-  ClientPackageDescription,
-  ServerAcknowledgement,
-  ServerHeaderType,
-  ServerNewMessagePackage,
-  ServerPackage,
-  ServerSyncResponsePackage,
-} from '../../../../../types';
+import { ServerSyncResponsePackage } from '../../../../../types';
 import { AuthService } from '../http/auth.service';
-import * as msgpack from '@msgpack/msgpack';
 
 import PackageSender from './socketPackage';
 
@@ -20,25 +11,23 @@ const URL: string = 'ws://localhost:8080';
 })
 export class SocketService {
   private authorized: boolean = false;
-  packageSender = new PackageSender(URL);
+  packageSender: PackageSender;
 
   constructor(private authService: AuthService) {
-    this.packageSender.onInit(() => {
+    this.packageSender = new PackageSender(URL, () => {
       authService.token$.subscribe((token) => {
         token ? this.auth(token) : this.deAuth();
       });
     });
 
-    this.packageSender.onPackage('SyncResponse', (pkg) => {
-      const p = pkg as ServerSyncResponsePackage;
-
-      console.log(p.chatMessages);
+    this.packageSender.addPackageListener('SyncResponse', (pkg) => {
+      console.log(pkg.chatMessages);
     });
   }
 
   private auth(token: string) {
     if (this.authorized) {
-      return;
+      throw new Error('Cannot authorize while authorized!');
     }
 
     const authPackageId = this.packageSender.sendPackage({
@@ -61,14 +50,14 @@ export class SocketService {
 
   private deAuth() {
     if (!this.authorized) {
-      return;
+      throw new Error('Cannot deAuthorize while deAuthorized!');
     }
 
-    const deauthPackageId = this.packageSender.sendPackage({
+    const deAuthPackageId = this.packageSender.sendPackage({
       header: 'DeAuthorization',
     });
 
-    this.packageSender.createPending(deauthPackageId, () => {
+    this.packageSender.createPending(deAuthPackageId, () => {
       this.authorized = false;
     });
   }

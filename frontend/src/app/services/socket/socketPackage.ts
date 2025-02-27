@@ -1,6 +1,7 @@
 import {
   ClientPackage,
   ClientPackageDescription,
+  PackageForHeader,
   ServerAcknowledgement,
   ServerHeaderType,
   ServerPackage,
@@ -55,7 +56,6 @@ export type PendingPackage = {
 export default class PackageSender {
   private ws: WebSocket;
   private pendingPackages: PendingPackage[] = [];
-  private initializerEvents: (() => void)[] = [];
 
   private packageEvents: {
     header: ServerHeaderType;
@@ -65,18 +65,15 @@ export default class PackageSender {
   /**
    * Creates a new PackageSender instance.
    * @param {string} URL - The WebSocket server URL to connect to.
+   * @param {() => void} onOpen - Callback function to run when the connection is opened.
    */
-  constructor(URL: string) {
+  constructor(URL: string, onOpen: () => void) {
     this.ws = new WebSocket(URL);
     this.ws.onmessage = this.onIncomingPackage;
 
-    this.ws.onopen = () => {
-      this.initializerEvents.forEach((initEvent) => {
-        initEvent();
-      });
-    };
+    this.ws.onopen = onOpen;
 
-    this.onPackage('Acknowledgement', (pkg) => {
+    this.addPackageListener('Acknowledgement', (pkg) => {
       const incoming = pkg as ServerAcknowledgement;
       const ackMessageId = incoming.ackMessageId;
 
@@ -97,25 +94,21 @@ export default class PackageSender {
   }
 
   /**
-   * Registers a callback to be executed when the WebSocket connection is opened.
-   * @param {() => void} callback - The callback function to execute on connection open.
-   */
-  onInit(callback: () => void) {
-    this.initializerEvents.push(callback);
-  }
-
-  /**
    * Registers a callback to handle incoming packages with a specific header.
-   * @param {ServerHeaderType} header - The header to listen for.
-   * @param {(pkg: ServerPackage) => void} callback - The callback to execute when a package with the specified header is received.
+   * @param {ServerHeaderType} header - The header type to listen for.
+   * @param {(pkg: PackageForHeader<T>) => void} callback - The callback to execute when a package with the specified header is received.
    */
-  onPackage(header: ServerHeaderType, callback: (pkg: ServerPackage) => void) {
-    const event = {
+  addPackageListener<T extends ServerHeaderType>(
+    header: T,
+    callback: (pkg: PackageForHeader<T>) => void
+  ) {
+    const listener = {
       header: header,
       callback: callback,
     };
 
-    this.packageEvents.push(event);
+    // Any cast required because TS is not smart enough to infer the type of pkg in callback
+    this.packageEvents.push(listener as any);
   }
 
   /**
@@ -146,7 +139,6 @@ export default class PackageSender {
     return pkg.uuid;
   }
 
-  createPending(dependsOn: string): string | null;
   createPending(
     dependsOn: string,
     packageDesc: ClientPackageDescription
@@ -167,7 +159,7 @@ export default class PackageSender {
    */
   createPending(
     dependsOn: string,
-    packageDesc?: ClientPackageDescription | (() => void),
+    packageDesc: ClientPackageDescription | (() => void),
     callback?: () => void
   ): string | null {
     let pkg = undefined;
