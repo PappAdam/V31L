@@ -6,7 +6,6 @@ import {
   ServerPackage,
 } from '../../../../../types';
 import * as msgpack from '@msgpack/msgpack';
-const URL: string = 'ws://localhost:8080';
 
 export type PendingPackage = {
   dependsOn: string;
@@ -53,7 +52,7 @@ export type PendingPackage = {
  * });
  * console.log('Created pending package with ID:', pendingId);
  */
-class PackageSender {
+export default class PackageSender {
   private ws: WebSocket;
   private pendingPackages: PendingPackage[] = [];
   private initializerEvents: (() => void)[] = [];
@@ -212,7 +211,3 @@ class PackageSender {
     };
   }
 }
-
-const Sender = new PackageSender(URL);
-
-export default Sender;

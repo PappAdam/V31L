@@ -13,20 +13,23 @@ import * as msgpack from '@msgpack/msgpack';
 
 import PackageSender from './socketPackage';
 
+const URL: string = 'ws://localhost:8080';
+
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
   private authorized: boolean = false;
+  packageSender = new PackageSender(URL);
 
   constructor(private authService: AuthService) {
-    PackageSender.onInit(() => {
+    this.packageSender.onInit(() => {
       authService.token$.subscribe((token) => {
         token ? this.auth(token) : this.deAuth();
       });
     });
 
-    PackageSender.onPackage('SyncResponse', (pkg) => {
+    this.packageSender.onPackage('SyncResponse', (pkg) => {
       const p = pkg as ServerSyncResponsePackage;
 
       console.log(p.chatMessages);
@@ -38,12 +41,12 @@ export class SocketService {
       return;
     }
 
-    const authPackageId = PackageSender.sendPackage({
+    const authPackageId = this.packageSender.sendPackage({
       header: 'Authorization',
       token,
     });
 
-    PackageSender.createPending(
+    this.packageSender.createPending(
       authPackageId,
       {
         header: 'Sync',
@@ -61,11 +64,11 @@ export class SocketService {
       return;
     }
 
-    const deauthPackageId = PackageSender.sendPackage({
+    const deauthPackageId = this.packageSender.sendPackage({
       header: 'DeAuthorization',
     });
 
-    PackageSender.createPending(deauthPackageId, () => {
+    this.packageSender.createPending(deauthPackageId, () => {
       this.authorized = false;
     });
   }
