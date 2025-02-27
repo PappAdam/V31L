@@ -1,4 +1,6 @@
 export type ServerPackage = ServerNewMessagePackage | ServerErrorPackage | ServerSyncResponsePackage;
+export type ServerHeaderType = ServerPackage["header"];
+export type PackageForHeader<T extends ServerHeaderType> = Extract<ServerPackage, {header: T}>;
 
 export type ServerNewMessagePackage = {
   header: "NewMessage";

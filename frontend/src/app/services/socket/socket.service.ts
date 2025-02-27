@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import * as msgpack from '@msgpack/msgpack';
 import {
   ClientPackage,
+  ServerHeaderType,
   ServerNewMessagePackage,
   ServerPackage,
 } from '../../../../../types';
@@ -16,6 +17,9 @@ const URL: string = 'ws://localhost:8080';
 export class SocketService {
   ws: WebSocket;
   private authorized: boolean = false;
+  private pendingPackets: ServerPackage[] = [];
+  private packageEvents: {header: ServerHeaderType, callback: (pkg: ServerPackage) => void}[] = [];
+
 
   private newMessageSubject = new Subject<ServerNewMessagePackage>();
   newMessageRecieved$ = this.newMessageSubject.asObservable();
@@ -27,27 +31,40 @@ export class SocketService {
       authService.token$.subscribe((token) => {
         token ? this.auth(token) : this.deAuth();
       });
-
       this.ws.onmessage = this.onIncomingPackage;
     };
+
+    this.on("NewMessage", (pkg) => {
+        // this.newMessageSubject.next(pkg);
+    })
   }
 
-  private async onIncomingPackage(socketMessage: MessageEvent) {
-    const incoming = msgpack.decode(
-      await (socketMessage.data as any).arrayBuffer()
-    ) as ServerPackage;
-    switch (incoming.header) {
-      case 'NewMessage':
-        this.newMessageSubject.next(incoming);
-        break;
-      case 'SyncResponse':
-        console.log(incoming.chatMessages);
-        break;
-      default:
-        throw new Error('Server package handler not implemented.');
+  on(header: ServerHeaderType, callback: (pkg: ServerPackage) => void) {
+    const event = {
+      header: header,
+      callback: callback,
+    };
+
+    const index = this.packageEvents.findIndex((p) => p.header == header);
+    if (index < 0) {
+      this.packageEvents.push(event);  
+    }
+    else {
+      this.packageEvents.splice(index, 1, event);
     }
   }
 
+  private onIncomingPackage = async (socketMessage: MessageEvent) => {
+    const incoming = msgpack.decode(
+      await (socketMessage.data as any).arrayBuffer()
+    ) as ServerPackage;
+
+    const event = this.packageEvents.find((ev) => ev.header == incoming.header);
+    if (event) {
+      event.callback(incoming);
+    }
+  }
+  
   sendMessage(messageContent: string, chatId: string) {
     let outgouing: ClientPackage = {
       id: crypto.randomUUID(),

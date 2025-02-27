@@ -68,7 +68,7 @@ async function processPackage(
           chatMessages: chatMessages,
         }
       )
-      .sendPackage();
+      .sendPackage()
       break;
 
     default:
