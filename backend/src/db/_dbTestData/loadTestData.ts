@@ -2,7 +2,6 @@ import { createChat } from "../chat";
 import { createMessage } from "../message";
 import testData from "./testData.json";
 import { createUser } from "../user";
-import { load } from "yamljs";
 
 async function loadData() {
   const users = await Promise.all(

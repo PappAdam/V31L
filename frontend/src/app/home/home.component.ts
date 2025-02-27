@@ -19,9 +19,9 @@ export class HomeComponent {
   ) {}
 
   async ngAfterViewInit() {
-    this.socketService.newMessageRecieved$.subscribe((message) => {
-      this.messages.push(message.messageContent);
-    });
+    // this.socketService.newMessageRecieved$.subscribe((message) => {
+    //   this.messages.push(message.messageContent);
+    // });
   }
 
   async sendClicked() {

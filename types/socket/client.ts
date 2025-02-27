@@ -1,8 +1,10 @@
-export type ClientPackage = 
-  (ClientConnectionPackage
+export type ClientPackageDescription =
+  | ClientConnectionPackage
   | ClientNewMessagePackage
   | ClientBodyLessPackage
-  | ClientSync) & {id: string};
+  | ClientSync;
+
+export type ClientPackage = ClientPackageDescription & { id: string };
 
 export type ClientNewMessagePackage = {
   header: "NewMessage";

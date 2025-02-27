@@ -1,5 +1,5 @@
 import { WebSocket, MessageEvent, CloseEvent } from "ws";
-import { ClientPackage } from "../../../types";
+import { ClientPackage, ClientPackageDescription } from "../../../types";
 import * as msgpack from "@msgpack/msgpack";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { findUserById } from "../db/user";
@@ -67,7 +67,7 @@ export class Client {
    * @returns {Promise<string | null>} `userId` if the package is valid, `null` otherwise
    */
   validateIncomingPackage = async (
-    incoming: ClientPackage
+    incoming: ClientPackageDescription
   ): Promise<string | null> => {
     switch (incoming.header) {
       case "Authorization":

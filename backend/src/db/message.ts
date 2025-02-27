@@ -98,12 +98,13 @@ export async function findSyncMessages(
   if (
     !userId ||
     (numberOfChats <= 0 && numberOfChats !== -1) ||
-    numberOfMessagesInFirstChat <= 0
+    (numberOfMessagesInFirstChat <= 0 && numberOfMessagesInFirstChat !== -1)
   ) {
     return null;
   }
 
   let chats = await findChatsByUser(userId);
+
   if (chats.length === 0) {
     return null;
   }
