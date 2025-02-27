@@ -15,21 +15,26 @@ model User {
   chats    ChatMember[]
 }
 
+model Chat {
+  id            String       @id @default(uuid())
+  name          String
+  messages      Message[]    @relation("ChatMessages") // Named relation for messages
+  members       ChatMember[]
+
+  lastMessageId String?  @unique
+  lastMessage   Message? @relation("ChatLastMessage", fields: [lastMessageId], references: [id], onDelete: Cascade)
+}
+
 model Message {
   id        String   @id @default(uuid())
-  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade) // Delete all messages if a chat is deleted
-  chatId    String
-  user      User     @relation(fields: [userId], references: [id]) // Don't delete messages if a user is deleted
+  chat      Chat     @relation("ChatMessages", fields: [chatId], references: [id], onDelete: Cascade) // Matches "ChatMessages"
+  chatId    String    
+  user      User     @relation(fields: [userId], references: [id]) // No delete cascade for user
   userId    String
   timeStamp DateTime @default(now())
   content   String
-}
 
-model Chat {
-  id       String       @id @default(uuid())
-  name     String
-  messages Message[]
-  members  ChatMember[]
+  lastMessageForChat Chat? @relation("ChatLastMessage") // Opposite relation field
 }
 
 model ChatMember {
@@ -40,6 +45,8 @@ model ChatMember {
 
   chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade) // Delete members if chat is deleted
   chatId String
+
+  @@unique([userId, chatId])
 
   key String
 }

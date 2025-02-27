@@ -1,12 +1,23 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { Request, Response, Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { createUser, findUserByName } from "../db/user";
-import prisma from "../db/_db";
+import { createUser, findUserByName } from "@/db/user";
+import {
+  extractUserFromTokenMiddleWare,
+  validateRequiredFields,
+} from "@/http/middlewares/validate";
 
 const authRouter = Router();
-authRouter.post("/register", registerUser);
-authRouter.post("/login", loginUser);
+authRouter.post(
+  "/register",
+  validateRequiredFields(["username", "password"]),
+  registerUser
+);
+authRouter.post(
+  "/login",
+  validateRequiredFields(["username", "password"]),
+  loginUser
+);
 authRouter.post("/refresh", extractUserFromTokenMiddleWare, refreshToken);
 export default authRouter;
 
@@ -62,66 +73,11 @@ async function loginUser(req: Request, res: Response) {
 }
 
 async function refreshToken(req: Request, res: Response) {
-  const userId = req.user?.id;
-
-  if (!userId) {
-    res.status(401).json({ message: "Invalid or expired token" });
-    return;
-  }
+  const userId = req.user?.id as string;
   const newToken = generateToken(userId);
   res.json({ token: newToken });
 }
 
-const generateToken = (userId: string): string => {
+export const generateToken = (userId: string): string => {
   return jwt.sign({ userId }, "your_secret_key", { expiresIn: "1h" });
 };
-
-export async function extractUserFromTokenMiddleWare(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
-  if (!token) {
-    res.status(401).json({ message: "No token provided." });
-    return;
-  }
-
-  try {
-    const { userId, expired } = extractUserIdFromToken(token);
-    if (!userId || expired) {
-      throw Error;
-    }
-
-    const user = await prisma.user.findUniqueOrThrow({
-      where: { id: userId },
-    });
-    req.user = user;
-
-    next();
-  } catch (error) {
-    res.status(401).json({ message: "Invalid or expired token" });
-    return;
-  }
-}
-
-export function extractUserIdFromToken(token: string): TokenExtractResult {
-  try {
-    const decoded = jwt.verify(token, "your_secret_key") as jwt.JwtPayload;
-
-    if (!decoded || typeof decoded !== "object" || !decoded.userId) {
-      return { userId: null, expired: false };
-    }
-
-    const expired = decoded.exp ? Date.now() >= decoded.exp * 1000 : false;
-
-    return { userId: decoded.userId as string, expired };
-  } catch (error) {
-    return { userId: null, expired: false };
-  }
-}
-
-interface TokenExtractResult {
-  userId: string | null;
-  expired: boolean;
-}

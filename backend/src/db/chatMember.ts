@@ -16,16 +16,7 @@ export async function addUserToChat(
     return null;
   }
   try {
-    const existingMember = await prisma.chatMember.findFirst({
-      where: {
-        userId: userId,
-        chatId: chatId,
-      },
-    });
-    if (existingMember) {
-      return null;
-    }
-
+    // Unique constraint will fail if the ChatMember exists, throwing an error
     const newChatMember = await prisma.chatMember.create({
       data: {
         userId,
@@ -51,20 +42,17 @@ export async function removeUserFromChat(
   userId: string,
   chatId: string
 ): Promise<ChatMember | null> {
-  try {
-    const existingMember = await prisma.chatMember.findFirst({
-      where: {
-        userId: userId,
-        chatId: chatId,
-      },
-    });
-    if (!existingMember) {
-      return null;
-    }
+  if (!userId || !chatId) {
+    return null;
+  }
 
+  try {
     const removedChatMember = await prisma.chatMember.delete({
       where: {
-        id: existingMember.id,
+        userId_chatId: {
+          userId,
+          chatId,
+        },
       },
     });
     return removedChatMember;
@@ -78,22 +66,24 @@ export async function removeUserFromChat(
  * Retrieves all chat memberships for a given user.
  *
  * @param {string} userId - The ID of the user whose chat memberships are being retrieved.
- * @returns {Promise<ChatMember[] | null>} An array of `ChatMember` objects if found, or `null` if an error occurs.
+ * @returns {Promise<ChatMember[]>} An array of `ChatMember` objects if found, or `null` if an error occurs.
  */
-export async function getChatMembersByUser(
+export async function findChatMembersByUser(
   userId: string
-): Promise<ChatMember[] | null> {
+): Promise<ChatMember[]> {
+  if (!userId) {
+    return [];
+  }
   try {
     const chatMembers = await prisma.chatMember.findMany({
       where: {
         userId: userId,
       },
     });
-
     return chatMembers;
   } catch (error) {
     console.error("Error retrieving users chats:\n", error);
-    return null;
+    return [];
   }
 }
 
@@ -101,11 +91,14 @@ export async function getChatMembersByUser(
  * Retrieves all chat memberships for a given user.
  *
  * @param {string} chatId - The ID of the chat which user memberships are being retrieved.
- * @returns {Promise<ChatMember[] | null>} An array of `ChatMember` objects if found, or `null` if an error occurs.
+ * @returns {Promise<ChatMember[]>} An array of `ChatMember` objects if found, or `null` if an error occurs.
  */
-export async function getChatMembersByChat(
+export async function findChatMembersByChat(
   chatId: string
-): Promise<ChatMember[] | null> {
+): Promise<ChatMember[]> {
+  if (!chatId) {
+    return [];
+  }
   try {
     const chatMembers = await prisma.chatMember.findMany({
       where: {
@@ -115,7 +108,33 @@ export async function getChatMembersByChat(
 
     return chatMembers;
   } catch (error) {
-    console.error("Error retrieving chats:\n", error);
+    console.error("Error retrieving chat members:\n", error);
+    return [];
+  }
+}
+
+/**
+ * Retrieves chat membership for a given user and chat id.
+ *
+ * @param {string} userId - The ID of the user which membership is being retrieved.
+ * @param {string} chatId - The ID of the chat which membership is being retrieved.
+ * @returns {Promise<ChatMember | null>} `ChatMember` if found, or `null` if no chatMember with these ids exists.
+ */
+export async function findChatMember(
+  userId: string,
+  chatId: string
+): Promise<ChatMember | null> {
+  if (!userId || !chatId) {
+    return null;
+  }
+  try {
+    const chatMember = await prisma.chatMember.findUnique({
+      where: { userId_chatId: { userId, chatId } },
+    });
+
+    return chatMember;
+  } catch (error) {
+    console.error("Error retrieving chatMember:\n", error);
     return null;
   }
 }

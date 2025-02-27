@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import * as msgpack from '@msgpack/msgpack';
 import {
-  ClientMessage,
-  ClientHeader,
-  ServerMessage,
-  ServerHeader,
+  ClientPackage,
+  ServerNewMessagePackage,
+  ServerPackage,
 } from '../../../../../types';
 import { AuthService } from '../http/auth.service';
+import { Subject } from 'rxjs';
 
 const URL: string = 'ws://localhost:8080';
 
@@ -15,45 +15,78 @@ const URL: string = 'ws://localhost:8080';
 })
 export class SocketService {
   ws: WebSocket;
+  private authorized: boolean = false;
 
-  onMsgRecieved = (msg: string) => {};
+  private newMessageSubject = new Subject<ServerNewMessagePackage>();
+  newMessageRecieved$ = this.newMessageSubject.asObservable();
 
-  constructor() {
+  constructor(private authService: AuthService) {
     this.ws = new WebSocket(URL);
-    this.ws.onmessage = async (msg) => {
-      const message = msgpack.decode(
-        await (msg.data as any).arrayBuffer()
-      ) as ServerMessage;
-      if (message.header == ServerHeader.NewMsg) {
-        this.onMsgRecieved(message.data);
-      }
+
+    this.ws.onopen = () => {
+      authService.token$.subscribe((token) => {
+        token ? this.auth(token) : this.deAuth();
+      });
+
+      this.ws.onmessage = this.onIncomingPackage;
     };
   }
 
-  connect(token: string) {  
-    let client_message: ClientMessage = {
-      header: ClientHeader.Connection,
-      data: {
-        target: token,
-        content: '',
-      },
+  private async onIncomingPackage(socketMessage: MessageEvent) {
+    const incoming = msgpack.decode(
+      await (socketMessage.data as any).arrayBuffer()
+    ) as ServerPackage;
+    switch (incoming.header) {
+      case 'NewMessage':
+        this.newMessageSubject.next(incoming);
+        break;
+      default:
+        throw new Error('Server package handler not implemented.');
+    }
+  }
+
+  sendMessage(messageContent: string, chatId: string) {
+    let outgouing: ClientPackage = {
+      header: 'NewMessage',
+      messageContent,
+      chatId,
     };
 
-    let bin = msgpack.encode(client_message);
+    let bin = msgpack.encode(outgouing);
+
     this.ws.send(bin);
   }
 
-  sendMsg(msg: string, target_chat: string) {
-    let client_message: ClientMessage = {
-      header: ClientHeader.NewMsg,
-      data: {
-        target: target_chat,
-        content: msg,
-      },
+  private auth(token: string) {
+    if (this.authorized) {
+      return;
+    }
+
+    let outgoing: ClientPackage = {
+      header: 'Authorization',
+      token,
     };
 
-    let bin = msgpack.encode(client_message);
-
+    let bin = msgpack.encode(outgoing);
     this.ws.send(bin);
+
+    console.log(
+      'Place this after auth acknowledgement once acknowledgements are finished'
+    );
+    this.authorized = true;
+  }
+
+  private deAuth() {
+    if (!this.authorized) {
+      return;
+    }
+
+    let outgoing: ClientPackage = {
+      header: 'DeAuthorization',
+    };
+
+    let bin = msgpack.encode(outgoing);
+    this.ws.send(bin);
+    this.authorized = false;
   }
 }

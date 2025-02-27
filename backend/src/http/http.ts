@@ -4,8 +4,9 @@ import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import path from "path";
 import YAML from "yamljs";
-import authRouter, { extractUserFromTokenMiddleWare } from "./auth";
-import logRouter from "./log";
+import authRouter from "@/http/auth";
+import logRouter from "@/http/log";
+import { extractUserFromTokenMiddleWare } from "@/http/middlewares/validate";
 
 const httpServer = express();
 httpServer.use(cors());
