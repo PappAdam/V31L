@@ -40,6 +40,9 @@ export class SocketService {
       case 'NewMessage':
         this.newMessageSubject.next(incoming);
         break;
+      case 'SyncResponse':
+        console.log(incoming.chatMessages);
+        break;
       default:
         throw new Error('Server package handler not implemented.');
     }
@@ -47,6 +50,7 @@ export class SocketService {
 
   sendMessage(messageContent: string, chatId: string) {
     let outgouing: ClientPackage = {
+      id: crypto.randomUUID(),
       header: 'NewMessage',
       messageContent,
       chatId,
@@ -63,6 +67,7 @@ export class SocketService {
     }
 
     let outgoing: ClientPackage = {
+      id: crypto.randomUUID(),
       header: 'Authorization',
       token,
     };
@@ -73,7 +78,18 @@ export class SocketService {
     console.log(
       'Place this after auth acknowledgement once acknowledgements are finished'
     );
+
     this.authorized = true;
+    
+    outgoing = {
+      id: crypto.randomUUID(),
+      header: 'Sync',
+      maxDisplayableMessagCount: 2,
+      displayedGroupCount: -1,
+    };
+    
+    bin = msgpack.encode(outgoing);
+    this.ws.send(bin);
   }
 
   private deAuth() {
@@ -82,6 +98,7 @@ export class SocketService {
     }
 
     let outgoing: ClientPackage = {
+      id: crypto.randomUUID(),
       header: 'DeAuthorization',
     };
 

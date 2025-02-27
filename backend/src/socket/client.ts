@@ -88,6 +88,9 @@ export class Client {
       case "DeAuthorization":
         return this.userId;
 
+      case "Sync":
+        return this.userId;
+
       default:
         throw new Error(
           "Validation for this package type has not been implemented."

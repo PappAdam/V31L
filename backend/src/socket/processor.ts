@@ -4,7 +4,7 @@ import { findChatMembersByChat } from "../db/chatMember";
 import { createMessage, findSyncMessages } from "../db/message";
 import { findUserById } from "../db/user";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
-import { Client } from "./client";
+import { Client, clients } from "./client";
 import { ServerPackageSender } from "./server";
 
 /**
@@ -24,7 +24,6 @@ async function processPackage(
     case "Authorization":
       const token = extractUserIdFromToken(incoming.token);
       client.userId = token.userId as string;
-
       break;
 
     case "NewMessage":
@@ -34,25 +33,43 @@ async function processPackage(
         incoming.messageContent
       );
       const author = (await findUserById(client.userId)) as User;
-      const newMessagePackage: ServerPackage = {
-        header: "NewMessage",
-        chatId: incoming.chatId,
-        messageContent: incoming.messageContent,
-        username: author.username,
-      };
       const chatMembers = await findChatMembersByChat(incoming.chatId);
-      chatMembers.forEach((chatMember) => {
-        const packageDescription = new ServerPackageSender(
-          chatMember.userId,
-          newMessagePackage
-        );
-        packageDescription.sendPackage();
-      });
+      const outgoingSender = new ServerPackageSender(
+        chatMembers.map((member) => member.id),
+        {
+          header: "NewMessage",
+          chatId: incoming.chatId,
+          messageContent: incoming.messageContent,
+          username: author.username,
+        }
+      );
+      outgoingSender.sendPackage();
+      break;
 
     case "DeAuthorization":
       client.userId = "";
       break;
+
     case "Sync":
+      console.log("Sync sent");
+      
+      let chatMessages = await findSyncMessages(client.userId, incoming.displayedGroupCount, incoming.maxDisplayableMessagCount);
+      if (!chatMessages) {
+        const userId = await extractUserIdFromToken(client.userId)
+        console.error(
+          "Failed to sync chat messages for user: ", userId.userId 
+        );
+        break;
+      }
+      new ServerPackageSender(
+        [client.ws],
+        {
+          header: "SyncResponse",
+          chatMessages: chatMessages,
+        }
+      )
+      .sendPackage();
+      break;
 
     default:
       console.error(

@@ -1,4 +1,4 @@
-export type ServerPackage = ServerNewMessagePackage | ServerErrorPackage;
+export type ServerPackage = ServerNewMessagePackage | ServerErrorPackage | ServerSyncResponsePackage;
 
 export type ServerNewMessagePackage = {
   header: "NewMessage";
@@ -8,9 +8,18 @@ export type ServerNewMessagePackage = {
   messageContent: string;
 };
 
+export type ServerAcknowledgement = {
+  header: "Acknowledgement",
+  ackMessageId: string,
+  details: string,
+}
+
 export type ServerSyncResponsePackage = {
   header: "SyncResponse";
-  //TODO
+  chatMessages: {
+    chatId: string,
+    messages: string[],
+  }[]
 };
 
 export type ServerErrorPackage = {

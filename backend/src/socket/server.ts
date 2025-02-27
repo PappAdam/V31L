@@ -1,23 +1,34 @@
+import { WebSocket } from "ws";
 import { ServerPackage } from "../../../types";
 import { clients } from "./client";
 import * as msgpack from "@msgpack/msgpack";
 
+function isStringArray(arr: any[]): arr is string[] {
+  return typeof arr[0] === 'string';
+}
+
 export class ServerPackageSender {
   private package: ServerPackage;
-  private targetId: string;
+  private clients: WebSocket[];
 
-  constructor(targetId: string, outgoing: ServerPackage) {
+  constructor(userIds: string[], outgoing: ServerPackage);
+  constructor(wsArray: WebSocket[], outgoing: ServerPackage);
+
+  constructor(clientDescription: string[] | WebSocket[], outgoing: ServerPackage) {
     this.package = outgoing;
-    this.targetId = targetId;
+    if (isStringArray(clientDescription)) {
+      this.clients = clients.filter((client) => {
+        clientDescription.includes(client.userId)
+      })
+      .map((client) => client.ws)
+    }
+    else {
+      this.clients = clientDescription;
+    }
   }
 
   async sendPackage() {
     const encoded = msgpack.encode(this.package);
-    const targetClients = clients.filter(
-      (client) => client.userId == this.targetId
-    );
-    targetClients.forEach((targetClient) => {
-      targetClient.ws.send(encoded);
-    });
+
   }
 }
