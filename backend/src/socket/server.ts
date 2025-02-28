@@ -13,7 +13,7 @@ function isStringArray(arr: any[]): arr is string[] {
  */
 export default class ServerPackageSender {
   private package: ServerPackage;
-  private clients: WebSocket[];
+  private targetClients: WebSocket[];
 
   // constructor(userIds: string[], outgoing: ServerPackage);
   // constructor(wsArray: WebSocket[], outgoing: ServerPackage);
@@ -24,13 +24,11 @@ export default class ServerPackageSender {
   ) {
     this.package = outgoing;
     if (isStringArray(clientDescription)) {
-      this.clients = clients
-        .filter((client) => {
-          clientDescription.includes(client.userId);
-        })
+      this.targetClients = clients
+        .filter((client) => clientDescription.includes(client.userId))
         .map((client) => client.ws);
     } else {
-      this.clients = clientDescription;
+      this.targetClients = clientDescription;
     }
   }
 
@@ -57,13 +55,13 @@ export default class ServerPackageSender {
     clientDescriptrion: WebSocket[] | string[],
     outgoing: ServerPackage
   ) {
-    const self = new ServerPackageSender(clientDescriptrion, outgoing);
-    await self.sendPackage();
+    const sender = new ServerPackageSender(clientDescriptrion, outgoing);
+    await sender.sendPackage();
   }
 
   async sendPackage() {
     const encoded = msgpack.encode(this.package);
-    this.clients.forEach((client) => {
+    this.targetClients.forEach((client) => {
       client.send(encoded);
     });
   }

@@ -6,6 +6,8 @@ import { findUserById } from "../db/user";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import ServerPackageSender from "./server";
+import { findChatById } from "@/db/chat";
+import { create } from "domain";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
@@ -49,7 +51,7 @@ async function processBasedOnHeader(
       const author = (await findUserById(client.userId)) as User;
       const chatMembers = await findChatMembersByChat(incoming.chatId);
       await ServerPackageSender.send(
-        chatMembers.map((member) => member.id),
+        chatMembers.map((member) => member.userId),
         {
           header: "NewMessage",
           chatId: incoming.chatId,
@@ -57,6 +59,7 @@ async function processBasedOnHeader(
           username: author.username,
         }
       );
+
       return true;
 
     case "DeAuthorization":

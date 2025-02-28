@@ -1,16 +1,50 @@
 <main>
   <div class="sidebar">
-    <button mat-flat-button (click)="authService.logout()">Log out</button>
+    <button mat-flat-button color="primary" (click)="authService.logout()">
+      Log out
+    </button>
     <ul>
-      <!-- @for (chat of this.messages; track $index) {
-      <li>
-        <h1>{{ chat.chatId }}</h1>
-        <p>{{ chat.messages[0] }}</p>
+      @for (chatMessage of chatMessages; track $index) {
+      <li
+        (click)="selectChat(chatMessage.chat.id)"
+        [class.active]="selectedChat === chatMessage.chat.id"
+      >
+        <h1>{{ chatMessage.chat.name }}</h1>
+        @if (chatMessage.messages.length > 0) {
+        <span>{{ chatMessage.messages[0].username }}: </span>
+        <span>{{ chatMessage.messages[0].content }}</span>
+        }
       </li>
-      } -->
+      }
     </ul>
   </div>
   <div class="content">
-    <ul></ul>
+    @if (selectedChat) {
+    <ul #messagesContainer>
+      @for (message of chatMessages[selectedChatIndex].messages; track $index) {
+      <li>
+        <span>{{ message.username }}: </span>
+        <span>{{ message.content }}</span>
+      </li>
+      }
+    </ul>
+    } @if (selectedChat) {
+    <div class="message-input">
+      <textarea
+        matInput
+        placeholder="Type your message..."
+        [formControl]="messageControl"
+        (keydown.enter)="$event.preventDefault(); sendMessage()"
+      ></textarea>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="sendMessage()"
+        [disabled]="!messageControl.value?.trim()"
+      >
+        Send
+      </button>
+    </div>
+    }
   </div>
 </main>

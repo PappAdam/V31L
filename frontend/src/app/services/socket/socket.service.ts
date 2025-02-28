@@ -168,7 +168,7 @@ export class SocketService {
     this.createPackage(
       {
         header: 'Sync',
-        displayedGroupCount: 2,
+        displayedGroupCount: -1,
         maxDisplayableMessagCount: 5,
       },
       () => {},

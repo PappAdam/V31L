@@ -27,7 +27,7 @@ export async function getChatMessages(chatId: string, limit: number) {
         chatId: chatId,
       },
       orderBy: {
-        timeStamp: "asc", // Order by oldest to newest
+        timeStamp: "desc", // Order by oldest to newest
       },
       include: {
         user: {

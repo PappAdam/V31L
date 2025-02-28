@@ -1,67 +1,116 @@
+@use "@angular/material" as mat;
+
 main {
   display: flex;
   height: 100vh;
-  background-color: #f4f4f4;
+  background-color: #f5f5f5;
+}
 
-  .sidebar {
-    width: 250px;
-    background-color: #2c3e50;
-    color: #ecf0f1;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.sidebar {
+  width: 300px;
+  background-color: white;
+  border-right: 1px solid #e0e0e0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
 
-    button {
-      background-color: #e74c3c;
-      color: #fff;
-      border: none;
-      padding: 10px 15px;
-      margin-bottom: 20px;
-      cursor: pointer;
-      transition: background 0.3s;
-
-      &:hover {
-        background-color: #c0392b;
-      }
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      width: 100%;
-
-      li {
-        padding: 10px;
-        text-align: center;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        cursor: pointer;
-
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.1);
-        }
-      }
-    }
+  button {
+    margin-bottom: 1rem;
+    align-self: flex-start;
   }
 
-  .content {
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
     flex-grow: 1;
-    padding: 20px;
-    background-color: #ffffff;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  }
 
-    ul {
-      list-style: none;
-      padding: 0;
+  li {
+    padding: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.2s;
 
-      li {
-        padding: 15px;
-        border-bottom: 1px solid #ddd;
-
-        &:hover {
-          background-color: #f9f9f9;
-        }
-      }
+    &:hover {
+      background-color: #f0f0f0;
     }
+
+    &.active {
+      background-color: #abcd;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    span {
+      font-size: 0.875rem;
+      color: #616161;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+}
+
+.content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+
+  ul {
+    flex-grow: 1;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  li {
+    max-width: 70%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+
+    &.own-message {
+      align-self: flex-end;
+      background-color: #abcd;
+      color: white;
+    }
+  }
+}
+
+.message-input {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+
+  textarea {
+    flex-grow: 1;
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    resize: none;
+    min-height: 40px;
+    max-height: 120px;
+  }
+
+  button {
+    align-self: flex-end;
   }
 }
