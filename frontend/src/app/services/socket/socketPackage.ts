@@ -8,13 +8,11 @@ import {
 } from '../../../../../types';
 import * as msgpack from '@msgpack/msgpack';
 
-export type PendingPackage = {
+export type PackageQueueItem = {
   dependsOn: string;
-  pkg?: {
-    encoded: Uint8Array<ArrayBufferLike>;
-    uuid: string;
-  };
-  callback?: () => void;
+  pkg: ClientPackage;
+  callback: () => void;
+  status: 'Pending' | 'Sent' | 'Acknowledged';
 };
 
 /**
@@ -55,7 +53,7 @@ export type PendingPackage = {
  */
 export default class PackageSender {
   private ws: WebSocket;
-  private pendingPackages: PendingPackage[] = [];
+  private packageQueue: PackageQueueItem[] = [];
 
   private packageEvents: {
     header: ServerHeaderType;
@@ -70,27 +68,8 @@ export default class PackageSender {
   constructor(URL: string, onOpen: () => void) {
     this.ws = new WebSocket(URL);
     this.ws.onmessage = this.onIncomingPackage;
-
     this.ws.onopen = onOpen;
-
-    this.addPackageListener('Acknowledgement', (pkg) => {
-      const incoming = pkg as ServerAcknowledgement;
-      const ackMessageId = incoming.ackMessageId;
-
-      const packagesToProcess = this.pendingPackages.filter(
-        (pp) => pp.dependsOn === ackMessageId
-      );
-      packagesToProcess.forEach((pp) => {
-        pp.callback?.();
-        if (pp.pkg) {
-          this.ws.send(pp.pkg.encoded);
-        }
-      });
-
-      this.pendingPackages = this.pendingPackages.filter(
-        (pp) => pp.dependsOn !== ackMessageId
-      );
-    });
+    this.addPackageListener('Acknowledgement', this.onAcknowledgement);
   }
 
   /**
@@ -111,6 +90,30 @@ export default class PackageSender {
     this.packageEvents.push(listener as any);
   }
 
+  createPackage(
+    packageDesc: ClientPackageDescription,
+    callback: () => void = () => {},
+    dependsOn: string = ''
+  ): PackageQueueItem {
+    const id = crypto.randomUUID();
+    const pkg: ClientPackage = {
+      id,
+      ...packageDesc,
+    };
+
+    const queueItem: PackageQueueItem = {
+      dependsOn,
+      pkg,
+      callback,
+      status: 'Pending',
+    };
+    this.packageQueue.push(queueItem);
+    if (!dependsOn) {
+      this.sendPackage(queueItem);
+    }
+    return queueItem;
+  }
+
   /**
    * Handles incoming WebSocket messages.
    * @param {MessageEvent} socketMessage - The incoming WebSocket message.
@@ -127,79 +130,34 @@ export default class PackageSender {
     }
   };
 
-  /**
-   * Sends a package to the WebSocket server.
-   * @param {ClientPackageDescription} packageDesc - The package description to send.
-   * @returns {string} The UUID of the sent package.
-   */
-  sendPackage(packageDesc: ClientPackageDescription): string {
-    const pkg = PackageSender.wrapPackage(packageDesc);
-    this.ws.send(pkg.encoded);
-
-    return pkg.uuid;
-  }
-
-  createPending(
-    dependsOn: string,
-    packageDesc: ClientPackageDescription
-  ): string | null;
-  createPending(dependsOn: string, callback: () => void): string | null;
-  createPending(
-    dependsOn: string,
-    packageDesc: ClientPackageDescription,
-    callback: () => void
-  ): string | null;
-
-  /**
-   * Creates a pending package that waits for an acknowledgement before being processed.
-   * @param {string} dependsOn - The message ID that this package depends on.
-   * @param {ClientPackageDescription} [packageDesc] - The package description to send after acknowledgement.
-   * @param {() => void} [callback] - The callback to execute after acknowledgement.
-   * @returns {string | null} The UUID of the pending package, or null if no package description is provided.
-   */
-  createPending(
-    dependsOn: string,
-    packageDesc: ClientPackageDescription | (() => void),
-    callback?: () => void
-  ): string | null {
-    let pkg = undefined;
-    let actualCallback: (() => void) | undefined = undefined;
-
-    if (typeof packageDesc === 'function') {
-      actualCallback = packageDesc;
-    } else if (packageDesc) {
-      pkg = PackageSender.wrapPackage(packageDesc);
-      actualCallback = callback;
+  private onAcknowledgement = (acknowledgement: ServerAcknowledgement) => {
+    const queueItem = this.packageQueue.find(
+      (item) => item.pkg.id == acknowledgement.packageId
+    );
+    if (!queueItem) {
+      return;
     }
+    queueItem.status = 'Acknowledged';
 
-    this.pendingPackages.push({
-      pkg,
-      dependsOn,
-      callback: actualCallback,
-    });
+    queueItem.callback();
 
-    return pkg ? pkg.uuid : null;
-  }
+    // Sending packages that depended on this one
+    this.packageQueue
+      .filter((queueItem) => queueItem.status === 'Pending')
+      .forEach((queueItem) => {
+        if (queueItem.dependsOn === acknowledgement.packageId) {
+          this.sendPackage(queueItem);
+        }
+      });
+  };
 
   /**
-   * Wraps a package description into an encoded format with a UUID.
-   * @param {ClientPackageDescription} packageDesc - The package description to wrap.
-   * @returns {{ encoded: Uint8Array<ArrayBufferLike>; uuid: string }} The encoded package and its UUID.
-   * @private
+   * Sends a queue item to the WebSocket server.
+   * @param {PackageQueueItem} queueItem - The queue item to send.
    */
-  private static wrapPackage(packageDesc: ClientPackageDescription): {
-    encoded: Uint8Array<ArrayBufferLike>;
-    uuid: string;
-  } {
-    const uuid = crypto.randomUUID();
-    const pkg: ClientPackage = {
-      id: uuid,
-      ...packageDesc,
-    };
-
-    return {
-      encoded: msgpack.encode(pkg),
-      uuid: uuid,
-    };
+  private sendPackage(queueItem: PackageQueueItem) {
+    const encoded = msgpack.encode(queueItem.pkg);
+    this.ws.send(encoded);
+    queueItem.status = 'Sent';
   }
 }

@@ -5,6 +5,7 @@ import { createChat, findChatById } from "../../src/db/chat";
 const mockChat: Chat = {
   id: "id-123",
   name: "name-123",
+  lastMessageId: "last-id-123",
 };
 const mockChatIds: string[] = ["id1", "id2"];
 

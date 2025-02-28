@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ServerSyncResponsePackage } from '../../../../../types';
 import { AuthService } from '../http/auth.service';
 
 import PackageSender from './socketPackage';
@@ -26,21 +25,24 @@ export class SocketService {
       throw new Error('Cannot authorize while authorized!');
     }
 
-    const authPackageId = this.packageSender.sendPackage({
-      header: 'Authorization',
-      token,
-    });
-
-    this.packageSender.createPending(
-      authPackageId,
+    const authPackage = this.packageSender.createPackage(
       {
-        header: 'Sync',
-        displayedGroupCount: 2,
-        maxDisplayableMessagCount: -1,
+        header: 'Authorization',
+        token,
       },
       () => {
         this.authorized = true;
       }
+    );
+
+    this.packageSender.createPackage(
+      {
+        header: 'Sync',
+        displayedGroupCount: 2,
+        maxDisplayableMessagCount: 5,
+      },
+      () => {},
+      authPackage.pkg.id
     );
   }
 
@@ -49,12 +51,13 @@ export class SocketService {
       throw new Error('Cannot deAuthorize while deAuthorized!');
     }
 
-    const deAuthPackageId = this.packageSender.sendPackage({
-      header: 'DeAuthorization',
-    });
-
-    this.packageSender.createPending(deAuthPackageId, () => {
-      this.authorized = false;
-    });
+    this.packageSender.createPackage(
+      {
+        header: 'DeAuthorization',
+      },
+      () => {
+        this.authorized = false;
+      }
+    );
   }
 }

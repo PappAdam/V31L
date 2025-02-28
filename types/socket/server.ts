@@ -22,8 +22,8 @@ export type ServerNewMessagePackage = {
 
 export type ServerAcknowledgement = {
   header: "Acknowledgement";
-  ackMessageId: string;
-  details: string;
+  packageId: string;
+  details: "Success" | "Error";
 };
 
 export type ServerSyncResponsePackage = {
