@@ -19,10 +19,6 @@ export class SocketService {
         token ? this.auth(token) : this.deAuth();
       });
     });
-
-    this.packageSender.addPackageListener('SyncResponse', (pkg) => {
-      console.log(pkg.chatMessages);
-    });
   }
 
   private auth(token: string) {

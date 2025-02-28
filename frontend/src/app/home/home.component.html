@@ -1,7 +1,14 @@
 <main>
   <div class="sidebar">
     <button mat-flat-button (click)="authService.logout()">Log out</button>
-    <ul></ul>
+    <ul>
+      <!-- @for (chat of this.messages; track $index) {
+      <li>
+        <h1>{{ chat.chatId }}</h1>
+        <p>{{ chat.messages[0] }}</p>
+      </li>
+      } -->
+    </ul>
   </div>
   <div class="content">
     <ul></ul>

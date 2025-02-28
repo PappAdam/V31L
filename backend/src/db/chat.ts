@@ -101,17 +101,7 @@ export async function deleteChat(chatId: string): Promise<Chat | null> {
  *   } & { name: string; id: string; lastMessageId: string | null })[]
  * >} A promise that resolves to an array of chat objects, including the last message.
  */
-export async function findChatsByUser(userId: string): Promise<
-  ({
-    lastMessage: {
-      id: string;
-      userId: string;
-      chatId: string;
-      timeStamp: Date;
-      content: string;
-    } | null;
-  } & { name: string; id: string; lastMessageId: string | null })[]
-> {
+export async function findChatsByUser(userId: string) {
   try {
     if (!userId) {
       console.warn("findChatsByUser called with an empty userId");
@@ -127,7 +117,15 @@ export async function findChatsByUser(userId: string): Promise<
         },
       },
       include: {
-        lastMessage: true,
+        lastMessage: {
+          include: {
+            user: {
+              select: {
+                username: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         lastMessage: {

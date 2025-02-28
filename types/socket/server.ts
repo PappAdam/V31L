@@ -1,3 +1,5 @@
+import { ChatMessage } from "./public";
+
 export type ServerPackage =
   | ServerNewMessagePackage
   | ServerErrorPackage
@@ -26,10 +28,7 @@ export type ServerAcknowledgement = {
 
 export type ServerSyncResponsePackage = {
   header: "SyncResponse";
-  chatMessages: {
-    chatId: string;
-    messages: string[];
-  }[];
+  chatMessages: ChatMessage[];
 };
 
 export type ServerErrorPackage = {

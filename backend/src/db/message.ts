@@ -1,7 +1,9 @@
-import { Message } from "@prisma/client";
+import { Chat, Message } from "@prisma/client";
 import prisma from "./_db";
 import { findChatMembersByUser } from "./chatMember";
 import { findChatsByUser } from "./chat";
+import { ChatMessage, FMessage } from "../../../types";
+import { timeStamp } from "console";
 
 /**
  * Retrieves a specified number of messages from a chat, ordered by timestamp.
@@ -26,6 +28,13 @@ export async function getChatMessages(chatId: string, limit: number) {
       },
       orderBy: {
         timeStamp: "asc", // Order by oldest to newest
+      },
+      include: {
+        user: {
+          select: {
+            username: true, // Include the username from the User model
+          },
+        },
       },
       ...(limit > 0 ? { take: limit } : {}), // Limit the number of messages returned
     });
@@ -94,7 +103,7 @@ export async function findSyncMessages(
   userId: string,
   numberOfChats: number,
   numberOfMessagesInFirstChat: number
-): Promise<{ messages: any[]; chatId: string }[] | null> {
+): Promise<ChatMessage[] | null> {
   if (
     !userId ||
     (numberOfChats <= 0 && numberOfChats !== -1) ||
@@ -112,7 +121,10 @@ export async function findSyncMessages(
   const firstChat = chats.splice(0, 1)[0];
   const firstChatMessages = {
     messages: await getChatMessages(firstChat.id, numberOfMessagesInFirstChat),
-    chatId: firstChat.id,
+    chat: {
+      id: firstChat.id,
+      name: firstChat.name,
+    },
   };
 
   if (numberOfChats !== -1) {
@@ -120,12 +132,74 @@ export async function findSyncMessages(
   }
 
   const syncMessages = chats.map((ch) => {
-    return { messages: [ch.lastMessage], chatId: ch.id };
+    return { messages: [ch.lastMessage], chat: { id: ch.id, name: ch.name } };
   });
 
   syncMessages.splice(0, 0, firstChatMessages);
 
-  return syncMessages;
+  return transformSyncMessages(syncMessages);
 }
+
+function transformSyncMessages(
+  syncMessages: {
+    messages: (
+      | ({
+          user: { username: string };
+        } & {
+          id: string;
+          userId: string;
+          timeStamp: Date;
+          chatId: string;
+          content: string;
+        })
+      | null
+    )[];
+    chat: {
+      id: string;
+      name: string;
+    };
+  }[]
+): ChatMessage[] {
+  return syncMessages.map((syncMessage) => {
+    // Extract the chat object directly
+    const chat = {
+      id: syncMessage.chat.id,
+      name: syncMessage.chat.name,
+    };
+
+    // Transform the messages array
+    const messages: FMessage[] = syncMessage.messages
+      .map(transformMessage)
+      .filter((msg): msg is FMessage => msg !== null); // Filter out null values
+
+    // Return the ChatMessage object
+    return {
+      chat,
+      messages,
+    };
+  });
+}
+
+function transformMessage(
+  originalMessage: {
+    user: { username: string };
+    id: string;
+    userId: string;
+    timeStamp: Date;
+    chatId: string;
+    content: string;
+  } | null
+): FMessage | null {
+  if (!originalMessage) return null;
+
+  return {
+    id: originalMessage.id,
+    username: originalMessage.user.username, // Extract username from the user object
+    chatId: originalMessage.chatId,
+    timeStamp: originalMessage.timeStamp,
+    content: originalMessage.content,
+  };
+}
+
 // Update and Delete can be implemented later here, no need for it now.
 // I WAS HERE BEFORE DELETE WAS IMPLEMENTED

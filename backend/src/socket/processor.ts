@@ -1,9 +1,5 @@
 import { User } from "@prisma/client";
-import {
-  ClientPackage,
-  ClientPackageDescription,
-  ServerPackage,
-} from "../../../types";
+import { ClientPackage, ChatMessage } from "../../../types";
 import { findChatMembersByChat } from "../db/chatMember";
 import { createMessage, findSyncMessages } from "../db/message";
 import { findUserById } from "../db/user";
@@ -71,6 +67,7 @@ async function processPackage(
         incoming.displayedGroupCount,
         incoming.maxDisplayableMessagCount
       );
+
       if (!chatMessages) {
         console.error("Failed to sync chat messages for user: ", client.userId);
         break;
