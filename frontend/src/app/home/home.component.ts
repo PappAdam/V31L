@@ -23,27 +23,24 @@ export class HomeComponent {
   ) {}
 
   async ngOnInit() {
-    this.socketService.packageSender.addPackageListener(
-      'SyncResponse',
-      (pkg) => {
-        pkg.chatMessages.forEach((chatmsg) => {
-          const chatIndex = this.chatMessages.findIndex(
-            (f) => f.chat.id === chatmsg.chat.id
-          );
-          if (chatIndex < 0) {
-            this.chatMessages.push(chatmsg);
-          } else {
-            let messages = this.chatMessages[chatIndex].messages;
-            messages = messages.concat(chatmsg.messages);
-          }
-        });
+    this.socketService.addPackageListener('SyncResponse', (pkg) => {
+      pkg.chatMessages.forEach((chatmsg) => {
+        const chatIndex = this.chatMessages.findIndex(
+          (f) => f.chat.id === chatmsg.chat.id
+        );
+        if (chatIndex < 0) {
+          this.chatMessages.push(chatmsg);
+        } else {
+          let messages = this.chatMessages[chatIndex].messages;
+          messages = messages.concat(chatmsg.messages);
+        }
+      });
 
-        console.log(pkg);
+      console.log(pkg);
 
-        this.selectedChatIndex = 0;
-        this.selectedChat = this.chatMessages[0].chat.id;
-      }
-    );
+      this.selectedChatIndex = 0;
+      this.selectedChat = this.chatMessages[0].chat.id;
+    });
   }
 
   async sendClicked() {
