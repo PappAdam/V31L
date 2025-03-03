@@ -36,8 +36,6 @@ export async function extractUserFromTokenMiddleWare(
   res: Response,
   next: NextFunction
 ) {
-  console.log("middle");
-
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) {
     res.status(401).json({ message: "No token provided" });

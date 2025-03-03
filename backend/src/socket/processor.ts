@@ -1,13 +1,19 @@
 import { User } from "@prisma/client";
 import { ClientPackage, ChatMessage } from "../../../types";
 import { findChatMembersByChat } from "../db/chatMember";
-import { createMessage, findSyncMessages } from "../db/message";
+import {
+  createMessage,
+  dbMessageToFrontend,
+  findSyncMessages,
+  getChatMessages,
+} from "../db/message";
 import { findUserById } from "../db/user";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import ServerPackageSender from "./server";
 import { findChatById } from "@/db/chat";
 import { create } from "domain";
+import { Server } from "http";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
@@ -50,7 +56,7 @@ async function processBasedOnHeader(
       );
       const author = (await findUserById(client.userId)) as User;
       const chatMembers = await findChatMembersByChat(incoming.chatId);
-      await ServerPackageSender.send(
+      ServerPackageSender.send(
         chatMembers.map((member) => member.userId),
         {
           header: "NewMessage",
@@ -66,7 +72,7 @@ async function processBasedOnHeader(
       client.userId = "";
       return true;
 
-    case "Sync":
+    case "InitialSync":
       let chatMessages = await findSyncMessages(
         client.userId,
         incoming.displayedGroupCount,
@@ -77,10 +83,35 @@ async function processBasedOnHeader(
         console.error("Failed to sync chat messages for user: ", client.userId);
         return false;
       }
-      await ServerPackageSender.send([client.ws], {
+
+      ServerPackageSender.send([client.ws], {
         header: "SyncResponse",
         chatMessages: chatMessages,
       });
+      return true;
+
+    case "Sync":
+      const syncMessages = (
+        await getChatMessages(
+          incoming.chatId,
+          incoming.messageCount,
+          incoming.fromMessageId
+        )
+      ).map(dbMessageToFrontend);
+
+      ServerPackageSender.send([client.ws], {
+        header: "SyncResponse",
+        chatMessages: [
+          {
+            chat: {
+              id: incoming.chatId,
+              name: incoming.chatId,
+            },
+            messages: syncMessages,
+          },
+        ],
+      });
+
       return true;
 
     default:

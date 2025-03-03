@@ -33,6 +33,25 @@ export class HomeComponent {
     public authService: AuthService
   ) {}
 
+  ngAfterViewInit() {
+    this.messagesContainer.nativeElement.addEventListener('scroll', () => {
+      this.onScroll();
+    });
+  }
+
+  onScroll() {
+    const element = this.messagesContainer.nativeElement;
+    if (element.scrollTop === 0) {
+      // User has scrolled to the top, send a sync request
+      this.socketService.createPackage({
+        header: 'Sync',
+        messageCount: 4,
+        fromMessageId: this.chatMessages[this.selectedChatIndex].messages[0].id,
+        chatId: this.selectedChat,
+      });
+    }
+  }
+
   async ngOnInit() {
     this.socketService.addPackageListener(
       'SyncResponse',
@@ -45,8 +64,8 @@ export class HomeComponent {
             this.chatMessages.push(chatmsg);
           } else {
             this.chatMessages[chatIndex].messages = [
-              ...this.chatMessages[chatIndex].messages,
               ...chatmsg.messages,
+              ...this.chatMessages[chatIndex].messages,
             ];
           }
         });
@@ -54,8 +73,8 @@ export class HomeComponent {
         if (this.chatMessages.length > 0 && !this.selectedChat) {
           this.selectedChat = this.chatMessages[0].chat.id;
           this.selectedChatIndex = 0;
+          this.scrollToBottom();
         }
-        this.scrollToBottom();
       }
     );
 

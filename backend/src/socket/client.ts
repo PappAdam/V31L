@@ -88,6 +88,9 @@ export class Client {
       case "DeAuthorization":
         return this.userId;
 
+      case "InitialSync":
+        return this.userId;
+
       case "Sync":
         return this.userId;
 

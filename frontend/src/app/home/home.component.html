@@ -12,23 +12,25 @@
         <h1>{{ chatMessage.chat.name }}</h1>
         @if (chatMessage.messages.length > 0) {
         <span>{{ chatMessage.messages[0].username }}: </span>
-        <span>{{ chatMessage.messages[0].content }}</span>
+        <span>{{
+          chatMessage.messages[chatMessage.messages.length - 1].content
+        }}</span>
         }
       </li>
       }
     </ul>
   </div>
   <div class="content">
-    @if (selectedChat) {
     <ul #messagesContainer>
-      @for (message of chatMessages[selectedChatIndex].messages; track $index) {
+      @if (selectedChat) { @for (message of
+      chatMessages[selectedChatIndex].messages; track $index) {
       <li>
         <span>{{ message.username }}: </span>
         <span>{{ message.content }}</span>
       </li>
-      }
+      } }
     </ul>
-    } @if (selectedChat) {
+    @if (selectedChat) {
     <div class="message-input">
       <textarea
         matInput

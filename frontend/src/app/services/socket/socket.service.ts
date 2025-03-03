@@ -167,9 +167,9 @@ export class SocketService {
 
     this.createPackage(
       {
-        header: 'Sync',
+        header: 'InitialSync',
         displayedGroupCount: -1,
-        maxDisplayableMessagCount: 5,
+        maxDisplayableMessagCount: 20,
       },
       () => {},
       authPackage.pkg.id

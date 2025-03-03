@@ -4,40 +4,54 @@ import { findChatMembersByUser } from "./chatMember";
 import { findChatsByUser } from "./chat";
 import { ChatMessage, FMessage } from "../../../types";
 import { timeStamp } from "console";
-
 /**
  * Retrieves a specified number of messages from a chat, ordered by timestamp.
- * On limit = -1 returns all the messages
+ * On limit = -1 returns all the messages.
+ * Supports paging using and cursor.
+ * Reveses the returned message array
  *
  * @param {string} chatId - The ID of the chat.
  * @param {number} limit - The number of messages to retrieve.
- * @returns {Promise<
- *   { id: string; userId: string; chatId: string; timeStamp: Date; content: string }[]
- * >} A promise that resolves to an array of messages.
+ * @param {string} cursor - The ID of the message to start fetching after (cursor-based pagination).
  */
-export async function getChatMessages(chatId: string, limit: number) {
+export async function getChatMessages(
+  chatId: string,
+  limit: number,
+  cursor?: string
+): Promise<
+  ({ user: { username: string } } & {
+    id: string;
+    chatId: string;
+    userId: string;
+    timeStamp: Date;
+    content: string;
+  })[]
+> {
   try {
     if (!chatId || (limit <= 0 && limit != -1)) {
       console.warn("Invalid chatId or limit provided to getChatMessages.");
       return [];
     }
 
-    return await prisma.message.findMany({
-      where: {
-        chatId: chatId,
-      },
-      orderBy: {
-        timeStamp: "desc", // Order by oldest to newest
-      },
-      include: {
-        user: {
-          select: {
-            username: true, // Include the username from the User model
+    return (
+      await prisma.message.findMany({
+        where: {
+          chatId: chatId,
+        },
+        orderBy: {
+          timeStamp: "desc", // Order by newest to oldest
+        },
+        include: {
+          user: {
+            select: {
+              username: true, // Include the username from the User model
+            },
           },
         },
-      },
-      ...(limit > 0 ? { take: limit } : {}), // Limit the number of messages returned
-    });
+        ...(limit > 0 ? { take: limit } : {}), // Limit the number of messages returned
+        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}), // Cursor-based pagination
+      })
+    ).reverse();
   } catch (error) {
     console.error("Error retrieving messages for chat:", error);
     return [];
@@ -137,13 +151,21 @@ export async function findSyncMessages(
 
   syncMessages.splice(0, 0, firstChatMessages);
 
-  return transformSyncMessages(syncMessages);
+  return syncMessages.map((sync) => {
+    return {
+      chat: sync.chat,
+      messages: sync.messages
+        .filter((msgs) => msgs !== null)
+        // msgs cannot be null
+        .map((msgs) => dbMessageToFrontend(msgs as any)),
+    };
+  });
 }
 
-function transformSyncMessages(
+function dbMessagesToFrontend(
   syncMessages: {
     messages: (
-      | ({
+      | {
           user: { username: string };
         } & {
           id: string;
@@ -151,8 +173,7 @@ function transformSyncMessages(
           timeStamp: Date;
           chatId: string;
           content: string;
-        })
-      | null
+        }
     )[];
     chat: {
       id: string;
@@ -168,9 +189,7 @@ function transformSyncMessages(
     };
 
     // Transform the messages array
-    const messages: FMessage[] = syncMessage.messages
-      .map(transformMessage)
-      .filter((msg): msg is FMessage => msg !== null); // Filter out null values
+    const messages: FMessage[] = syncMessage.messages.map(dbMessageToFrontend);
 
     // Return the ChatMessage object
     return {
@@ -180,18 +199,14 @@ function transformSyncMessages(
   });
 }
 
-function transformMessage(
-  originalMessage: {
-    user: { username: string };
-    id: string;
-    userId: string;
-    timeStamp: Date;
-    chatId: string;
-    content: string;
-  } | null
-): FMessage | null {
-  if (!originalMessage) return null;
-
+export function dbMessageToFrontend(originalMessage: {
+  user: { username: string };
+  id: string;
+  userId: string;
+  timeStamp: Date;
+  chatId: string;
+  content: string;
+}): FMessage {
   return {
     id: originalMessage.id,
     username: originalMessage.user.username, // Extract username from the user object
