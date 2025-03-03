@@ -1,5 +1,5 @@
 import { Client } from "@/socket/client";
-import { ClientChat, ClientChatMessage, ClientMessage } from "../../../types";
+import { ClientChat, ClientChatMessage, ClientMessage } from "@common";
 import { findChatsByUser } from "./chat";
 import { findChatMessages } from "./message";
 import { Message } from "@prisma/client";

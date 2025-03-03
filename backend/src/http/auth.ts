@@ -6,6 +6,13 @@ import {
   extractUserFromTokenMiddleWare,
   validateRequiredFields,
 } from "@/http/middlewares/validate";
+import {
+  invalidCredentialsResponse,
+  serverErrorResponse,
+  missingFieldsResponse,
+  noTokenProvidedResponse,
+  successResponse,
+} from "@common";
 
 const authRouter = Router();
 authRouter.post(
@@ -28,7 +35,7 @@ async function registerUser(req: Request, res: Response) {
     const existingUser = await findUserByName(username);
 
     if (existingUser) {
-      res.status(400).json({ message: "User with username already exists" });
+      res.status(400).json(noTokenProvidedResponse);
       return;
     }
 
@@ -38,10 +45,10 @@ async function registerUser(req: Request, res: Response) {
     }
 
     const token = generateToken(newUser.id);
-    res.status(201).json({ message: "Success", token });
+    res.status(201).json(successResponse(token));
   } catch (error) {
     console.error("Error during register: \n", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json(serverErrorResponse);
   }
 }
 
@@ -53,21 +60,21 @@ async function loginUser(req: Request, res: Response) {
 
     //Invalid username
     if (!user) {
-      res.status(400).json({ message: "Invalid credentials" });
+      res.status(400).json(invalidCredentialsResponse);
       return;
     }
 
     //Invalid password
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      res.status(400).json({ message: "Invalid credentials" });
+      res.status(400).json(invalidCredentialsResponse);
       return;
     }
 
     const token = generateToken(user.id);
-    res.json({ message: "Success", token });
+    res.json(successResponse(token));
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json(serverErrorResponse);
     console.error("Error during login: \n", error);
   }
 }
@@ -75,7 +82,7 @@ async function loginUser(req: Request, res: Response) {
 async function refreshToken(req: Request, res: Response) {
   const userId = req.user?.id as string;
   const newToken = generateToken(userId);
-  res.json({ token: newToken });
+  res.json(successResponse(newToken));
 }
 
 export const generateToken = (userId: string): string => {

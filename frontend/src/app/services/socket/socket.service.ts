@@ -8,7 +8,7 @@ import {
   ServerAcknowledgement,
   ServerHeaderType,
   ServerPackage,
-} from '../../../../../types';
+} from '@common';
 
 const URL: string = 'ws://localhost:8080';
 

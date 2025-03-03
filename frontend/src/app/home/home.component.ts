@@ -2,10 +2,7 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { AuthService } from '../services/http/auth.service';
 import { MatButtonModule } from '@angular/material/button';
 import { SocketService } from '../services/socket/socket.service';
-import {
-  ClientChatMessage,
-  ServerSyncResponsePackage,
-} from '../../../../types';
+import { ClientChatMessage, ServerSyncResponsePackage } from '@common';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';

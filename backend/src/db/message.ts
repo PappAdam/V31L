@@ -2,7 +2,7 @@ import { Chat, Message } from "@prisma/client";
 import prisma from "./_db";
 import { findChatMembersByUser } from "./chatMember";
 import { findChatsByUser } from "./chat";
-import { ClientChatMessage, ClientMessage } from "../../../types";
+import { ClientChatMessage, ClientMessage } from "@common";
 import { timeStamp } from "console";
 /**
  * Retrieves a specified number of messages from a chat, ordered by timestamp.

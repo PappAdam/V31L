@@ -1,4 +1,9 @@
 import prisma from "@/db/_db";
+import {
+  invalidTokenResponse,
+  missingFieldsResponse,
+  noTokenProvidedResponse,
+} from "@common";
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
@@ -21,9 +26,7 @@ export const validateRequiredFields = (requiredFields: string[]) => {
     });
 
     if (missingFields.length > 0) {
-      res.status(400).json({
-        message: `Missing required fields: ${missingFields.join(", ")}`,
-      });
+      res.status(400).json(missingFieldsResponse(missingFields));
       return;
     }
 
@@ -38,7 +41,7 @@ export async function extractUserFromTokenMiddleWare(
 ) {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) {
-    res.status(401).json({ message: "No token provided" });
+    res.status(401).json(noTokenProvidedResponse);
     return;
   }
 
@@ -55,7 +58,7 @@ export async function extractUserFromTokenMiddleWare(
 
     next();
   } catch (error) {
-    res.status(401).json({ message: "Invalid or expired token" });
+    res.status(401).json(invalidTokenResponse);
     return;
   }
 }

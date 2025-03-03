@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import { AuthSuccessResponse } from '@common';
 
 @Injectable({
   providedIn: 'root',
@@ -59,7 +60,7 @@ export class AuthService {
       username,
       password,
     };
-    const registerRequest = this.http.post<AuthResponse>(
+    const registerRequest = this.http.post<AuthSuccessResponse>(
       this.baseUrl + authUrlPath,
       body
     );
@@ -110,10 +111,4 @@ export class AuthService {
     localStorage.removeItem('jwt');
     this.router.navigateByUrl('/login');
   }
-}
-
-// TODO: Move class into common (shared) types
-interface AuthResponse {
-  message: string;
-  token: string;
 }

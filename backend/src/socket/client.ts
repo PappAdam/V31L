@@ -1,5 +1,5 @@
 import { WebSocket, MessageEvent, CloseEvent } from "ws";
-import { ClientPackage, ClientPackageDescription } from "../../../types";
+import { ClientPackage, ClientPackageDescription } from "@common";
 import * as msgpack from "@msgpack/msgpack";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { findUserById } from "../db/user";

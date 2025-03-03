@@ -16,7 +16,11 @@
     "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
-    "module": "ES2022"
+    "module": "ES2022",
+    "paths": {
+      "@/*": ["./src/app/*"],
+      "@common": ["../common/index"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
@@ -24,5 +28,5 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true
   },
-  "references": [{ "path": "../types" }]
+  "references": [{ "path": "../common" }]
 }

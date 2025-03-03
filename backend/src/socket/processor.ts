@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import { ClientPackage, ClientChatMessage } from "../../../types";
+import { ClientPackage, ClientChatMessage } from "@common";
 import { findChatMembersByChat } from "../db/chatMember";
 import { createMessage, findChatMessages } from "../db/message";
 import { findUserById } from "../db/user";

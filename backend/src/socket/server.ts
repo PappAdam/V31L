@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { ServerPackage } from "../../../types";
+import { ServerPackage } from "@common";
 import { clients } from "./client";
 import * as msgpack from "@msgpack/msgpack";
 
