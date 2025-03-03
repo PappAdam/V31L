@@ -2,7 +2,10 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { AuthService } from '../services/http/auth.service';
 import { MatButtonModule } from '@angular/material/button';
 import { SocketService } from '../services/socket/socket.service';
-import { ChatMessage, ServerSyncResponsePackage } from '../../../../types';
+import {
+  ClientChatMessage,
+  ServerSyncResponsePackage,
+} from '../../../../types';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -25,7 +28,7 @@ export class HomeComponent {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   selectedChat: string = '';
   selectedChatIndex: number = -1;
-  chatMessages: ChatMessage[] = [];
+  chatMessages: ClientChatMessage[] = [];
   messageControl = new FormControl('');
 
   constructor(
@@ -44,9 +47,9 @@ export class HomeComponent {
     if (element.scrollTop === 0) {
       // User has scrolled to the top, send a sync request
       this.socketService.createPackage({
-        header: 'Sync',
-        messageCount: 4,
-        fromMessageId: this.chatMessages[this.selectedChatIndex].messages[0].id,
+        header: 'GetMessages',
+        messageCount: 10,
+        fromId: this.chatMessages[this.selectedChatIndex].messages[0].id,
         chatId: this.selectedChat,
       });
     }
@@ -57,6 +60,8 @@ export class HomeComponent {
       'SyncResponse',
       (pkg: ServerSyncResponsePackage) => {
         pkg.chatMessages.forEach((chatmsg) => {
+          console.log(chatmsg);
+
           const chatIndex = this.chatMessages.findIndex(
             (f) => f.chat.id === chatmsg.chat.id
           );
@@ -80,14 +85,8 @@ export class HomeComponent {
 
     this.socketService.addPackageListener('NewMessage', (pkg) => {
       this.chatMessages
-        .find((chatMessage) => chatMessage.chat.id == pkg.chatId)
-        ?.messages.push({
-          id: 'TODO',
-          chatId: pkg.chatId,
-          content: pkg.messageContent,
-          timeStamp: new Date(),
-          username: pkg.username,
-        });
+        .find((chatMessage) => chatMessage.chat.id == pkg.chatMessage.chat.id)
+        ?.messages.push(...pkg.chatMessage.messages);
     });
   }
 

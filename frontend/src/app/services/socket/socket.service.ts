@@ -167,9 +167,9 @@ export class SocketService {
 
     this.createPackage(
       {
-        header: 'InitialSync',
-        displayedGroupCount: -1,
-        maxDisplayableMessagCount: 20,
+        header: 'GetChats',
+        chatCount: 10,
+        messageCount: 20,
       },
       () => {},
       authPackage.pkg.id

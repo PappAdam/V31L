@@ -2,8 +2,8 @@ export type ClientPackageDescription =
   | ClientConnectionPackage
   | ClientNewMessagePackage
   | ClientBodyLessPackage
-  | ClientInitialSync
-  | ClientSync;
+  | ClientGetChatsPackage
+  | ClientGetMessagesPackage;
 
 export type ClientPackage = ClientPackageDescription & { id: string };
 
@@ -22,15 +22,28 @@ export type ClientBodyLessPackage = {
   header: "DeAuthorization";
 };
 
-export type ClientInitialSync = {
-  header: "InitialSync";
-  displayedGroupCount: number;
-  maxDisplayableMessagCount: number;
+export type ClientGetChatsPackage = {
+  header: "GetChats";
+  /**
+   * Number of chats retrieved
+   */
+  chatCount: number;
+  /**
+   * Number of messages in each retrieved chat
+   */
+  messageCount: number;
+  /**
+   * chatId used as cursor if paging is needed
+   */
+  fromId?: string;
 };
 
-export type ClientSync = {
-  header: "Sync";
+export type ClientGetMessagesPackage = {
+  header: "GetMessages";
   messageCount: number;
-  fromMessageId: string;
   chatId: string;
+  /**
+   * MessageId used as cursor if paging is needed
+   */
+  fromId?: string;
 };

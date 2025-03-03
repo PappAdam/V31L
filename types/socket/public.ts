@@ -1,17 +1,17 @@
-export type FChat = {
+export type ClientChat = {
   id: string;
-  name: string;
+  name?: string;
 };
 
-export type FMessage = {
+export type ClientMessage = {
   id: string;
   username: string;
-  chatId: string;
+  userId: string;
   timeStamp: Date;
   content: string;
 };
 
-export type ChatMessage = {
-  chat: FChat;
-  messages: FMessage[];
+export type ClientChatMessage = {
+  chat: ClientChat;
+  messages: ClientMessage[];
 };

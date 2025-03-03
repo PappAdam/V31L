@@ -1,12 +1,7 @@
 import { User } from "@prisma/client";
-import { ClientPackage, ChatMessage } from "../../../types";
+import { ClientPackage, ClientChatMessage } from "../../../types";
 import { findChatMembersByChat } from "../db/chatMember";
-import {
-  createMessage,
-  dbMessageToFrontend,
-  findSyncMessages,
-  getChatMessages,
-} from "../db/message";
+import { createMessage, findChatMessages } from "../db/message";
 import { findUserById } from "../db/user";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
@@ -14,6 +9,11 @@ import ServerPackageSender from "./server";
 import { findChatById } from "@/db/chat";
 import { create } from "domain";
 import { Server } from "http";
+import {
+  initialMessageSync,
+  dbMessageToClientMessage,
+  toClientCompaitbleMessage,
+} from "@/db/dbHelpers";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
@@ -49,20 +49,30 @@ async function processBasedOnHeader(
       return true;
 
     case "NewMessage":
-      await createMessage(
-        incoming.chatId,
-        client.userId,
-        incoming.messageContent
+      let newMessage = await dbMessageToClientMessage(
+        await createMessage(
+          incoming.chatId,
+          client.userId,
+          incoming.messageContent
+        )
       );
-      const author = (await findUserById(client.userId)) as User;
+
+      if (!newMessage) {
+        return false;
+      }
+
       const chatMembers = await findChatMembersByChat(incoming.chatId);
+
       ServerPackageSender.send(
         chatMembers.map((member) => member.userId),
         {
           header: "NewMessage",
-          chatId: incoming.chatId,
-          messageContent: incoming.messageContent,
-          username: author.username,
+          chatMessage: {
+            chat: {
+              id: incoming.chatId,
+            },
+            messages: [newMessage],
+          },
         }
       );
 
@@ -72,11 +82,11 @@ async function processBasedOnHeader(
       client.userId = "";
       return true;
 
-    case "InitialSync":
-      let chatMessages = await findSyncMessages(
+    case "GetChats":
+      let chatMessages = await initialMessageSync(
         client.userId,
-        incoming.displayedGroupCount,
-        incoming.maxDisplayableMessagCount
+        incoming.chatCount,
+        incoming.messageCount
       );
 
       if (!chatMessages) {
@@ -88,16 +98,17 @@ async function processBasedOnHeader(
         header: "SyncResponse",
         chatMessages: chatMessages,
       });
+
       return true;
 
-    case "Sync":
+    case "GetMessages":
       const syncMessages = (
-        await getChatMessages(
+        await findChatMessages(
           incoming.chatId,
           incoming.messageCount,
-          incoming.fromMessageId
+          incoming.fromId
         )
-      ).map(dbMessageToFrontend);
+      ).map(toClientCompaitbleMessage);
 
       ServerPackageSender.send([client.ws], {
         header: "SyncResponse",
@@ -105,7 +116,6 @@ async function processBasedOnHeader(
           {
             chat: {
               id: incoming.chatId,
-              name: incoming.chatId,
             },
             messages: syncMessages,
           },

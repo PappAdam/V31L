@@ -2,7 +2,7 @@ import { Chat, Message } from "@prisma/client";
 import prisma from "./_db";
 import { findChatMembersByUser } from "./chatMember";
 import { findChatsByUser } from "./chat";
-import { ChatMessage, FMessage } from "../../../types";
+import { ClientChatMessage, ClientMessage } from "../../../types";
 import { timeStamp } from "console";
 /**
  * Retrieves a specified number of messages from a chat, ordered by timestamp.
@@ -14,7 +14,7 @@ import { timeStamp } from "console";
  * @param {number} limit - The number of messages to retrieve.
  * @param {string} cursor - The ID of the message to start fetching after (cursor-based pagination).
  */
-export async function getChatMessages(
+export async function findChatMessages(
   chatId: string,
   limit: number,
   cursor?: string
@@ -97,123 +97,6 @@ export async function createMessage(
     console.error("Error creating message:\n", error);
     return null;
   }
-}
-
-/**
- * Retrieves synchronized chat messages for a user.
- *
- * - Fetches the user's chats.
- * - Retrieves a specified number of messages for the first chat.
- * - For the remaining chats, includes only the last message.
- * - Supports limiting the number of chats and messages.
- *
- * @param {string} userId - The ID of the user whose chats are to be synchronized.
- * @param {number} numberOfChats - The number of chats to retrieve (-1 for all).
- * @param {number} numberOfMessagesInFirstChat - The number of messages to retrieve from the first chat.
- * @returns {Promise<{ messages: any[]; chatId: string }[] | null>}
- *          A promise that resolves to an array of chat objects with messages, or null if no chats exist.
- */
-export async function findSyncMessages(
-  userId: string,
-  numberOfChats: number,
-  numberOfMessagesInFirstChat: number
-): Promise<ChatMessage[] | null> {
-  if (
-    !userId ||
-    (numberOfChats <= 0 && numberOfChats !== -1) ||
-    (numberOfMessagesInFirstChat <= 0 && numberOfMessagesInFirstChat !== -1)
-  ) {
-    return null;
-  }
-
-  let chats = await findChatsByUser(userId);
-
-  if (chats.length === 0) {
-    return null;
-  }
-
-  const firstChat = chats.splice(0, 1)[0];
-  const firstChatMessages = {
-    messages: await getChatMessages(firstChat.id, numberOfMessagesInFirstChat),
-    chat: {
-      id: firstChat.id,
-      name: firstChat.name,
-    },
-  };
-
-  if (numberOfChats !== -1) {
-    chats = chats.slice(0, numberOfChats - 1);
-  }
-
-  const syncMessages = chats.map((ch) => {
-    return { messages: [ch.lastMessage], chat: { id: ch.id, name: ch.name } };
-  });
-
-  syncMessages.splice(0, 0, firstChatMessages);
-
-  return syncMessages.map((sync) => {
-    return {
-      chat: sync.chat,
-      messages: sync.messages
-        .filter((msgs) => msgs !== null)
-        // msgs cannot be null
-        .map((msgs) => dbMessageToFrontend(msgs as any)),
-    };
-  });
-}
-
-function dbMessagesToFrontend(
-  syncMessages: {
-    messages: (
-      | {
-          user: { username: string };
-        } & {
-          id: string;
-          userId: string;
-          timeStamp: Date;
-          chatId: string;
-          content: string;
-        }
-    )[];
-    chat: {
-      id: string;
-      name: string;
-    };
-  }[]
-): ChatMessage[] {
-  return syncMessages.map((syncMessage) => {
-    // Extract the chat object directly
-    const chat = {
-      id: syncMessage.chat.id,
-      name: syncMessage.chat.name,
-    };
-
-    // Transform the messages array
-    const messages: FMessage[] = syncMessage.messages.map(dbMessageToFrontend);
-
-    // Return the ChatMessage object
-    return {
-      chat,
-      messages,
-    };
-  });
-}
-
-export function dbMessageToFrontend(originalMessage: {
-  user: { username: string };
-  id: string;
-  userId: string;
-  timeStamp: Date;
-  chatId: string;
-  content: string;
-}): FMessage {
-  return {
-    id: originalMessage.id,
-    username: originalMessage.user.username, // Extract username from the user object
-    chatId: originalMessage.chatId,
-    timeStamp: originalMessage.timeStamp,
-    content: originalMessage.content,
-  };
 }
 
 // Update and Delete can be implemented later here, no need for it now.
