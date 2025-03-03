@@ -2,16 +2,16 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/http/auth.service';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (!authService.token) {
+  // Returns null if no token is stored
+  const refreshedToken = await authService.refreshToken();
+  if (!refreshedToken) {
     router.navigateByUrl('/login');
     return false;
   }
-
-  const refreshed = authService.refreshToken();
 
   return true;
 };

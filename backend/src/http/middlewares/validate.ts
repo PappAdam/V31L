@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 /**
- * Middleware to validate that all required fields are present in the request body.
+ * Middleware generator to validate that all required fields are present in the request body.
  *
  * @param {string[]} requiredFields - An array of strings representing the required fields in the request body.
  * @returns A middleware function that checks if the required fields are present in `req.body`.
@@ -36,8 +36,6 @@ export async function extractUserFromTokenMiddleWare(
   res: Response,
   next: NextFunction
 ) {
-  console.log("middle");
-
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) {
     res.status(401).json({ message: "No token provided" });
