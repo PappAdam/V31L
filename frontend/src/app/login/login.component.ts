@@ -39,6 +39,9 @@ export class LoginComponent {
       // Ensures at least one uppercase letter, one lowercase letter, and one digit
     ]),
   });
+  errorMessage: string = '';
+  showPassord = false;
+  signIn: boolean = true;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -53,38 +56,49 @@ export class LoginComponent {
     }
   }
 
-  onSubmit(): void {
+  get promptText() {
+    return this.signIn ? 'Sign In' : 'Sign Up';
+  }
+
+  async onSubmit(): Promise<void> {
     if (!this.loginForm.valid) {
       return;
     }
-    const { username, password } = this.loginForm.value;
-    if (this.signIn) {
-      this.authService.login(username!, password!).then(() => {
-        this.router.navigate(['/']);
-      });
-    } else {
-      this.authService.register(username!, password!).then(() => {
-        this.router.navigate(['/']);
-      });
+
+    // Form is valid, so both fields are present.
+    const { username, password } = this.loginForm.value as {
+      username: string;
+      password: string;
+    };
+
+    const authRoute = this.signIn ? 'login' : 'register';
+    const response = await this.authService.authorize(
+      username,
+      password,
+      authRoute
+    );
+
+    if (response.result == 'Success') {
+      this.router.navigate(['/']);
+      return;
     }
+
+    this.errorMessage = response.message;
+    console.warn('Add this error message to login form: ', this.errorMessage);
   }
 
-  showPassord = false;
   toggleShowPassword(event: MouseEvent) {
     this.showPassord = !this.showPassord;
     event.stopPropagation();
   }
 
-  signIn: boolean = true;
   togglePromptText(event: MouseEvent) {
     this.loginForm.reset();
     this.signIn = !this.signIn;
   }
-  get promptText() {
-    return this.signIn ? 'Sign In' : 'Sign Up';
-  }
 }
-export function passwordValidator(): ValidatorFn {
+
+function passwordValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
 

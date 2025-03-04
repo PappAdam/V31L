@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import { BehaviorSubject, lastValueFrom, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
-import { AuthSuccessResponse } from '@common';
+import { AuthResponse, AuthSuccessResponse, AuthErrorResponse } from '@common';
 
 @Injectable({
   providedIn: 'root',
@@ -20,59 +20,44 @@ export class AuthService {
   }
 
   /**
-   * Gets the plain value of the JWT token
+   * Gets the plain value of the user
    */
   public get user(): StoredUser | null {
     return this._user$.getValue();
   }
 
   /**
-   * Gets a token RxJS observable
+   * Gets a user RxJS observable
    */
   public get user$(): Observable<StoredUser | null> {
     return this._user$.asObservable();
   }
 
   /**
-   * Logs the user in with the username password combination.
-   * If the login is successful, it updates the stored token and returns the new token.
+   * Authorizes a user by sending their credentials to the server.
+   * This method sends a POST request to the specified authentication endpoint
    *
-   * @returns {Promise<string | null>} The new token if the login is successful, `null` if the login fails.
+   * @param {string} username - The username of the user
+   * @param {string} password - The password of the user
+   * @param {'login' | 'register'} authUrlPath - The authentication endpoint to use. Must be either 'login' or 'register'
+   * @returns {Promise<AuthResponse>} A promise that resolves to the authentication response.
+   * - If the request is successful, it returns an {@link AuthSuccessResponse}
+   * - If the request fails, it returns an {@link AuthErrorResponse}
    */
-  async login(username: string, password: string): Promise<string | null> {
-    return await this.authorize(username, password, 'login');
-  }
-
-  /**
-   * Registers the user in with the username password combination.
-   * If the register is successful, it updates the stored token and returns the new token.
-   *
-   * @returns {Promise<string | null>} The new token if the register is successful, `null` if it fails.
-   */
-  async register(username: string, password: string): Promise<string | null> {
-    return await this.authorize(username, password, 'register');
-  }
-
-  private async authorize(
+  async authorize(
     username: string,
     password: string,
     authUrlPath: 'login' | 'register'
-  ) {
-    const body = {
-      username,
-      password,
-    };
-    const registerRequest = this.http.post<AuthSuccessResponse>(
-      this.baseUrl + authUrlPath,
-      body
-    );
-
+  ): Promise<AuthResponse> {
+    const body = { username, password };
     try {
-      const res = await firstValueFrom(registerRequest);
-      this.saveUser(res);
-      return res.token;
-    } catch {
-      return null;
+      const response = await lastValueFrom(
+        this.http.post<AuthSuccessResponse>(this.baseUrl + authUrlPath, body)
+      );
+      this.saveUser(response);
+      return response;
+    } catch (httpError: any) {
+      return httpError.error;
     }
   }
 
@@ -95,14 +80,14 @@ export class AuthService {
     );
 
     try {
-      const res = await firstValueFrom(refreshRequest);
+      const res = await lastValueFrom(refreshRequest);
       this.saveUser(res);
       return res.token;
     } catch {
       return null;
     }
   }
-
+  
   private saveUser(user: StoredUser): void {
     this._user$.next(user);
     localStorage.setItem('user', JSON.stringify(user));
