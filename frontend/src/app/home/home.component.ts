@@ -37,6 +37,13 @@ export class HomeComponent {
     this.messagesContainer.nativeElement.addEventListener('scroll', () => {
       this.onScroll();
     });
+
+    this.socketService.open$.subscribe((value) => {
+      if (value) {
+        this.chatMessages.splice(0, this.chatMessages.length);
+        this.selectedChat = '';
+      }
+    });
   }
 
   onScroll() {

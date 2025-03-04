@@ -9,6 +9,7 @@ import {
   ServerHeaderType,
   ServerPackage,
 } from '@common';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 const URL: string = 'ws://localhost:8080';
 
@@ -45,16 +46,28 @@ type PackageEventListener = {
   providedIn: 'root',
 })
 export class SocketService {
-  private ws: WebSocket;
+  private ws!: WebSocket;
   private authorized: boolean = false;
   private packageQueue: PackageQueueItem[] = [];
   private packageEvents: PackageEventListener[] = [];
+  private _open$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
+    false
+  );
 
   constructor(private authService: AuthService) {
+    this.connect();
+  }
+
+  connect = () => {
     this.ws = new WebSocket(URL);
     this.ws.onmessage = this.onIncomingPackage;
+    this.ws.onclose = this.onClose;
     this.ws.onopen = this.onOpen;
     this.addPackageListener('Acknowledgement', this.onAcknowledgement);
+  };
+
+  public get open$(): Observable<boolean> {
+    return this._open$.asObservable();
   }
 
   /**
@@ -98,10 +111,20 @@ export class SocketService {
     return queueItem;
   }
 
+  private onClose = () => {
+    this._open$.next(false);
+    this.authorized = false;
+    console.warn('WebSocket connection lost');
+    console.info('Reconnecting...');
+    this.connect();
+  };
+
   private onOpen = () => {
+    this._open$.next(true);
     this.authService.token$.subscribe((token) => {
       token ? this.auth(token) : this.deAuth();
     });
+    console.info('WebSocket connection established');
   };
 
   /**
