@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --verbose --silent",
-    "install": "prisma migrate reset -f",
+    "install": "prisma migrate reset -f && npm run load:test-data",
     "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts",
     "load:test-data": "tsx src/db/_dbTestData/loadTestData.ts"
