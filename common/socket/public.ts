@@ -1,9 +1,9 @@
-export type ClientChat = {
+export type PublicChat = {
   id: string;
   name?: string;
 };
 
-export type ClientMessage = {
+export type PublicMessage = {
   id: string;
   username: string;
   userId: string;
@@ -11,7 +11,12 @@ export type ClientMessage = {
   content: string;
 };
 
-export type ClientChatMessage = {
-  chat: ClientChat;
-  messages: ClientMessage[];
+export type PublicChatMessage = {
+  chat: PublicChat;
+  messages: PublicMessage[];
+};
+
+export type PublicUser = {
+  id: string;
+  username: string;
 };

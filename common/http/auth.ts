@@ -1,7 +1,9 @@
+import { PublicUser } from "../socket/public";
+
 export type AuthSuccessResponse = {
   result: "Success";
   token: string;
-};
+} & PublicUser;
 
 export type AuthErrorResponse = {
   result: "Error";
@@ -17,10 +19,15 @@ export type AuthErrorResponse = {
 export type AuthResponse = AuthSuccessResponse | AuthErrorResponse;
 
 // All auth requests
-export const successResponse = (token: string): AuthSuccessResponse => {
+export const successResponse = (
+  token: string,
+  user: PublicUser
+): AuthSuccessResponse => {
   return {
     result: "Success",
     token,
+    id: user.id,
+    username: user.username,
   };
 };
 

@@ -1,4 +1,4 @@
-import { ClientChatMessage } from "./public";
+import { PublicChatMessage } from "./public";
 
 export type ServerPackage =
   | ServerNewMessagePackage
@@ -14,7 +14,7 @@ export type PackageForHeader<T extends ServerHeaderType> = Extract<
 
 export type ServerNewMessagePackage = {
   header: "NewMessage";
-  chatMessage: ClientChatMessage;
+  chatMessage: PublicChatMessage;
 };
 
 export type ServerAcknowledgement = {
@@ -25,7 +25,7 @@ export type ServerAcknowledgement = {
 
 export type ServerSyncResponsePackage = {
   header: "SyncResponse";
-  chatMessages: ClientChatMessage[];
+  chatMessages: PublicChatMessage[];
 };
 
 export type ServerErrorPackage = {

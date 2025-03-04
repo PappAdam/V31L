@@ -44,7 +44,7 @@ export class LoginComponent {
 
   // If a token is stored in localstorage, refresh it, navigate to frontpage if the refresh was successful
   ngOnInit() {
-    if (this.authService.token) {
+    if (this.authService.user) {
       this.authService.refreshToken().then((token) => {
         if (token) {
           this.router.navigate(['../']);

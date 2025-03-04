@@ -121,8 +121,8 @@ export class SocketService {
 
   private onOpen = () => {
     this._open$.next(true);
-    this.authService.token$.subscribe((token) => {
-      token ? this.auth(token) : this.deAuth();
+    this.authService.user$.subscribe((user) => {
+      user ? this.auth(user.token) : this.deAuth();
     });
     console.info('WebSocket connection established');
   };

@@ -1,18 +1,13 @@
-import { User } from "@prisma/client";
-import { ClientPackage, ClientChatMessage } from "@common";
+import { ClientPackage } from "@common";
 import { findChatMembersByChat } from "../db/chatMember";
 import { createMessage, findChatMessages } from "../db/message";
-import { findUserById } from "../db/user";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import ServerPackageSender from "./server";
-import { findChatById } from "@/db/chat";
-import { create } from "domain";
-import { Server } from "http";
 import {
   initialMessageSync,
-  dbMessageToClientMessage,
-  toClientCompaitbleMessage,
+  dbMessageToPublicMessage,
+  toPublicMessage,
 } from "@/db/dbHelpers";
 
 // Nothing here needs validation, since the package has been validated already
@@ -49,7 +44,7 @@ async function processBasedOnHeader(
       return true;
 
     case "NewMessage":
-      let newMessage = await dbMessageToClientMessage(
+      let newMessage = await dbMessageToPublicMessage(
         await createMessage(
           incoming.chatId,
           client.userId,
@@ -108,7 +103,7 @@ async function processBasedOnHeader(
           incoming.messageCount,
           incoming.fromId
         )
-      ).map(toClientCompaitbleMessage);
+      ).map(toPublicMessage);
 
       ServerPackageSender.send([client.ws], {
         header: "SyncResponse",

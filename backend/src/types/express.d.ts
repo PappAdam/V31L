@@ -8,6 +8,6 @@ declare module "express" {
   }
 
   interface Response {
-    json: <T extends HttpResponse>(body: T) => this;
+    json: <T extends HttpResponse>(body: T = {}) => this;
   }
 }

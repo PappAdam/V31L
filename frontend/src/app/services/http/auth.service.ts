@@ -9,26 +9,28 @@ import { AuthSuccessResponse } from '@common';
 })
 export class AuthService {
   baseUrl: string = 'http://localhost:3000/auth/';
-  private _token$: BehaviorSubject<string | null> = new BehaviorSubject<
-    string | null
-  >(null);
+  private _user$: BehaviorSubject<StoredUser | null> =
+    new BehaviorSubject<StoredUser | null>(null);
 
   constructor(private http: HttpClient, private router: Router) {
-    this._token$.next(localStorage.getItem('jwt'));
+    const user = localStorage.getItem('user');
+    if (user) {
+      this._user$.next(JSON.parse(user));
+    }
   }
 
   /**
    * Gets the plain value of the JWT token
    */
-  public get token(): string | null {
-    return this._token$.getValue();
+  public get user(): StoredUser | null {
+    return this._user$.getValue();
   }
 
   /**
    * Gets a token RxJS observable
    */
-  public get token$(): Observable<string | null> {
-    return this._token$.asObservable();
+  public get user$(): Observable<StoredUser | null> {
+    return this._user$.asObservable();
   }
 
   /**
@@ -67,7 +69,7 @@ export class AuthService {
 
     try {
       const res = await firstValueFrom(registerRequest);
-      this.saveToken(res.token);
+      this.saveUser(res);
       return res.token;
     } catch {
       return null;
@@ -82,33 +84,35 @@ export class AuthService {
    * or `null` if no token is available or the refresh fails.
    */
   async refreshToken(): Promise<string | null> {
-    if (!this.token) {
+    if (!this.user) {
       return null;
     }
 
-    const refreshRequest = this.http.post<{ token: string }>(
+    const refreshRequest = this.http.post<AuthSuccessResponse>(
       this.baseUrl + 'refresh',
       {},
-      { headers: { Authorization: this.token } }
+      { headers: { Authorization: this.user.token } }
     );
 
     try {
       const res = await firstValueFrom(refreshRequest);
-      this.saveToken(res.token);
+      this.saveUser(res);
       return res.token;
     } catch {
       return null;
     }
   }
 
-  private saveToken(token: string): void {
-    this._token$.next(token);
-    localStorage.setItem('jwt', token);
+  private saveUser(user: StoredUser): void {
+    this._user$.next(user);
+    localStorage.setItem('user', JSON.stringify(user));
   }
 
   logout(): void {
-    this._token$.next(null);
-    localStorage.removeItem('jwt');
+    this._user$.next(null);
+    localStorage.removeItem('user');
     this.router.navigateByUrl('/login');
   }
 }
+
+type StoredUser = Omit<AuthSuccessResponse, 'result'>;

@@ -1,5 +1,4 @@
-import { Client } from "@/socket/client";
-import { ClientChat, ClientChatMessage, ClientMessage } from "@common";
+import { PublicChat, PublicChatMessage, PublicMessage } from "@common";
 import { findChatsByUser } from "./chat";
 import { findChatMessages } from "./message";
 import { Message } from "@prisma/client";
@@ -10,16 +9,14 @@ import { findUserById } from "./user";
  * @param originalMessage query result from database
  * @returns A client side parsable single-message description
  */
-export function toClientCompaitbleMessage<
-  T extends ClientMessage
->(originalMessage: {
+export function toPublicMessage(originalMessage: {
   user: { username: string };
   id: string;
   userId: string;
   timeStamp: Date;
   chatId: string;
   content: string;
-}): ClientMessage {
+}): PublicMessage {
   return {
     id: originalMessage.id,
     username: originalMessage.user.username,
@@ -34,9 +31,9 @@ export function toClientCompaitbleMessage<
  * @param originalMessage query result from database
  * @returns A client side parsable single-message description
  */
-export async function dbMessageToClientMessage(
+export async function dbMessageToPublicMessage(
   originalMessage: Message | null
-): Promise<ClientMessage | null> {
+): Promise<PublicMessage | null> {
   if (!originalMessage) {
     return null;
   }
@@ -58,10 +55,10 @@ export async function dbMessageToClientMessage(
 
 /**
  *
- * @param item chat description, which extends the values of ClientChat
- * @returns A clientChat instance
+ * @param item chat description, which extends the values of {@link PublicChat}
+ * @returns A {@link PublicChat} instance
  */
-function toClientCompaitbleChat<T extends ClientChat>(item: T): ClientChat {
+function toPublicChat<T extends PublicChat>(item: T): PublicChat {
   return item;
 }
 
@@ -84,7 +81,7 @@ export async function initialMessageSync(
   userId: string,
   chatCount: number,
   messageCount: number
-): Promise<ClientChatMessage[] | null> {
+): Promise<PublicChatMessage[] | null> {
   if (
     !userId ||
     (chatCount <= 0 && chatCount !== -1) ||
@@ -99,8 +96,8 @@ export async function initialMessageSync(
       let messages = await findChatMessages(chat.id, messageCount);
 
       return {
-        chat: toClientCompaitbleChat(chat),
-        messages: messages.map(toClientCompaitbleMessage),
+        chat: toPublicChat(chat),
+        messages: messages.map(toPublicMessage),
       };
     })
   );
