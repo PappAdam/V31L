@@ -24,7 +24,7 @@
     <ul #messagesContainer>
       @if (selectedChat) { @for (message of
       chatMessages[selectedChatIndex].messages; track $index) {
-      <li>
+      <li [class.own-message]="message.username === authService.user?.username">
         <span>{{ message.username }}: </span>
         <span>{{ message.content }}</span>
       </li>
