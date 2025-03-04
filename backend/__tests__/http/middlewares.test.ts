@@ -6,6 +6,11 @@ import {
 } from "@/http/middlewares/validate";
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import {
+  invalidTokenResponse,
+  missingFieldsResponse,
+  noTokenProvidedResponse,
+} from "@common";
 
 let req: Partial<Request> = {};
 let res: Partial<Response> = {
@@ -78,7 +83,7 @@ describe("extractUserFromTokenMiddleWare", () => {
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ message: "No token provided" });
+    expect(res.json).toHaveBeenCalledWith(noTokenProvidedResponse);
     expect(next).not.toHaveBeenCalled();
   }
 
@@ -89,9 +94,7 @@ describe("extractUserFromTokenMiddleWare", () => {
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Invalid or expired token",
-    });
+    expect(res.json).toHaveBeenCalledWith(invalidTokenResponse);
     expect(next).not.toHaveBeenCalled();
   }
 
@@ -104,9 +107,7 @@ describe("extractUserFromTokenMiddleWare", () => {
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Invalid or expired token",
-    });
+    expect(res.json).toHaveBeenCalledWith(invalidTokenResponse);
     expect(next).not.toHaveBeenCalled();
   }
 
@@ -121,9 +122,7 @@ describe("extractUserFromTokenMiddleWare", () => {
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Invalid or expired token",
-    });
+    expect(res.json).toHaveBeenCalledWith(invalidTokenResponse);
     expect(next).not.toHaveBeenCalled();
   }
 });
@@ -147,9 +146,7 @@ describe("validateRequiredFields", () => {
     middleware(req as Request, res as Response, next);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Missing required fields: field2",
-    });
+    expect(res.json).toHaveBeenCalledWith(missingFieldsResponse(["field2"]));
     expect(next).not.toHaveBeenCalled();
   });
 
@@ -160,9 +157,9 @@ describe("validateRequiredFields", () => {
     middleware(req as Request, res as Response, next);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Missing required fields: field1, field2",
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      missingFieldsResponse(["field1", "field2"])
+    );
     expect(next).not.toHaveBeenCalled();
   });
 

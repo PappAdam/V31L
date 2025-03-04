@@ -5,6 +5,13 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import httpServer from "../../src/http/http";
 import { Request, Response, NextFunction } from "express";
+import {
+  invalidCredentialsResponse,
+  missingFieldsResponse,
+  serverErrorResponse,
+  successResponse,
+  userExistsResponse,
+} from "@common";
 
 const user = {
   id: "id-123",
@@ -71,10 +78,7 @@ describe(`POST ${registerRoute}`, () => {
       .send({ username: user.username, password: user.password });
 
     expect(response.status).toBe(201);
-    expect(response.body).toEqual({
-      message: "Success",
-      token: token,
-    });
+    expect(response.body).toEqual(successResponse(token));
     expect(prismaMock.user.create).toHaveBeenCalled();
     expect(jwt.sign).toHaveBeenCalled();
   }
@@ -83,9 +87,9 @@ describe(`POST ${registerRoute}`, () => {
     const response = await request(httpServer).post(registerRoute);
 
     expect(response.status).toBe(400);
-    expect(response.body).toEqual({
-      message: "Missing required fields: username, password",
-    });
+    expect(response.body).toEqual(
+      missingFieldsResponse(["username", "password"])
+    );
     expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
     expect(prismaMock.user.create).not.toHaveBeenCalled();
   }
@@ -98,9 +102,7 @@ describe(`POST ${registerRoute}`, () => {
       .send({ username: user.username, password: user.password });
 
     expect(response.status).toBe(400);
-    expect(response.body).toEqual({
-      message: "User with username already exists",
-    });
+    expect(response.body).toEqual(userExistsResponse);
     expect(prismaMock.user.findUnique).toHaveBeenCalled();
     expect(prismaMock.user.create).not.toHaveBeenCalled();
   }
@@ -114,7 +116,7 @@ describe(`POST ${registerRoute}`, () => {
       .send({ username: user.username, password: user.password });
 
     expect(response.status).toBe(500);
-    expect(response.body).toEqual({ message: "Server error" });
+    expect(response.body).toEqual(serverErrorResponse);
     expect(prismaMock.user.create).toHaveBeenCalled();
   }
 });
@@ -135,10 +137,7 @@ describe(`POST ${loginRoute}`, () => {
       .send({ username: user.username, password: user.password });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      message: "Success",
-      token: token,
-    });
+    expect(response.body).toEqual(successResponse(token));
     expect(prismaMock.user.findUnique).toHaveBeenCalled();
     expect(bcrypt.compare).toHaveBeenCalled();
     expect(jwt.sign).toHaveBeenCalled();
@@ -148,9 +147,9 @@ describe(`POST ${loginRoute}`, () => {
     const response = await request(httpServer).post(loginRoute);
 
     expect(response.status).toBe(400);
-    expect(response.body).toEqual({
-      message: "Missing required fields: username, password",
-    });
+    expect(response.body).toEqual(
+      missingFieldsResponse(["username", "password"])
+    );
     expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
   }
 
@@ -162,9 +161,7 @@ describe(`POST ${loginRoute}`, () => {
       .send({ username: user.username, password: user.password });
 
     expect(response.status).toBe(400);
-    expect(response.body).toEqual({
-      message: "Invalid credentials",
-    });
+    expect(response.body).toEqual(invalidCredentialsResponse);
     expect(prismaMock.user.findUnique).toHaveBeenCalled();
     expect(bcrypt.compare).not.toHaveBeenCalled();
   }
@@ -178,9 +175,7 @@ describe(`POST ${loginRoute}`, () => {
       .send({ username: user.username, password: user.password });
 
     expect(response.status).toBe(400);
-    expect(response.body).toEqual({
-      message: "Invalid credentials",
-    });
+    expect(response.body).toEqual(invalidCredentialsResponse);
     expect(bcrypt.compare).toHaveBeenCalled();
     expect(jwt.sign).not.toHaveBeenCalled();
   }
@@ -201,8 +196,6 @@ describe(`POST ${refreshRoute}`, () => {
       .set("Authorization", "Bearer " + token)
       .send({ username: user.username, password: user.password });
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      token: newToken,
-    });
+    expect(response.body).toEqual(successResponse(newToken));
   }
 });

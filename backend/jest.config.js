@@ -1,5 +1,9 @@
+const { pathsToModuleNameMapper } = require("ts-jest");
+const { compilerOptions } = require("./tsconfig.json");
+
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
 module.exports = {
+  preset: "ts-jest",
   testEnvironment: "node",
   transform: {
     "^.+\\.tsx?$": [
@@ -10,10 +14,9 @@ module.exports = {
       },
     ],
   },
-  // Add this section to map the '@' alias
-  moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/src/$1", // Maps `@/...` to `src/...`
-  },
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
+    prefix: "<rootDir>/",
+  }),
   testMatch: ["**/*.test.ts", "**/*.spec.ts"],
   moduleFileExtensions: ["ts", "js", "json", "node"],
   setupFilesAfterEnv: ["./__tests__/_setup/setup.ts"],

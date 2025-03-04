@@ -12,6 +12,7 @@ import {
   missingFieldsResponse,
   noTokenProvidedResponse,
   successResponse,
+  userExistsResponse,
 } from "@common";
 
 const authRouter = Router();
@@ -35,7 +36,7 @@ async function registerUser(req: Request, res: Response) {
     const existingUser = await findUserByName(username);
 
     if (existingUser) {
-      res.status(400).json(noTokenProvidedResponse);
+      res.status(400).json(userExistsResponse);
       return;
     }
 
