@@ -1,7 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
 @use "@angular/material" as mat;
-@import "./styles/t4_theme-colors";
+@import "./styles/t1_theme-colors";
 
 html {
   @include mat.theme(
@@ -9,7 +9,7 @@ html {
       color: (
         primary: $primary-palette,
         tertiary: $tertiary-palette,
-        theme-type: light,
+        theme-type: dark,
       ),
       typography: Roboto,
       density: 0,

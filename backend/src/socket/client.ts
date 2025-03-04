@@ -91,7 +91,7 @@ export class Client {
       case "GetChats":
         return this.userId;
 
-      case "GetMessages":
+      case "GetChatMessages":
         return this.userId;
 
       default:

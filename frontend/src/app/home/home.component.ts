@@ -2,15 +2,19 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { AuthService } from '../services/http/auth.service';
 import { MatButtonModule } from '@angular/material/button';
 import { SocketService } from '../services/socket/socket.service';
-import { PublicChatMessage, ServerSyncResponsePackage } from '@common';
+import { PublicChatMessage } from '@common';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
 
 @Component({
   selector: 'app-home',
   imports: [
+    MatSidenavModule,
+    MatListModule,
     MatButtonModule,
     CommonModule,
     FormsModule,
@@ -51,7 +55,7 @@ export class HomeComponent {
     if (element.scrollTop === 0) {
       // User has scrolled to the top, send a sync request
       this.socketService.createPackage({
-        header: 'GetMessages',
+        header: 'GetChatMessages',
         messageCount: 10,
         fromId: this.chatMessages[this.selectedChatIndex].messages[0].id,
         chatId: this.selectedChat,
@@ -60,37 +64,38 @@ export class HomeComponent {
   }
 
   async ngOnInit() {
-    this.socketService.addPackageListener(
-      'SyncResponse',
-      (pkg: ServerSyncResponsePackage) => {
-        pkg.chatMessages.forEach((chatmsg) => {
-          console.log(chatmsg);
-
-          const chatIndex = this.chatMessages.findIndex(
-            (f) => f.chat.id === chatmsg.chat.id
-          );
-          if (chatIndex < 0) {
-            this.chatMessages.push(chatmsg);
-          } else {
-            this.chatMessages[chatIndex].messages = [
-              ...chatmsg.messages,
-              ...this.chatMessages[chatIndex].messages,
-            ];
-          }
-        });
-
-        if (this.chatMessages.length > 0 && !this.selectedChat) {
-          this.selectedChat = this.chatMessages[0].chat.id;
-          this.selectedChatIndex = 0;
+    this.socketService.addPackageListener('ChatMessages', (pkg) => {
+      pkg.chatMessages.forEach((chatmsg) => {
+        const chatIndex = this.chatMessages.findIndex(
+          (f) => f.chat.id === chatmsg.chat.id
+        );
+        if (chatIndex < 0) {
+          this.chatMessages.push(chatmsg);
+        } else if (
+          chatmsg.messages.length &&
+          chatmsg.messages[0].timeStamp >
+            this.chatMessages[chatIndex].messages[
+              this.chatMessages[chatIndex].messages.length - 1
+            ].timeStamp
+        ) {
+          this.chatMessages[chatIndex].messages = [
+            ...this.chatMessages[chatIndex].messages,
+            ...chatmsg.messages,
+          ];
           this.scrollToBottom();
+        } else {
+          this.chatMessages[chatIndex].messages = [
+            ...chatmsg.messages,
+            ...this.chatMessages[chatIndex].messages,
+          ];
         }
-      }
-    );
+      });
 
-    this.socketService.addPackageListener('NewMessage', (pkg) => {
-      this.chatMessages
-        .find((chatMessage) => chatMessage.chat.id == pkg.chatMessage.chat.id)
-        ?.messages.push(...pkg.chatMessage.messages);
+      if (this.chatMessages.length > 0 && !this.selectedChat) {
+        this.selectedChat = this.chatMessages[0].chat.id;
+        this.selectedChatIndex = 0;
+        this.scrollToBottom();
+      }
     });
   }
 

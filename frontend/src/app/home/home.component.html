@@ -21,16 +21,32 @@
     </ul>
   </div>
   <div class="content">
+    <div class="chat-header">
+      <span class="chat-username">
+        @if (this.selectedChat) {
+        {{ chatMessages[selectedChatIndex].chat.name }}
+        }
+      </span>
+    </div>
     <ul #messagesContainer>
-      @if (selectedChat) { @for (message of
+      @if (this.selectedChat) { @for (message of
       chatMessages[selectedChatIndex].messages; track $index) {
       <li [class.own-message]="message.username === authService.user?.username">
-        <span>{{ message.username }}: </span>
-        <span>{{ message.content }}</span>
+        <div class="message-header">
+          <span class="sender-name">
+            {{
+              message.username === authService.user?.username
+                ? ""
+                : message.username
+            }}
+          </span>
+        </div>
+        <div class="message-content">
+          <span>{{ message.content }}</span>
+        </div>
       </li>
       } }
     </ul>
-    @if (selectedChat) {
     <div class="message-input">
       <textarea
         matInput
@@ -47,6 +63,5 @@
         Send
       </button>
     </div>
-    }
   </div>
 </main>

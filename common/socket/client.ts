@@ -39,7 +39,7 @@ export type ClientGetChatsPackage = {
 };
 
 export type ClientGetMessagesPackage = {
-  header: "GetMessages";
+  header: "GetChatMessages";
   messageCount: number;
   chatId: string;
   /**

@@ -61,13 +61,15 @@ async function processBasedOnHeader(
       ServerPackageSender.send(
         chatMembers.map((member) => member.userId),
         {
-          header: "NewMessage",
-          chatMessage: {
-            chat: {
-              id: incoming.chatId,
+          header: "ChatMessages",
+          chatMessages: [
+            {
+              chat: {
+                id: incoming.chatId,
+              },
+              messages: [newMessage],
             },
-            messages: [newMessage],
-          },
+          ],
         }
       );
 
@@ -90,13 +92,13 @@ async function processBasedOnHeader(
       }
 
       ServerPackageSender.send([client.ws], {
-        header: "SyncResponse",
+        header: "ChatMessages",
         chatMessages: chatMessages,
       });
 
       return true;
 
-    case "GetMessages":
+    case "GetChatMessages":
       const syncMessages = (
         await findChatMessages(
           incoming.chatId,
@@ -106,7 +108,7 @@ async function processBasedOnHeader(
       ).map(toPublicMessage);
 
       ServerPackageSender.send([client.ws], {
-        header: "SyncResponse",
+        header: "ChatMessages",
         chatMessages: [
           {
             chat: {
