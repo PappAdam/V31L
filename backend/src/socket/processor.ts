@@ -61,7 +61,7 @@ async function processBasedOnHeader(
       ServerPackageSender.send(
         chatMembers.map((member) => member.userId),
         {
-          header: "ChatMessages",
+          header: "ChatContent",
           chatMessages: [
             {
               chat: {
@@ -92,7 +92,7 @@ async function processBasedOnHeader(
       }
 
       ServerPackageSender.send([client.ws], {
-        header: "ChatMessages",
+        header: "ChatContent",
         chatMessages: chatMessages,
       });
 
@@ -108,7 +108,7 @@ async function processBasedOnHeader(
       ).map(toPublicMessage);
 
       ServerPackageSender.send([client.ws], {
-        header: "ChatMessages",
+        header: "ChatContent",
         chatMessages: [
           {
             chat: {

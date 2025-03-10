@@ -11,7 +11,7 @@ export type PublicMessage = {
   content: string;
 };
 
-export type PublicChatMessage = {
+export type PublicChatContent = {
   chat: PublicChat;
   messages: PublicMessage[];
 };

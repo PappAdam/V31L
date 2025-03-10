@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AuthService } from '../auth.service';
+import { AuthService } from './auth.service';
 import * as msgpack from '@msgpack/msgpack';
 import {
   ClientPackage,
@@ -9,7 +9,7 @@ import {
   ServerHeaderType,
   ServerPackage,
 } from '@common';
-import { BehaviorSubject, map, Observable, shareReplay } from 'rxjs';
+import { BehaviorSubject, filter, map, Observable, shareReplay } from 'rxjs';
 
 const URL: string = 'ws://localhost:8080';
 
@@ -42,7 +42,7 @@ export class SocketService {
 
   // Avoids creating multiple observables for the same header
   private headerListenersCache = new Map<
-    string,
+    ServerHeaderType,
     Observable<PackageForHeader<any>[]>
   >();
 
@@ -98,7 +98,8 @@ export class SocketService {
     header: T
   ): Observable<PackageForHeader<T>> {
     return this.getPackagesForHeader(header).pipe(
-      map((packages) => packages[packages.length - 1])
+      map((packages) => packages[packages.length - 1]),
+      filter((pkg) => pkg !== undefined)
     );
   }
 

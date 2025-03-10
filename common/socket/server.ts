@@ -1,8 +1,8 @@
-import { PublicChatMessage } from "./public";
+import { PublicChatContent } from "./public";
 
 export type ServerPackage =
   | ServerErrorPackage
-  | ServerChatMessagesPackage
+  | ServerChatContentPackage
   | ServerAcknowledgement;
 
 export type ServerHeaderType = ServerPackage["header"];
@@ -17,9 +17,9 @@ export type ServerAcknowledgement = {
   details: "Success" | "Error";
 };
 
-export type ServerChatMessagesPackage = {
-  header: "ChatMessages";
-  chatMessages: PublicChatMessage[];
+export type ServerChatContentPackage = {
+  header: "ChatContent";
+  chatMessages: PublicChatContent[];
 };
 
 export type ServerErrorPackage = {
