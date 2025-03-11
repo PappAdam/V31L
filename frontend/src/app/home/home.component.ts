@@ -52,12 +52,10 @@ export class HomeComponent {
         tap(() => this.selectedChatIndex$.next(0))
       )
       .subscribe();
-    this.chats$.pipe(tap((chats) => console.log(chats))).subscribe();
   }
 
   async sendMessage() {
     const message = this.messageControl.value?.trim();
-    console.log(this.selectedChatIndex$.value);
     if (!message || this.selectedChatIndex$.value == -1) return;
     const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
     this.messageService.sendMessage(selectedChat.id, message);
