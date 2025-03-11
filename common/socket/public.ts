@@ -1,22 +1,17 @@
-export type PublicChat = {
+export type PublicUser = {
   id: string;
-  name?: string;
+  username: string;
 };
 
 export type PublicMessage = {
   id: string;
-  username: string;
-  userId: string;
+  user: PublicUser;
   timeStamp: Date;
   content: string;
 };
 
-export type PublicChatContent = {
-  chat: PublicChat;
-  messages: PublicMessage[];
-};
-
-export type PublicUser = {
+export type PublicChat = {
   id: string;
-  username: string;
+  name?: string;
+  messages: PublicMessage[];
 };

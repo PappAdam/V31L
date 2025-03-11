@@ -4,17 +4,15 @@
       Log out
     </button>
     <ul>
-      @for (chatMessage of chatMessages$ | async; track $index) {
+      @for (chat of chats$ | async; track $index) {
       <li
         (click)="selectedChatIndex$.next($index)"
         [class.active]="(selectedChatIndex$ | async) === $index"
       >
-        <h1>{{ chatMessage.chat.name }}</h1>
-        @if (chatMessage.messages.length > 0) {
-        <span>{{ chatMessage.messages[0].username }}: </span>
-        <span>{{
-          chatMessage.messages[chatMessage.messages.length - 1].content
-        }}</span>
+        <h1>{{ chat.name }}</h1>
+        @if (chat.messages.length > 0) {
+        <span>{{ chat.messages[0].user.username }}</span>
+        <span>{{ chat.messages[chat.messages.length - 1].content }}</span>
         }
       </li>
       }
@@ -23,21 +21,24 @@
   <div class="content">
     <div class="chat-header">
       <span class="chat-username">
-        @if (this.selectedChatContent$ | async; as selectedChatContent) {
-        {{ selectedChatContent.chat.name }}
+        @if (this.selectedChat$ | async; as selectedChat) {
+        {{ selectedChat.name }}
         }
       </span>
     </div>
     <ul #messagesContainer>
-      @for (message of (this.selectedChatContent$ | async)?.messages; track
-      $index) {
-      <li [class.own-message]="message.username === authService.user?.username">
+      @for (message of (this.selectedChat$ | async)?.messages; track $index) {
+      <li
+        [class.own-message]="
+          message.user.username === authService.user?.username
+        "
+      >
         <div class="message-header">
           <span class="sender-name">
             {{
-              message.username === authService.user?.username
+              message.user.username === authService.user?.username
                 ? ""
-                : message.username
+                : message.user.username
             }}
           </span>
         </div>

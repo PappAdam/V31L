@@ -1,5 +1,5 @@
 import { WebSocket, MessageEvent, CloseEvent } from "ws";
-import { ClientPackage, ClientPackageDescription } from "@common";
+import { ClientPackage, ClientPackageDescription, PublicUser } from "@common";
 import * as msgpack from "@msgpack/msgpack";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { findUserById } from "../db/user";
@@ -20,7 +20,10 @@ export const clients: Client[] = [];
  */
 export class Client {
   ws: WebSocket;
-  userId: string = "";
+  user: PublicUser = {
+    id: "",
+    username: "",
+  };
 
   constructor(connection: WebSocket) {
     this.ws = connection;
@@ -29,6 +32,10 @@ export class Client {
     this.ws.onclose = this.onClose;
 
     clients.push(this);
+  }
+
+  get isAuthorized() {
+    return !!this.user.id;
   }
 
   /**
@@ -79,20 +86,21 @@ export class Client {
         return user ? user.id : null;
 
       case "NewMessage":
-        if (!incoming.chatId || !incoming.messageContent || !this.userId) {
+        if (!incoming.chatId || !incoming.messageContent || !this.user.id) {
           return null;
         }
-        const chatMember = await findChatMember(this.userId, incoming.chatId);
-        return chatMember ? this.userId : null;
+        const chatMember = await findChatMember(this.user.id, incoming.chatId);
+        // If the user is not a member of the chat, incoming is invalid
+        return chatMember ? this.user.id : null;
 
       case "DeAuthorization":
-        return this.userId;
+        return this.isAuthorized ? this.user.id : null;
 
       case "GetChats":
-        return this.userId;
+        return this.isAuthorized ? this.user.id : null;
 
       case "GetChatMessages":
-        return this.userId;
+        return this.isAuthorized ? this.user.id : null;
 
       default:
         throw new Error(

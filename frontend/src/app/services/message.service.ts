@@ -1,11 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { SocketService } from './socket.service';
 import { BehaviorSubject, Observable } from 'rxjs';
-import {
-  PublicChatContent,
-  PublicMessage,
-  ServerChatContentPackage,
-} from '@common';
+import { PublicChat, PublicMessage, ServerChatsPackage } from '@common';
 
 @Injectable({
   providedIn: 'root',
@@ -13,19 +9,19 @@ import {
 export class MessageService {
   socketService = inject(SocketService);
 
-  private _messages$ = new BehaviorSubject<PublicChatContent[]>([]);
-  get messages$(): Observable<PublicChatContent[]> {
-    return this._messages$.asObservable();
+  private _chats$ = new BehaviorSubject<PublicChat[]>([]);
+  get chats$(): Observable<PublicChat[]> {
+    return this._chats$.asObservable();
   }
 
   constructor() {
     this.socketService
-      .addPackageListener('ChatContent')
+      .addPackageListener('Chats')
       .subscribe(this.onChatContentPackageRecieved);
   }
 
   lastMessage(chatId: string): PublicMessage | null {
-    const chat = this._messages$.value.find((c) => c.chat.id === chatId);
+    const chat = this._chats$.value.find((c) => c.id === chatId);
     return chat?.messages[chat.messages.length - 1] || null;
   }
 
@@ -37,34 +33,32 @@ export class MessageService {
     });
   }
 
-  onChatContentPackageRecieved = (
-    chatContentPackage: ServerChatContentPackage
-  ) => {
-    chatContentPackage.chatMessages.forEach((chatContent) => {
-      const chatIndex = this._messages$.value.findIndex(
-        (f) => f.chat.id === chatContent.chat.id
+  onChatContentPackageRecieved = (chatsPackage: ServerChatsPackage) => {
+    chatsPackage.chats.forEach((chatContent) => {
+      const chatIndex = this._chats$.value.findIndex(
+        (f) => f.id === chatContent.id
       );
 
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
-        this._messages$.next([...this._messages$.value, chatContent]);
+        this._chats$.next([...this._chats$.value, chatContent]);
         return;
       }
 
       if (
         chatContent.messages[0].timeStamp >
-        this.lastMessage(chatContent.chat.id)!.timeStamp
+        this.lastMessage(chatContent.id)!.timeStamp
       ) {
         // Pushing new messages to the end of the array
-        this._messages$.value[chatIndex].messages = [
-          ...this._messages$.value[chatIndex].messages,
+        this._chats$.value[chatIndex].messages = [
+          ...this._chats$.value[chatIndex].messages,
           ...chatContent.messages,
         ];
       } else {
         // Pushing new messages to the beginning of the array
-        this._messages$.value[chatIndex].messages = [
+        this._chats$.value[chatIndex].messages = [
           ...chatContent.messages,
-          ...this._messages$.value[chatIndex].messages,
+          ...this._chats$.value[chatIndex].messages,
         ];
       }
     });

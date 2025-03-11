@@ -15,21 +15,26 @@ export default class ServerPackageSender {
   private package: ServerPackage;
   private targetClients: WebSocket[];
 
-  // constructor(userIds: string[], outgoing: ServerPackage);
-  // constructor(wsArray: WebSocket[], outgoing: ServerPackage);
+  constructor(userIds: string[], outgoing: ServerPackage);
+  constructor(wsClients: WebSocket[], outgoing: ServerPackage);
+  constructor(
+    userIdsOrWsClients: string[] | WebSocket[],
+    outgoing: ServerPackage
+  );
 
   constructor(
     clientDescription: string[] | WebSocket[],
     outgoing: ServerPackage
   ) {
-    this.package = outgoing;
     if (isStringArray(clientDescription)) {
       this.targetClients = clients
-        .filter((client) => clientDescription.includes(client.userId))
+        .filter((client) => clientDescription.includes(client.user.id))
         .map((client) => client.ws);
     } else {
       this.targetClients = clientDescription;
     }
+
+    this.package = outgoing;
   }
 
   /**
