@@ -1,65 +1,225 @@
-$mat-sys-primary: var(--mat-sys-primary);
-$mat-sys-on-primary: var(--mat-sys-on-primary);
-$mat-sys-primary-container: var(--mat-sys-primary-container);
-$mat-sys-on-primary-container: var(--mat-sys-on-primary-container);
-$mat-sys-secondary: var(--mat-sys-secondary);
-$mat-sys-on-secondary: var(--mat-sys-on-secondary);
-$mat-sys-secondary-container: var(--mat-sys-secondary-container);
-$mat-sys-on-secondary-container: var(--mat-sys-on-secondary-container);
-$mat-sys-tertiary: var(--mat-sys-tertiary);
-$mat-sys-on-tertiary: var(--mat-sys-on-tertiary);
-$mat-sys-tertiary-container: var(--mat-sys-tertiary-container);
-$mat-sys-on-tertiary-container: var(--mat-sys-on-tertiary-container);
-$mat-sys-error: var(--mat-sys-error);
-$mat-sys-on-error: var(--mat-sys-on-error);
-$mat-sys-error-container: var(--mat-sys-error-container);
-$mat-sys-on-error-container: var(--mat-sys-on-error-container);
+// user defined stuff
+
+/// Spacing Variables (for gaps, margins, paddings)
+$mat-sys-spacing-base: 4px;
+$mat-sys-spacing-sm: 8px;
+$mat-sys-spacing-md: 16px;
+$mat-sys-spacing-lg: 24px;
+$mat-sys-spacing-xl: 32px;
+$mat-sys-spacing-xxl: 48px;
+
+/// Button Sizes
+$mat-sys-btn-height-sm: 32px;
+$mat-sys-btn-height-md: 40px;
+$mat-sys-btn-height-lg: 48px;
+$mat-sys-btn-height-xl: 56px;
+
+/// Button Padding
+$mat-sys-btn-padding-sm: 8px 12px;
+$mat-sys-btn-padding-md: 12px 16px;
+$mat-sys-btn-padding-lg: 16px 20px;
+$mat-sys-btn-padding-xl: 20px 24px;
+
+// pre defined stuff
+
+$mat-sys-body-large: var(--mat-sys-body-large);
+$mat-sys-body-large-font: var(--mat-sys-body-large-font);
+$mat-sys-body-large-line-height: var(--mat-sys-body-large-line-height);
+$mat-sys-body-large-size: var(--mat-sys-body-large-size);
+$mat-sys-body-large-tracking: var(--mat-sys-body-large-tracking);
+$mat-sys-body-large-weight: var(--mat-sys-body-large-weight);
+
+$mat-sys-body-medium: var(--mat-sys-body-medium);
+$mat-sys-body-medium-font: var(--mat-sys-body-medium-font);
+$mat-sys-body-medium-line-height: var(--mat-sys-body-medium-line-height);
+$mat-sys-body-medium-size: var(--mat-sys-body-medium-size);
+$mat-sys-body-medium-tracking: var(--mat-sys-body-medium-tracking);
+$mat-sys-body-medium-weight: var(--mat-sys-body-medium-weight);
+
+$mat-sys-body-small: var(--mat-sys-body-small);
+$mat-sys-body-small-font: var(--mat-sys-body-small-font);
+$mat-sys-body-small-line-height: var(--mat-sys-body-small-line-height);
+$mat-sys-body-small-size: var(--mat-sys-body-small-size);
+$mat-sys-body-small-tracking: var(--mat-sys-body-small-tracking);
+$mat-sys-body-small-weight: var(--mat-sys-body-small-weight);
+
+$mat-sys-display-large: var(--mat-sys-display-large);
+$mat-sys-display-large-font: var(--mat-sys-display-large-font);
+$mat-sys-display-large-line-height: var(--mat-sys-display-large-line-height);
+$mat-sys-display-large-size: var(--mat-sys-display-large-size);
+$mat-sys-display-large-tracking: var(--mat-sys-display-large-tracking);
+$mat-sys-display-large-weight: var(--mat-sys-display-large-weight);
+
+$mat-sys-display-medium: var(--mat-sys-display-medium);
+$mat-sys-display-medium-font: var(--mat-sys-display-medium-font);
+$mat-sys-display-medium-line-height: var(--mat-sys-display-medium-line-height);
+$mat-sys-display-medium-size: var(--mat-sys-display-medium-size);
+$mat-sys-display-medium-tracking: var(--mat-sys-display-medium-tracking);
+$mat-sys-display-medium-weight: var(--mat-sys-display-medium-weight);
+
+$mat-sys-display-small: var(--mat-sys-display-small);
+$mat-sys-display-small-font: var(--mat-sys-display-small-font);
+$mat-sys-display-small-line-height: var(--mat-sys-display-small-line-height);
+$mat-sys-display-small-size: var(--mat-sys-display-small-size);
+$mat-sys-display-small-tracking: var(--mat-sys-display-small-tracking);
+$mat-sys-display-small-weight: var(--mat-sys-display-small-weight);
+
+$mat-sys-headline-large: var(--mat-sys-headline-large);
+$mat-sys-headline-large-font: var(--mat-sys-headline-large-font);
+$mat-sys-headline-large-line-height: var(--mat-sys-headline-large-line-height);
+$mat-sys-headline-large-size: var(--mat-sys-headline-large-size);
+$mat-sys-headline-large-tracking: var(--mat-sys-headline-large-tracking);
+$mat-sys-headline-large-weight: var(--mat-sys-headline-large-weight);
+
+$mat-sys-headline-medium: var(--mat-sys-headline-medium);
+$mat-sys-headline-medium-font: var(--mat-sys-headline-medium-font);
+$mat-sys-headline-medium-line-height: var(
+  --mat-sys-headline-medium-line-height
+);
+$mat-sys-headline-medium-size: var(--mat-sys-headline-medium-size);
+$mat-sys-headline-medium-tracking: var(--mat-sys-headline-medium-tracking);
+$mat-sys-headline-medium-weight: var(--mat-sys-headline-medium-weight);
+
+$mat-sys-headline-small: var(--mat-sys-headline-small);
+$mat-sys-headline-small-font: var(--mat-sys-headline-small-font);
+$mat-sys-headline-small-line-height: var(--mat-sys-headline-small-line-height);
+$mat-sys-headline-small-size: var(--mat-sys-headline-small-size);
+$mat-sys-headline-small-tracking: var(--mat-sys-headline-small-tracking);
+$mat-sys-headline-small-weight: var(--mat-sys-headline-small-weight);
+
+$mat-sys-label-large: var(--mat-sys-label-large);
+$mat-sys-label-large-font: var(--mat-sys-label-large-font);
+$mat-sys-label-large-line-height: var(--mat-sys-label-large-line-height);
+$mat-sys-label-large-size: var(--mat-sys-label-large-size);
+$mat-sys-label-large-tracking: var(--mat-sys-label-large-tracking);
+$mat-sys-label-large-weight: var(--mat-sys-label-large-weight);
+$mat-sys-label-large-weight-prominent: var(
+  --mat-sys-label-large-weight-prominent
+);
+
+$mat-sys-label-medium: var(--mat-sys-label-medium);
+$mat-sys-label-medium-font: var(--mat-sys-label-medium-font);
+$mat-sys-label-medium-line-height: var(--mat-sys-label-medium-line-height);
+$mat-sys-label-medium-size: var(--mat-sys-label-medium-size);
+$mat-sys-label-medium-tracking: var(--mat-sys-label-medium-tracking);
+$mat-sys-label-medium-weight: var(--mat-sys-label-medium-weight);
+$mat-sys-label-medium-weight-prominent: var(
+  --mat-sys-label-medium-weight-prominent
+);
+
+$mat-sys-label-small: var(--mat-sys-label-small);
+$mat-sys-label-small-font: var(--mat-sys-label-small-font);
+$mat-sys-label-small-line-height: var(--mat-sys-label-small-line-height);
+$mat-sys-label-small-size: var(--mat-sys-label-small-size);
+$mat-sys-label-small-tracking: var(--mat-sys-label-small-tracking);
+$mat-sys-label-small-weight: var(--mat-sys-label-small-weight);
+
+$mat-sys-title-large: var(--mat-sys-title-large);
+$mat-sys-title-large-font: var(--mat-sys-title-large-font);
+$mat-sys-title-large-line-height: var(--mat-sys-title-large-line-height);
+$mat-sys-title-large-size: var(--mat-sys-title-large-size);
+$mat-sys-title-large-tracking: var(--mat-sys-title-large-tracking);
+$mat-sys-title-large-weight: var(--mat-sys-title-large-weight);
+
+$mat-sys-title-medium: var(--mat-sys-title-medium);
+$mat-sys-title-medium-font: var(--mat-sys-title-medium-font);
+$mat-sys-title-medium-line-height: var(--mat-sys-title-medium-line-height);
+$mat-sys-title-medium-size: var(--mat-sys-title-medium-size);
+$mat-sys-title-medium-tracking: var(--mat-sys-title-medium-tracking);
+$mat-sys-title-medium-weight: var(--mat-sys-title-medium-weight);
+
+$mat-sys-title-small: var(--mat-sys-title-small);
+$mat-sys-title-small-font: var(--mat-sys-title-small-font);
+$mat-sys-title-small-line-height: var(--mat-sys-title-small-line-height);
+$mat-sys-title-small-size: var(--mat-sys-title-small-size);
+$mat-sys-title-small-tracking: var(--mat-sys-title-small-tracking);
+$mat-sys-title-small-weight: var(--mat-sys-title-small-weight);
+
+//-----
+
+$mat-sys-corner-extra-large: var(--mat-sys-corner-extra-large);
+$mat-sys-corner-extra-large-top: var(--mat-sys-corner-extra-large-top);
+$mat-sys-corner-extra-small: var(--mat-sys-corner-extra-small);
+$mat-sys-corner-extra-small-top: var(--mat-sys-corner-extra-small-top);
+$mat-sys-corner-full: var(--mat-sys-corner-full);
+$mat-sys-corner-large: var(--mat-sys-corner-large);
+$mat-sys-corner-large-end: var(--mat-sys-corner-large-end);
+$mat-sys-corner-large-start: var(--mat-sys-corner-large-start);
+$mat-sys-corner-large-top: var(--mat-sys-corner-large-top);
+$mat-sys-corner-medium: var(--mat-sys-corner-medium);
+$mat-sys-corner-none: var(--mat-sys-corner-none);
+$mat-sys-corner-small: var(--mat-sys-corner-small);
+
+//------
+
 $mat-sys-background: var(--mat-sys-background);
-$mat-sys-on-background: var(--mat-sys-on-background);
-$mat-sys-surface: var(--mat-sys-surface);
-$mat-sys-on-surface: var(--mat-sys-on-surface);
-$mat-sys-surface-variant: var(--mat-sys-surface-variant);
-$mat-sys-on-surface-variant: var(--mat-sys-on-surface-variant);
-$mat-sys-outline: var(--mat-sys-outline);
-$mat-sys-outline-variant: var(--mat-sys-outline-variant);
-$mat-sys-shadow: var(--mat-sys-shadow);
-$mat-sys-scrim: var(--mat-sys-scrim);
-$mat-sys-inverse-surface: var(--mat-sys-inverse-surface);
+$mat-sys-error: var(--mat-sys-error);
+$mat-sys-error-container: var(--mat-sys-error-container);
 $mat-sys-inverse-on-surface: var(--mat-sys-inverse-on-surface);
 $mat-sys-inverse-primary: var(--mat-sys-inverse-primary);
-$mat-sys-primary: var(--mat-sys-primary);
-$mat-sys-on-primary: var(--mat-sys-on-primary);
-$mat-sys-primary-container: var(--mat-sys-primary-container);
-$mat-sys-on-primary-container: var(--mat-sys-on-primary-container);
-$mat-sys-secondary: var(--mat-sys-secondary);
-$mat-sys-on-secondary: var(--mat-sys-on-secondary);
-$mat-sys-secondary-container: var(--mat-sys-secondary-container);
-$mat-sys-on-secondary-container: var(--mat-sys-on-secondary-container);
-$mat-sys-tertiary: var(--mat-sys-tertiary);
-$mat-sys-on-tertiary: var(--mat-sys-on-tertiary);
-$mat-sys-tertiary-container: var(--mat-sys-tertiary-container);
-$mat-sys-on-tertiary-container: var(--mat-sys-on-tertiary-container);
-$mat-sys-error: var(--mat-sys-error);
-$mat-sys-on-error: var(--mat-sys-on-error);
-$mat-sys-error-container: var(--mat-sys-error-container);
-$mat-sys-on-error-container: var(--mat-sys-on-error-container);
-$mat-sys-background: var(--mat-sys-background);
+$mat-sys-inverse-surface: var(--mat-sys-inverse-surface);
 $mat-sys-on-background: var(--mat-sys-on-background);
-$mat-sys-surface: var(--mat-sys-surface);
+$mat-sys-on-error: var(--mat-sys-on-error);
+$mat-sys-on-error-container: var(--mat-sys-on-error-container);
+$mat-sys-on-primary: var(--mat-sys-on-primary);
+$mat-sys-on-primary-container: var(--mat-sys-on-primary-container);
+$mat-sys-on-primary-fixed: var(--mat-sys-on-primary-fixed);
+$mat-sys-on-primary-fixed-variant: var(--mat-sys-on-primary-fixed-variant);
+$mat-sys-on-secondary: var(--mat-sys-on-secondary);
+$mat-sys-on-secondary-container: var(--mat-sys-on-secondary-container);
+$mat-sys-on-secondary-fixed: var(--mat-sys-on-secondary-fixed);
+$mat-sys-on-secondary-fixed-variant: var(--mat-sys-on-secondary-fixed-variant);
 $mat-sys-on-surface: var(--mat-sys-on-surface);
-$mat-sys-surface-variant: var(--mat-sys-surface-variant);
 $mat-sys-on-surface-variant: var(--mat-sys-on-surface-variant);
+$mat-sys-on-tertiary: var(--mat-sys-on-tertiary);
+$mat-sys-on-tertiary-container: var(--mat-sys-on-tertiary-container);
+$mat-sys-on-tertiary-fixed: var(--mat-sys-on-tertiary-fixed);
+$mat-sys-on-tertiary-fixed-variant: var(--mat-sys-on-tertiary-fixed-variant);
 $mat-sys-outline: var(--mat-sys-outline);
 $mat-sys-outline-variant: var(--mat-sys-outline-variant);
-$mat-sys-shadow: var(--mat-sys-shadow);
+$mat-sys-primary: var(--mat-sys-primary);
+$mat-sys-primary-container: var(--mat-sys-primary-container);
+$mat-sys-primary-fixed: var(--mat-sys-primary-fixed);
+$mat-sys-primary-fixed-dim: var(--mat-sys-primary-fixed-dim);
 $mat-sys-scrim: var(--mat-sys-scrim);
-$mat-sys-inverse-surface: var(--mat-sys-inverse-surface);
-$mat-sys-inverse-on-surface: var(--mat-sys-inverse-on-surface);
-$mat-sys-inverse-primary: var(--mat-sys-inverse-primary);
-$mat-sys-surface-dim: var(--mat-sys-surface-dim);
+$mat-sys-secondary: var(--mat-sys-secondary);
+$mat-sys-secondary-container: var(--mat-sys-secondary-container);
+$mat-sys-secondary-fixed: var(--mat-sys-secondary-fixed);
+$mat-sys-secondary-fixed-dim: var(--mat-sys-secondary-fixed-dim);
+$mat-sys-shadow: var(--mat-sys-shadow);
+$mat-sys-surface: var(--mat-sys-surface);
 $mat-sys-surface-bright: var(--mat-sys-surface-bright);
-$mat-sys-surface-container-lowest: var(--mat-sys-surface-container-lowest);
-$mat-sys-surface-container-low: var(--mat-sys-surface-container-low);
 $mat-sys-surface-container: var(--mat-sys-surface-container);
 $mat-sys-surface-container-high: var(--mat-sys-surface-container-high);
 $mat-sys-surface-container-highest: var(--mat-sys-surface-container-highest);
+$mat-sys-surface-container-low: var(--mat-sys-surface-container-low);
+$mat-sys-surface-container-lowest: var(--mat-sys-surface-container-lowest);
+$mat-sys-surface-dim: var(--mat-sys-surface-dim);
+$mat-sys-surface-tint: var(--mat-sys-surface-tint);
+$mat-sys-surface-variant: var(--mat-sys-surface-variant);
+$mat-sys-tertiary: var(--mat-sys-tertiary);
+$mat-sys-tertiary-container: var(--mat-sys-tertiary-container);
+$mat-sys-tertiary-fixed: var(--mat-sys-tertiary-fixed);
+$mat-sys-tertiary-fixed-dim: var(--mat-sys-tertiary-fixed-dim);
+$mat-sys-neutral-variant20: var(--mat-sys-neutral-variant20);
+$mat-sys-neutral10: var(--mat-sys-neutral10);
+
+//--------
+
+$mat-sys-level5: var(--mat-sys-level5);
+$mat-sys-level4: var(--mat-sys-level4);
+$mat-sys-level3: var(--mat-sys-level3);
+$mat-sys-level2: var(--mat-sys-level2);
+$mat-sys-level1: var(--mat-sys-level1);
+$mat-sys-level0: var(--mat-sys-level0);
+
+//--------
+
+$mat-sys-dragged-state-layer-opacity: var(
+  --mat-sys-dragged-state-layer-opacity
+);
+$mat-sys-focus-state-layer-opacity: var(--mat-sys-focus-state-layer-opacity);
+$mat-sys-hover-state-layer-opacity: var(--mat-sys-hover-state-layer-opacity);
+$mat-sys-pressed-state-layer-opacity: var(
+  --mat-sys-pressed-state-layer-opacity
+);
