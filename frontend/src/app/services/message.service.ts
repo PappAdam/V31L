@@ -17,7 +17,18 @@ export class MessageService {
   constructor() {
     this.socketService
       .addPackageListener('Chats')
-      .subscribe(this.onChatContentPackageRecieved);
+      .subscribe(this.onChatsPackageRecieved);
+
+    this.socketService.authorized$.subscribe((authorized) => {
+      if (authorized) {
+        this._chats$.next([]);
+        this.socketService.createPackage({
+          header: 'GetChats',
+          chatCount: 10,
+          messageCount: 20,
+        });
+      }
+    });
   }
 
   lastMessage(chatId: string): PublicMessage | null {
@@ -33,7 +44,7 @@ export class MessageService {
     });
   }
 
-  onChatContentPackageRecieved = (chatsPackage: ServerChatsPackage) => {
+  onChatsPackageRecieved = (chatsPackage: ServerChatsPackage) => {
     chatsPackage.chats.forEach((chatContent) => {
       const chatIndex = this._chats$.value.findIndex(
         (f) => f.id === chatContent.id

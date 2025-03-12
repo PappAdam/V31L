@@ -6,7 +6,7 @@ export default logRouter;
 
 function logAuth(req: Request, res: Response) {
   const token = req.header("Authorization")?.replace("Bearer ", "");
-  console.log("Bearer token: ", token);
-  console.log("User: ", req.user);
+  console.info("Bearer token: ", token);
+  console.info("User: ", req.user);
   res.json();
 }

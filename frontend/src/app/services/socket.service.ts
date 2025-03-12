@@ -9,7 +9,14 @@ import {
   ServerHeaderType,
   ServerPackage,
 } from '@common';
-import { BehaviorSubject, filter, map, Observable, shareReplay } from 'rxjs';
+import {
+  BehaviorSubject,
+  filter,
+  map,
+  Observable,
+  shareReplay,
+  Subscription,
+} from 'rxjs';
 
 const URL: string = 'ws://localhost:8080';
 
@@ -36,9 +43,24 @@ export type PackageQueueItem = {
 })
 export class SocketService {
   private ws!: WebSocket;
-  private authorized = false;
+
+  private _authorized$ = new BehaviorSubject<boolean>(false);
+  public authorized$ = this._authorized$.asObservable();
+  get authorized() {
+    return this._authorized$.value;
+  }
+
+  /** Contains all packages sent */
   private packageQueue: PackageQueueItem[] = [];
+
+  /**
+   * Contains all packages received
+   * Emits a new value each time a new package is received
+   */
   private incomingPackages$ = new BehaviorSubject<ServerPackage[]>([]);
+
+  /** Storing the subsciption so that we can unsubscribe on close (prevents infinite subscriptions leading to memory leaks) */
+  private _tokenChangedSubscription?: Subscription;
 
   // Avoids creating multiple observables for the same header
   private headerListenersCache = new Map<
@@ -46,10 +68,9 @@ export class SocketService {
     Observable<PackageForHeader<any>[]>
   >();
 
-  private _open$ = new BehaviorSubject<boolean>(false);
-
   constructor(private authService: AuthService) {
     this.connect();
+
     this.addPackageListener('Acknowledgement').subscribe((acknowledgement) => {
       this.onAcknowledgement(acknowledgement);
     });
@@ -62,14 +83,10 @@ export class SocketService {
     this.ws.onopen = this.onOpen;
   };
 
-  public get open$(): Observable<boolean> {
-    return this._open$.asObservable();
-  }
-
   /**
    * Returns the observable for the specified header type.
-   * @param {ServerHeaderType} header - The header type to listen for.
-   * @returns {Observable<PackageForHeader<T>[]>} - An observable that emits an array of packages with the specified header type.
+   * @param {ServerHeaderType} header The header type to listen for.
+   * @returns {Observable<PackageForHeader<T>[]>} An observable that emits an array of packages with the specified header type when a new package of that header type is received.
    */
   getPackagesForHeader<T extends ServerHeaderType>(
     header: T
@@ -81,28 +98,47 @@ export class SocketService {
       >;
     }
 
+    // Creating a new observable
     const observable$ = this.incomingPackages$.pipe(
+      // Only emit if the last package has the specified header
+      filter(
+        (packages) =>
+          packages.length > 0 && packages[packages.length - 1].header === header
+      ),
+      // Filter out packages that don't match the header
       map(
         (packages) =>
           packages.filter(
             (pkg) => pkg.header === header
           ) as PackageForHeader<T>[]
       ),
+      // Share the observable to prevent multiple subscriptions
       shareReplay(1)
     );
     this.headerListenersCache.set(header, observable$);
     return observable$;
   }
 
+  /**
+   * Adds a listener for the specified header type.
+   * @param {ServerHeaderType} header The header type to listen for.
+   * @returns {Observable<PackageForHeader<T>>} An observable that emits the latest package with the specified header type when a new package of that header type is received.
+   */
   addPackageListener<T extends ServerHeaderType>(
     header: T
   ): Observable<PackageForHeader<T>> {
     return this.getPackagesForHeader(header).pipe(
-      map((packages) => packages[packages.length - 1]),
-      filter((pkg) => pkg !== undefined)
+      map((packages) => packages[packages.length - 1])
     );
   }
 
+  /**
+   * Creates a package and adds it to the package queue.
+   * @param {ClientPackageDescription} packageDesc - The description of the package to create.
+   * @param {() => void} callback - A function to be executed when the package is acknowledged by the server.
+   * @param {string} dependsOn - The ID of the package that this package depends on.
+   * @returns {PackageQueueItem} The package queue item that was created.
+   */
   createPackage(
     packageDesc: ClientPackageDescription,
     callback: () => void = () => {},
@@ -121,26 +157,28 @@ export class SocketService {
       status: 'Pending',
     };
     this.packageQueue.push(queueItem);
-    if (!dependsOn) {
+    if (!dependsOn && this.ws.readyState === WebSocket.OPEN) {
       this.sendPackage(queueItem);
     }
     return queueItem;
   }
 
+  /** Reconnects the WebSocket connection when the server is closed */
   private onClose = () => {
-    this._open$.next(false);
-    this.authorized = false;
+    this._authorized$.next(false);
+    this._tokenChangedSubscription?.unsubscribe();
     console.warn('WebSocket connection lost');
     console.info('Reconnecting...');
     this.connect();
   };
 
   private onOpen = () => {
-    this._open$.next(true);
-    this.authService.user$.subscribe((user) => {
-      user ? this.auth(user.token) : this.deAuth();
-    });
     console.info('WebSocket connection established');
+    this._tokenChangedSubscription = this.authService.user$.subscribe(
+      (user) => {
+        user ? this.auth(user.token) : this.deAuth();
+      }
+    );
   };
 
   /**
@@ -152,7 +190,6 @@ export class SocketService {
     const incoming = msgpack.decode(
       await (socketMessage.data as any).arrayBuffer()
     ) as ServerPackage;
-
     this.incomingPackages$.next([...this.incomingPackages$.value, incoming]);
   };
 
@@ -189,33 +226,24 @@ export class SocketService {
 
   private auth(token: string) {
     if (this.authorized) {
-      throw new Error('Cannot authorize while authorized!');
+      console.error('Cannot authorize while authorized!');
+      return;
     }
-
-    const authPackage = this.createPackage(
+    this.createPackage(
       {
         header: 'Authorization',
         token,
       },
       () => {
-        this.authorized = true;
+        this._authorized$.next(true);
       }
-    );
-
-    this.createPackage(
-      {
-        header: 'GetChats',
-        chatCount: 10,
-        messageCount: 20,
-      },
-      () => {},
-      authPackage.pkg.id
     );
   }
 
   private deAuth() {
     if (!this.authorized) {
-      throw new Error('Cannot deAuthorize while deAuthorized!');
+      console.error('Cannot deAuthorize while deAuthorized!');
+      return;
     }
 
     this.createPackage(
@@ -223,7 +251,7 @@ export class SocketService {
         header: 'DeAuthorization',
       },
       () => {
-        this.authorized = false;
+        this._authorized$.next(false);
       }
     );
   }
