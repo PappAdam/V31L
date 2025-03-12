@@ -1,6 +1,7 @@
 import { PlatformService } from '@/services/platform.service';
 import { Component, inject } from '@angular/core';
 import { DeviceInfo } from '@capacitor/device';
+
 @Component({
   selector: 'app-app-layout',
   imports: [],
