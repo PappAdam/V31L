@@ -3,12 +3,12 @@ import { Component, inject } from '@angular/core';
 import { DeviceInfo } from '@capacitor/device';
 
 @Component({
-  selector: 'app-app-layout',
+  selector: 'app-layout',
   imports: [],
-  templateUrl: './app-layout.component.html',
-  styleUrl: './app-layout.component.scss',
+  templateUrl: './layout.component.html',
+  styleUrl: './layout.component.scss',
 })
-export class AppLayoutComponent {
+export class LayoutComponent {
   platform: DeviceInfo | null = null;
   platformService: PlatformService = inject(PlatformService);
 

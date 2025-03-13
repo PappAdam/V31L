@@ -1,1 +1,7 @@
-<p>home works!</p>
+@if (this.platform?.platform == "web") {
+<div class="home-desktop-wrapper">
+  <div class="tab-outlet"><app-gdswitch></app-gdswitch></div>
+  <app-navbar></app-navbar>
+</div>
+
+} @else { "this is the mobile type stuff" }
