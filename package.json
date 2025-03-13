@@ -1,0 +1,14 @@
+{
+  "name": "veil",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "test": "concurrently -k \"npm run dev --workspace=backend\" \"npm start --workspace=frontend\" \"npm run test:e2e --workspace=frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}

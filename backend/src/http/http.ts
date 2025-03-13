@@ -7,6 +7,7 @@ import YAML from "yamljs";
 import authRouter from "@/http/auth";
 import logRouter from "@/http/log";
 import { extractUserFromTokenMiddleWare } from "@/http/middlewares/validate";
+import testApiRouter from "@/http/testapi";
 
 const httpServer = express();
 httpServer.use(cors());
@@ -26,6 +27,8 @@ httpServer.get("/tests", (req, res) => {
 
 httpServer.use(bodyParser.json());
 httpServer.use("/auth", authRouter);
+
+httpServer.use("/testapi", testApiRouter);
 
 // You can use req.user after this middleware runs
 const protectedRoutes = httpServer.use(extractUserFromTokenMiddleWare);

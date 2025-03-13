@@ -2,8 +2,14 @@ import { createChat } from "../chat";
 import { createMessage } from "../message";
 import testData from "./testData.json";
 import { createUser } from "../user";
+import prisma from "../_db";
 
-async function loadData() {
+export async function loadData() {
+  await prisma.message.deleteMany();
+  await prisma.chatMember.deleteMany();
+  await prisma.chat.deleteMany();
+  await prisma.user.deleteMany();
+
   const users = await Promise.all(
     testData.users.map(async (u) => createUser(u.username, u.password))
   );

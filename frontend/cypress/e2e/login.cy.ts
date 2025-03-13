@@ -1,6 +1,7 @@
-describe('Login Page', () => {
+describe('Login Page Validation', () => {
   beforeEach(() => {
     cy.visit('http://localhost:4200/login');
+    cy.task('seedDatabase');
   });
 
   it('should display the login form correctly', displayLoginForm);
