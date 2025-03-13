@@ -13,7 +13,7 @@ import { PublicUser } from "@common";
  */
 export async function findChatMessages(
   chatId: string,
-  limit: number,
+  limit: number = 20,
   cursor?: string
 ): Promise<({ user: PublicUser } & Message)[]> {
   try {

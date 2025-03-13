@@ -149,7 +149,7 @@ describe("removeUserFromChat(userId: string, chatId: string): Promise<ChatMember
   }
 });
 
-describe("getChatMembersByUser(userId: string): Promise<ChatMember[]>", () => {
+describe("findChatMembersByUser(userId: string): Promise<ChatMember[]>", () => {
   it("should return a ChatMember successfully", findSuccessful);
   it("should return empty array if no ChatMember exists", noChatMembersFound);
   it("should return empty array if userId is empty", userIdEmpty);
@@ -198,7 +198,7 @@ describe("getChatMembersByUser(userId: string): Promise<ChatMember[]>", () => {
   }
 });
 
-describe("getChatMembersByChat(chatId: string): Promise<ChatMember[] | null>", () => {
+describe("findChatMembersByChat(chatId: string): Promise<ChatMember[] | null>", () => {
   it("should return ChatMembers successfully", findSuccessful);
   it("should return empty array if no ChatMember exists", noChatMembersFound);
   it("should return empty array if chatId is empty", chatIdEmpty);
@@ -247,7 +247,7 @@ describe("getChatMembersByChat(chatId: string): Promise<ChatMember[] | null>", (
   }
 });
 
-describe("getChatMember(userId: string, chatId: string): Promise<ChatMember | null>", () => {
+describe("findChatMember(userId: string, chatId: string): Promise<ChatMember | null>", () => {
   it("should return a ChatMember successfully", findSuccessful);
   it("should return null if no ChatMember exists", noChatMemberFound);
   it("should return null if userId is empty", userIdEmpty);

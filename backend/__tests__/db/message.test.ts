@@ -1,6 +1,6 @@
 import { Message } from "@prisma/client";
 import prismaMock from "../_setup/prismaMock";
-import { createMessage } from "../../src/db/message";
+import { createMessage, findChatMessages } from "@/db/message";
 
 const mockMessage: Message = {
   id: "uuid",
@@ -9,6 +9,79 @@ const mockMessage: Message = {
   content: "Hello, World!",
   timeStamp: new Date(),
 };
+
+const mockChatMessages: Awaited<ReturnType<typeof findChatMessages>> = [
+  {
+    ...mockMessage,
+    user: {
+      id: "user-123",
+      username: "user123",
+    },
+  },
+];
+
+describe("findChatMessages(chatId: string, limit: number, cursor?: string): Promise<({ user: PublicUser } & Message)[]>", () => {
+  it("should find chat messages successfully", findSuccessful);
+  it("should return an empty array if chatId is empty", chatIdEmpty);
+  it("should return an empty array if limit is invalid (0)", limitZero);
+  it("should return an empty array if limit is invalid (-2)", limitNegativeTwo);
+  it("should return an empty array if prisma error occurs", prismaError);
+
+  async function findSuccessful() {
+    prismaMock.message.findMany.mockResolvedValue(mockChatMessages);
+
+    const result = await findChatMessages("chat-123", 10);
+
+    expect(result).toEqual(mockChatMessages);
+    expect(prismaMock.message.findMany).toHaveBeenCalledWith({
+      where: {
+        chatId: "chat-123",
+      },
+      orderBy: {
+        timeStamp: "desc",
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+            id: true,
+          },
+        },
+      },
+      take: 10,
+    });
+  }
+
+  async function chatIdEmpty() {
+    const result = await findChatMessages("", 10);
+
+    expect(result).toEqual([]);
+    expect(prismaMock.message.findMany).not.toHaveBeenCalled();
+  }
+
+  async function limitZero() {
+    const result = await findChatMessages("chat-123", 0);
+
+    expect(result).toEqual([]);
+    expect(prismaMock.message.findMany).not.toHaveBeenCalled();
+  }
+
+  async function limitNegativeTwo() {
+    const result = await findChatMessages("chat-123", -2);
+
+    expect(result).toEqual([]);
+    expect(prismaMock.message.findMany).not.toHaveBeenCalled();
+  }
+
+  async function prismaError() {
+    prismaMock.message.findMany.mockRejectedValue(new Error("Database error"));
+
+    const result = await findChatMessages("chat-123", 10);
+
+    expect(result).toEqual([]);
+    expect(prismaMock.message.findMany).toHaveBeenCalled();
+  }
+});
 
 describe("createMessage(chatId: string, userId: string, content: string): Promise<Message | null>", () => {
   it("should create a Message successfully", createSuccessful);

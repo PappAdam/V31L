@@ -9,7 +9,7 @@ import { createMessage, findChatMessages } from "../db/message";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import ServerPackageSender from "./server";
-import { getPublicChatsWithMessages } from "@/db/public";
+import { getPublicChats } from "@/db/public";
 import { findUserById } from "@/db/user";
 
 // Nothing here needs validation, since the package has been validated already
@@ -95,7 +95,7 @@ async function processBasedOnHeader(
       return true;
 
     case "GetChats":
-      const chats = await getPublicChatsWithMessages(
+      const chats = await getPublicChats(
         client.user.id,
         incoming.chatCount,
         incoming.messageCount

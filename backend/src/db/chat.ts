@@ -1,4 +1,4 @@
-import { Chat } from "@prisma/client";
+import { Chat, Message } from "@prisma/client";
 import prisma from "./_db";
 
 /**
@@ -89,31 +89,21 @@ export async function deleteChat(chatId: string): Promise<Chat | null> {
  * Finds all chats that a user is a member of, sorted by the date of the last message.
  *
  * @param {string} userId - The ID of the user whose chats are to be retrieved.
- * @returns {Promise<
- *   ({
- *     lastMessage: {
- *       id: string;
- *       userId: string;
- *       chatId: string;
- *       timeStamp: Date;
- *       content: string;
- *     } | null;
- *   } & { name: string; id: string; lastMessageId: string | null })[]
- * >} A promise that resolves to an array of chat objects, including the last message.
+ * @returns {Promise<Chat[]>} Array of chats the user is a member of, sorted by the date of the last message.
  */
 export async function findChatsByUser(
   userId: string,
-  limit?: number,
+  limit: number = -1,
   cursor?: string
-) {
+): Promise<Chat[]> {
   try {
     if (!userId) {
       console.warn("findChatsByUser called with an empty userId");
       return [];
     }
 
-    if (limit && limit < 0 && limit !== -1) {
-      console.warn("Invalid input");
+    if (limit <= 0 && limit !== -1) {
+      console.warn("Invalid limit value: ", limit);
       return [];
     }
 
@@ -125,23 +115,12 @@ export async function findChatsByUser(
           },
         },
       },
-      include: {
-        lastMessage: {
-          include: {
-            user: {
-              select: {
-                username: true,
-              },
-            },
-          },
-        },
-      },
       orderBy: {
         lastMessage: {
-          timeStamp: "desc", // Order by the last message timestamp in descending order (newest first)
+          timeStamp: "desc",
         },
       },
-      ...(limit && limit > 0 ? { take: limit } : {}),
+      ...(limit > 0 ? { take: limit } : {}),
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     });
   } catch (error) {

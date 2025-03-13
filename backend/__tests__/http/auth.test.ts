@@ -78,7 +78,7 @@ describe(`POST ${registerRoute}`, () => {
       .send({ username: user.username, password: user.password });
 
     expect(response.status).toBe(201);
-    expect(response.body).toEqual(successResponse(token));
+    expect(response.body).toEqual(successResponse(token, user));
     expect(prismaMock.user.create).toHaveBeenCalled();
     expect(jwt.sign).toHaveBeenCalled();
   }
@@ -137,7 +137,7 @@ describe(`POST ${loginRoute}`, () => {
       .send({ username: user.username, password: user.password });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(successResponse(token));
+    expect(response.body).toEqual(successResponse(token, user));
     expect(prismaMock.user.findUnique).toHaveBeenCalled();
     expect(bcrypt.compare).toHaveBeenCalled();
     expect(jwt.sign).toHaveBeenCalled();
@@ -196,6 +196,6 @@ describe(`POST ${refreshRoute}`, () => {
       .set("Authorization", "Bearer " + token)
       .send({ username: user.username, password: user.password });
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(successResponse(newToken));
+    expect(response.body).toEqual(successResponse(newToken, user));
   }
 });
