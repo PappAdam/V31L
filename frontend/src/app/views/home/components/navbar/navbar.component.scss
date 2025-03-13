@@ -1,0 +1,20 @@
+@use "./../../../../../styles/styles.scss" as *;
+
+mat-icon {
+  color: $mat-sys-inverse-surface;
+}
+
+.navbar-wrapper {
+  display: flex;
+  height: 80px;
+  padding: 12px 12px 16px 12px;
+  gap: $mat-sys-spacing-md;
+  background-color: $mat-sys-surface-container;
+
+  .option-wrapper {
+    width: 64px;
+    height: fit-content;
+    display: flex;
+    gap: $mat-sys-spacing-base;
+  }
+}
