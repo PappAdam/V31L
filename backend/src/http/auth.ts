@@ -41,7 +41,7 @@ export default authRouter;
  * {@link validateRequiredFields} middleware runs before this handler, no validation needed
  */
 async function registerUser(req: Request, res: Response) {
-  const { username, password } = req.body;
+  const { username, password, mfaEnabled } = req.body;
 
   try {
     const existingUser = await findUserByName(username);
@@ -51,7 +51,7 @@ async function registerUser(req: Request, res: Response) {
       return;
     }
 
-    const newUser = await createUser(username, password);
+    const newUser = await createUser(username, password, mfaEnabled);
     if (!newUser) {
       throw new Error("Error creating user in database");
     }

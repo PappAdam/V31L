@@ -17,6 +17,7 @@ const user = {
   id: "id-123",
   username: "user-123",
   password: "password-123",
+  authKey: "key-123",
 };
 const token = "mocked-token";
 const expiredJwtPayload = {

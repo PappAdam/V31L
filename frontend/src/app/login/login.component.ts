@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 @Component({
@@ -20,6 +21,7 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
     MatInputModule,
     MatIconModule,
     MatButtonModule,
+    MatCheckboxModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -39,22 +41,17 @@ export class LoginComponent {
       // Ensures at least one uppercase letter, one lowercase letter, and one digit
     ]),
   });
+
+  mfaEnabled = signal(false);
+  toggleMfaEnabled() {
+    this.mfaEnabled.update((value) => !value);
+  }
+
   errorMessage: string = '';
   showPassord = false;
   signIn: boolean = true;
 
   constructor(private authService: AuthService, private router: Router) {}
-
-  // If a token is stored in localstorage, refresh it, navigate to frontpage if the refresh was successful
-  ngOnInit() {
-    if (this.authService.user) {
-      this.authService.refreshToken().then((token) => {
-        if (token) {
-          this.router.navigate(['../']);
-        }
-      });
-    }
-  }
 
   get promptText() {
     return this.signIn ? 'Sign In' : 'Sign Up';
@@ -75,7 +72,8 @@ export class LoginComponent {
     const response = await this.authService.authorize(
       username,
       password,
-      authRoute
+      authRoute,
+      this.mfaEnabled()
     );
 
     if (response.result == 'Success') {

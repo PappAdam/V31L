@@ -11,6 +11,7 @@ const mockUser: User = {
   id: "id-123",
   username: "name-123",
   password: "pass-123",
+  authKey: "key-123",
 };
 
 describe("createUser(username: string, password: string): Promise<User | null>", () => {
@@ -31,32 +32,39 @@ describe("createUser(username: string, password: string): Promise<User | null>",
       id: mockUser.id,
       username: mockUser.username,
       password: "hashedPassword",
+      authKey: null,
     });
 
-    const result = await createUser(mockUser.username, mockUser.password);
+    const result = await createUser(
+      mockUser.username,
+      mockUser.password,
+      false
+    );
 
     expect(result).toEqual({
       id: mockUser.id,
       username: mockUser.username,
       password: "hashedPassword",
+      authKey: null,
     });
     expect(mockHash).toHaveBeenCalledWith(mockUser.password, 10);
     expect(prismaMock.user.create).toHaveBeenCalledWith({
       data: {
         username: mockUser.username,
         password: "hashedPassword",
+        authKey: null,
       },
     });
   }
 
   async function usernameEmpty() {
-    const result = await createUser("", mockUser.password);
+    const result = await createUser("", mockUser.password, false);
     expect(result).toBeNull();
     expect(prismaMock.user.create).not.toHaveBeenCalled();
   }
 
   async function passwordEmpty() {
-    const result = await createUser(mockUser.username, "");
+    const result = await createUser(mockUser.username, "", false);
     expect(result).toBeNull();
     expect(prismaMock.user.create).not.toHaveBeenCalled();
   }
@@ -64,13 +72,18 @@ describe("createUser(username: string, password: string): Promise<User | null>",
   async function prismaError() {
     prismaMock.user.create.mockRejectedValue(new Error("Database error"));
 
-    const result = await createUser(mockUser.username, mockUser.password);
+    const result = await createUser(
+      mockUser.username,
+      mockUser.password,
+      false
+    );
 
     expect(result).toBeNull();
     expect(prismaMock.user.create).toHaveBeenCalledWith({
       data: {
         username: mockUser.username,
         password: "hashedPassword",
+        authKey: null,
       },
     });
   }

@@ -40,6 +40,7 @@ export class AuthService {
    * @param {string} username - The username of the user
    * @param {string} password - The password of the user
    * @param {'login' | 'register'} authUrlPath - The authentication endpoint to use. Must be either 'login' or 'register'
+   * @param {boolean} mfaEnabled - Whether 2FA codes should be generated for the account. Only works when `authUrlPath` is set to `register`
    * @returns {Promise<AuthResponse>} A promise that resolves to the authentication response.
    * - If the request is successful, it returns an {@link AuthSuccessResponse}
    * - If the request fails, it returns an {@link AuthErrorResponse}
@@ -47,9 +48,10 @@ export class AuthService {
   async authorize(
     username: string,
     password: string,
-    authUrlPath: 'login' | 'register'
+    authUrlPath: 'login' | 'register',
+    mfaEnabled: boolean
   ): Promise<AuthResponse> {
-    const body = { username, password };
+    const body = { username, password, mfaEnabled };
     try {
       const response = await lastValueFrom(
         this.http.post<AuthSuccessResponse>(this.baseUrl + authUrlPath, body)
@@ -87,7 +89,7 @@ export class AuthService {
       return null;
     }
   }
-  
+
   private saveUser(user: StoredUser): void {
     this._user$.next(user);
     localStorage.setItem('user', JSON.stringify(user));
