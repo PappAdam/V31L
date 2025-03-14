@@ -4,19 +4,17 @@ import { DeviceInfo } from '@capacitor/device';
 import { HeaderComponent } from './components/header/header.component';
 import { MessageComponent } from './components/message/message.component';
 import { DetailsComponent } from './components/details/details.component';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormField } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-chat',
   imports: [
     HeaderComponent,
+    MatButtonModule,
     MessageComponent,
     DetailsComponent,
-    MatInputModule,
-    MatFormField,
-    MatFormFieldModule,
+    MatIconModule,
   ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',

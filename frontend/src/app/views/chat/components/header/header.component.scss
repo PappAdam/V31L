@@ -1,7 +1,29 @@
 @use "../../../../../styles/styles.scss" as *;
 
 .header-wrapper {
-  height: 80px;
+  height: $mat-sys-component-height;
+  border-radius: $mat-sys-corner-medium;
   background-color: $mat-sys-surface-container-high;
   width: 100%;
+  display: flex;
+  align-items: center;
+  padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
+  gap: $mat-sys-spacing-sm;
+  color: $mat-sys-on-surface;
+
+  .title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: $mat-sys-spacing-sm;
+    width: 100%;
+    .image {
+      background-color: $mat-sys-primary;
+      width: $mat-sys-img-profile-large;
+      aspect-ratio: 1/1;
+      border-radius: $mat-sys-corner-full;
+    }
+    .title {
+      font-size: $mat-sys-title-large-size;
+    }
+  }
 }
