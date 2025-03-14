@@ -1,0 +1,7 @@
+@use "../../../../../styles/styles.scss" as *;
+
+.header-wrapper {
+  height: 80px;
+  background-color: $mat-sys-surface-container-high;
+  width: 100%;
+}

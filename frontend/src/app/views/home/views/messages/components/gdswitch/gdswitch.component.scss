@@ -1,0 +1,45 @@
+@use "../../../../../../../styles/styles.scss" as *;
+
+.gdswitch-wrapper {
+  width: 100%;
+  height: 65px;
+  background-color: $mat-sys-surface-container-highest;
+  border-radius: $mat-sys-corner-medium $mat-sys-corner-medium 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: $mat-sys-spacing-sm;
+
+  .placeholder1 {
+    background-color: $mat-sys-surface-dim;
+    border-radius: $mat-sys-corner-full;
+    width: 60px;
+    aspect-ratio: 1/1;
+  }
+
+  .placeholder2 {
+    background-color: $mat-sys-surface-dim;
+    border-radius: $mat-sys-corner-full;
+    width: 60px;
+    aspect-ratio: 1/1;
+  }
+
+  .switch-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .switch-inner-wrapper {
+      display: flex;
+      width: fit-content;
+      align-items: center;
+      justify-content: center;
+      color: $mat-sys-on-surface;
+      border-radius: $mat-sys-corner-full;
+      background-color: $mat-sys-surface-container-high;
+      padding: $mat-sys-spacing-md $mat-sys-spacing-xl;
+      gap: $mat-sys-spacing-xl;
+    }
+  }
+}

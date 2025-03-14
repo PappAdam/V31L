@@ -1,13 +1,16 @@
 <div class="navbar-wrapper">
-  <div class="option-wrapper">
+  @for (tab of tabs; track $index) {
+  <div
+    class="option-wrapper"
+    (click)="selectTab(tab)"
+    [ngClass]="{ active: activeTab === tab }"
+  >
     <div class="option-icon">
-      <mat-icon
-        aria-hidden="false"
-        aria-label="Example home icon"
-        fontIcon="home"
-        color="white"
-      ></mat-icon>
+      <mat-icon fontIcon="{{ tab }}" class="nav-icon"></mat-icon>
     </div>
-    <div class="option-label"></div>
+    <div class="option-label">
+      {{ tab }}
+    </div>
   </div>
+  }
 </div>

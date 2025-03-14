@@ -2,7 +2,7 @@
 
 @use "@angular/material" as mat;
 @import "./mat-map.scss";
-@import "./themes/t2_theme-colors";
+@import "./themes/t1_theme-colors";
 
 html {
   @include mat.theme(

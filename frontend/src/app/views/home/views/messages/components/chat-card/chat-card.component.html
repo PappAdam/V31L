@@ -1,1 +1,19 @@
-<p>chat-card works!</p>
+<div class="card-wrapper">
+  <div class="image-wrapper"><img src="" alt="" /></div>
+  <div class="text-wrapper">
+    <div class="title-wrapper">
+      <p class="group_title">{{ name }}</p>
+    </div>
+    <div class="last-msg-wrapper">
+      <p class="last_msg">{{ last_msg }}</p>
+    </div>
+  </div>
+  <div class="info-wrapper">
+    <div class="status-wrapper" [attr.data-status]="status">
+      <p class="status">{{ status }}</p>
+    </div>
+    <div class="unread-wrapper" [attr.data-unread]="unread">
+      <div class="unread">{{ unread }}</div>
+    </div>
+  </div>
+</div>

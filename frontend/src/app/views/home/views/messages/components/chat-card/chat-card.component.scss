@@ -1,0 +1,110 @@
+@use "../../../../../../../styles/styles.scss" as *;
+
+.card-wrapper {
+  background-color: $mat-sys-surface-container-highest;
+  border-radius: $mat-sys-corner-medium;
+  color: $mat-sys-on-surface;
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  gap: $mat-sys-spacing-base;
+  padding: $mat-sys-spacing-sm;
+
+  .image-wrapper {
+    height: $mat-sys-btn-height-md;
+    background-color: $mat-sys-surface-variant;
+    border-radius: $mat-sys-corner-full;
+    aspect-ratio: 1/1;
+  }
+
+  .text-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    .title-wrapper {
+      height: 50%;
+      font: $mat-sys-title-medium-font;
+      font-size: $mat-sys-title-medium-size;
+      font-weight: $mat-sys-title-medium-weight;
+      line-height: $mat-sys-title-medium-line-height;
+      letter-spacing: $mat-sys-title-medium-tracking;
+    }
+
+    .last-msg-wrapper {
+      height: 50%;
+      font: $mat-sys-body-medium-font;
+      font-size: $mat-sys-body-medium-size;
+      font-weight: $mat-sys-body-medium-weight;
+      line-height: $mat-sys-body-medium-line-height;
+      letter-spacing: $mat-sys-body-medium-tracking;
+      display: flex;
+      align-items: end;
+    }
+  }
+
+  .info-wrapper {
+    height: 100%;
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: end;
+    gap: $mat-sys-spacing-sm;
+
+    .status-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: end;
+      height: $mat-sys-spacing-md;
+      visibility: hidden;
+
+      .status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: $mat-sys-spacing-base;
+        background-color: $mat-sys-primary-container;
+        height: 100%;
+        border-radius: $mat-sys-corner-extra-small;
+        font: $mat-sys-label-medium-font;
+        font-size: $mat-sys-label-medium-size;
+        font-weight: $mat-sys-label-medium-weight-prominent;
+        line-height: $mat-sys-label-medium-line-height;
+        letter-spacing: $mat-sys-label-medium-tracking;
+      }
+    }
+
+    .status-wrapper:not([data-status=""]) {
+      visibility: visible;
+    }
+
+    .unread-wrapper {
+      height: $mat-sys-spacing-md;
+      display: flex;
+      align-items: center;
+      justify-content: end;
+      visibility: hidden;
+
+      .unread {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: $mat-sys-primary-container;
+        height: 100%;
+        border-radius: $mat-sys-corner-full;
+        padding: $mat-sys-spacing-base;
+        aspect-ratio: 1/1;
+        font: $mat-sys-label-medium-font;
+        font-size: $mat-sys-label-medium-size;
+        font-weight: $mat-sys-label-medium-weight-prominent;
+        line-height: $mat-sys-label-medium-line-height;
+        letter-spacing: $mat-sys-label-medium-tracking;
+      }
+    }
+
+    .unread-wrapper:not([data-unread="0"]) {
+      visibility: visible;
+    }
+  }
+}

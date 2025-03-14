@@ -7,4 +7,8 @@
   flex-direction: column;
   padding: $mat-sys-spacing-sm;
   gap: $mat-sys-spacing-sm;
+
+  .tab-outlet {
+    height: 100%;
+  }
 }

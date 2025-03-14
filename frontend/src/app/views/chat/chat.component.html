@@ -1,1 +1,14 @@
-<p>chat works!</p>
+@if (this.platform?.platform == "web") {
+<div class="chat-wrapper">
+  <app-header></app-header>
+  <div class="messages-wrapper"></div>
+  <div class="input-wrapper">
+    <mat-form-field appearance="outline">
+      <mat-label>Outline form field</mat-label>
+      <input matInput placeholder="Placeholder" />
+      <mat-hint>Hint</mat-hint>
+    </mat-form-field>
+  </div>
+</div>
+
+} @else { "this is the mobile type stuff" }
