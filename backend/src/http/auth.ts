@@ -14,8 +14,11 @@ import {
   AuthResponse,
   AuthErrorResponse,
   AuthSuccessResponse,
+  AuthNextMfaSetupResponse,
+  nextSetupMfaResponse,
 } from "@common";
 import { User } from "@prisma/client";
+import authenticator, { generateTotpUri } from "authenticator";
 
 const authRouter = Router();
 authRouter.post(
@@ -56,6 +59,19 @@ async function registerUser(req: Request, res: Response) {
       throw new Error("Error creating user in database");
     }
 
+    if (mfaEnabled) {
+      const setupCode = generateTotpUri(
+        newUser.authKey!,
+        newUser.username,
+        "Veil",
+        "SHA1",
+        6,
+        30
+      );
+      res.json(nextSetupMfaResponse(setupCode));
+      return;
+    }
+
     const token = generateToken(newUser.id);
     res.status(201).json(successResponse(token, newUser));
   } catch (error) {
@@ -90,6 +106,11 @@ async function loginUser(req: Request, res: Response) {
     if (!isPasswordMatch) {
       res.status(400).json(invalidCredentialsResponse);
       return;
+    }
+
+    if (user.authKey) {
+      // TODO: Finish 2fa login.
+      console.error("Logging in with mfa not implemented.");
     }
 
     const token = generateToken(user.id);

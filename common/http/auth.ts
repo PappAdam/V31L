@@ -1,9 +1,26 @@
 import { PublicUser } from "../socket/public";
 
+export type AuthResponse = AuthSuccessResponse | AuthErrorResponse;
+
+export type AuthNextResponse =
+  | AuthNextMfaSetupResponse
+  | AuthNextMfaRequiredReponse;
+
 export type AuthSuccessResponse = {
   result: "Success";
   token: string;
 } & PublicUser;
+
+export type AuthNextMfaSetupResponse = {
+  result: "Next";
+  to: "Setup";
+  setupCode: string;
+};
+
+export type AuthNextMfaRequiredReponse = {
+  result: "Next";
+  to: "Verify";
+};
 
 export type AuthErrorResponse = {
   result: "Error";
@@ -16,9 +33,7 @@ export type AuthErrorResponse = {
     | "Invalid or expired token";
 };
 
-export type AuthResponse = AuthSuccessResponse | AuthErrorResponse;
-
-// All auth requests
+// Used in both auth requests
 export const successResponse = (
   token: string,
   user: PublicUser
@@ -31,18 +46,28 @@ export const successResponse = (
   };
 };
 
+export const nextSetupMfaResponse = (
+  setupCode: string
+): AuthNextMfaSetupResponse => {
+  return {
+    result: "Next",
+    to: "Setup",
+    setupCode,
+  };
+};
+
 export const serverErrorResponse: AuthErrorResponse = {
   result: "Error",
   message: "Server error",
 };
 
-// Login
+// Used in Login
 export const invalidCredentialsResponse: AuthErrorResponse = {
   result: "Error",
   message: "Invalid credentials",
 };
 
-// Register
+// Used in Register
 export const userExistsResponse: AuthErrorResponse = {
   result: "Error",
   message: "User with username already exists",
