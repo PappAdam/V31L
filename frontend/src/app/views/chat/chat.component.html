@@ -1,7 +1,19 @@
 @if (this.platform?.platform == "web") {
 <div class="chat-wrapper">
   <app-header></app-header>
-  <div class="messages-wrapper"></div>
+  <div class="messages-wrapper">
+    <app-message msg="asdasd" first="true"></app-message>
+    <app-message msg="asdasd"></app-message>
+    <app-message
+      msg="lorem ipszum CoDASDKASIDJ OASJDOASJDOASDOIAJSODI AJSDOI JASD OIAJS DOIASJ D"
+    ></app-message>
+    <app-message msg="asdasd" first="true" sender="Igenjo"></app-message>
+    <app-message msg="asdasd" sender="igenjo"></app-message>
+    <app-message
+      msg="lorem ipszum CoDASDKASIDJ OASJDOASJDOASDOIAJSODI AJSDOI JASD OIAJS DOIASJ D"
+      sender="igenjo"
+    ></app-message>
+  </div>
   <div class="input-wrapper">
     <textarea name="message" class="text-input"></textarea>
     <button class="message-button">

@@ -1,7 +1,7 @@
 @use "../../../../../../../styles/styles.scss" as *;
 
 .card-wrapper {
-  background-color: $mat-sys-surface-container-highest;
+  background-color: $mat-sys-surface-container-high;
   border-radius: $mat-sys-corner-medium;
   color: $mat-sys-on-surface;
   width: 100%;
@@ -9,9 +9,10 @@
   display: flex;
   gap: $mat-sys-spacing-base;
   padding: $mat-sys-spacing-sm;
+  align-items: center;
 
   .image-wrapper {
-    height: $mat-sys-btn-height-md;
+    height: $mat-sys-img-profile-medium;
     background-color: $mat-sys-surface-variant;
     border-radius: $mat-sys-corner-full;
     aspect-ratio: 1/1;

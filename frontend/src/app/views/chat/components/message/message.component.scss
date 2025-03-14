@@ -16,7 +16,7 @@
   gap: calc(#{$mat-sys-spacing-sm} / 2);
   padding: calc(#{$mat-sys-spacing-sm} / 4) $mat-sys-spacing-sm 0
     $mat-sys-spacing-sm;
-  background-color: $mat-sys-surface-container-lowest;
+  color: $mat-sys-on-surface;
 
   .message-bubble-wrapper:not([data-sender=""]) {
     display: flex;
@@ -54,7 +54,7 @@
       border-radius: $mat-sys-corner-large;
       padding: $mat-sys-spacing-sm calc(#{$mat-sys-spacing-sm} * 1.5);
       max-width: 580px;
-      min-height: $mat-sys-btn-height-sm;
+      min-height: $mat-sys-img-profile-medium;
       font: $mat-sys-body-medium-font;
       font-size: $mat-sys-body-medium-size;
       line-height: $mat-sys-body-medium-line-height;
@@ -83,13 +83,13 @@
       border-radius: $mat-sys-corner-full;
       background-color: $mat-sys-surface-variant;
       height: 0;
-      width: $mat-sys-btn-height-sm;
+      width: $mat-sys-img-profile-medium;
     }
 
     .profile-image[data-first="true"] {
       visibility: visible;
-      width: $mat-sys-btn-height-sm;
-      height: $mat-sys-btn-height-sm;
+      width: $mat-sys-img-profile-medium;
+      height: $mat-sys-img-profile-medium;
     }
   }
 }
