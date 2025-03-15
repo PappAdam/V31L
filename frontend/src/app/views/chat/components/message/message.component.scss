@@ -63,6 +63,7 @@
       height: fit-content;
       flex-shrink: 1;
       word-wrap: break-word;
+      min-width: none;
 
       .message {
         word-wrap: wrap;
