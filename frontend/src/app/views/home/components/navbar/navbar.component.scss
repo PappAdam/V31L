@@ -2,6 +2,7 @@
 
 .navbar-wrapper {
   display: flex;
+  min-width: 0;
   padding: 8px 8px 10px 8px;
   gap: $mat-sys-spacing-md;
   background-color: $mat-sys-surface-container;
@@ -12,6 +13,7 @@
 
   .option-wrapper {
     display: flex;
+    min-width: 0;
     flex-direction: column;
     align-items: center;
     gap: $mat-sys-spacing-base;
@@ -21,6 +23,7 @@
       width: $mat-sys-component-height;
       padding: 1.5px;
       display: flex;
+      min-width: 0;
       align-items: center;
       justify-content: center;
 

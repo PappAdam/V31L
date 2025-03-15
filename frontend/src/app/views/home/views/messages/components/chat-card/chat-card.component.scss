@@ -7,6 +7,7 @@
   width: 100%;
   height: fit-content;
   display: flex;
+  min-width: 0;
   gap: $mat-sys-spacing-base;
   padding: $mat-sys-spacing-sm;
   align-items: center;
@@ -20,6 +21,7 @@
 
   .text-wrapper {
     display: flex;
+    min-width: 0;
     flex-direction: column;
     width: 100%;
 
@@ -40,6 +42,7 @@
       line-height: $mat-sys-body-medium-line-height;
       letter-spacing: $mat-sys-body-medium-tracking;
       display: flex;
+      min-width: 0;
       align-items: end;
     }
   }
@@ -48,6 +51,7 @@
     height: 100%;
     width: 25%;
     display: flex;
+    min-width: 0;
     flex-direction: column;
     justify-content: space-between;
     align-items: end;
@@ -55,6 +59,7 @@
 
     .status-wrapper {
       display: flex;
+      min-width: 0;
       align-items: center;
       justify-content: end;
       height: $mat-sys-spacing-md;
@@ -62,6 +67,7 @@
 
       .status {
         display: flex;
+        min-width: 0;
         align-items: center;
         justify-content: center;
         padding: $mat-sys-spacing-base;
@@ -83,12 +89,14 @@
     .unread-wrapper {
       height: $mat-sys-spacing-md;
       display: flex;
+      min-width: 0;
       align-items: center;
       justify-content: end;
       visibility: hidden;
 
       .unread {
         display: flex;
+        min-width: 0;
         justify-content: center;
         align-items: center;
         background-color: $mat-sys-primary-container;

@@ -9,6 +9,7 @@
 
   .chat-card-wrapper {
     display: flex;
+    min-width: 0;
     flex-direction: column;
     padding-top: $mat-sys-spacing-sm;
     gap: $mat-sys-spacing-sm;

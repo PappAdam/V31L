@@ -27,12 +27,13 @@
     display: flex;
     flex-direction: column-reverse;
     min-width: 0;
+    justify-content: flex-start;
 
     .profile-name-wrapper {
-      padding-left: $mat-sys-spacing-sm;
+      padding-left: $mat-sys-spacing-md;
       visibility: hidden;
       font: $mat-sys-label-large-font;
-      font-size: $mat-sys-label-large-size;
+      font-size: $mat-sys-label-medium-size;
       font-weight: $mat-sys-label-large-weight;
       line-height: $mat-sys-label-large-line-height;
       letter-spacing: $mat-sys-label-large-tracking;
@@ -40,7 +41,7 @@
 
       &[data-first="true"]:not([data-sender=""]) {
         visibility: visible;
-        height: $mat-sys-label-large-size;
+        height: calc($mat-sys-label-medium-size * 1.4);
       }
     }
 
@@ -52,7 +53,7 @@
     .message-bubble {
       background-color: $mat-sys-surface-container-high;
       border-radius: $mat-sys-corner-large;
-      padding: $mat-sys-spacing-sm calc(#{$mat-sys-spacing-sm} * 1.5);
+      padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
       max-width: 580px;
       min-height: $mat-sys-img-profile-medium;
       font: $mat-sys-body-medium-font;
@@ -61,6 +62,7 @@
       letter-spacing: $mat-sys-body-medium-tracking;
       height: fit-content;
       flex-shrink: 1;
+      word-wrap: break-word;
 
       .message {
         word-wrap: wrap;
@@ -91,5 +93,9 @@
       width: $mat-sys-img-profile-medium;
       height: $mat-sys-img-profile-medium;
     }
+  }
+
+  .message-profile-wrapper[data-sender=""][data-first="true"] {
+    margin-top: 0px;
   }
 }

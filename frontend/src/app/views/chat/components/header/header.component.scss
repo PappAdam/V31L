@@ -6,13 +6,17 @@
   background-color: $mat-sys-surface-container;
   width: 100%;
   display: flex;
+  min-width: 0;
   align-items: center;
   padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
   gap: $mat-sys-spacing-sm;
   color: $mat-sys-on-surface;
+  min-width: 0;
 
   .title-wrapper {
+    min-width: 0;
     display: flex;
+    min-width: 0;
     align-items: center;
     gap: $mat-sys-spacing-sm;
     width: 100%;
