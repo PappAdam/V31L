@@ -1,7 +1,7 @@
 @if (this.platform?.platform == "web") {
 <div class="chat-outer-wrapper">
   <div class="chat-wrapper">
-    <app-header></app-header>
+    <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
     <div class="messages-wrapper">
       <app-message
         msg="asdasdfasdfasd;lfkja;sdklfja;sdlfkja;sdklfja;sdlfkja;sdklfjaichkaj;sdklfja;sdlfkja;sdlkfjqpwoeirupqoweiurpqwoeiruqpwoerjl;sdkfja;askdlfja;lsdkfja;sdlfkja;sdflkja;sdlfkja;sdflkajsd;fkljasd;flkajsd;fljasdfkjqweoiruqpowieruqpowiejfpawosdklfnmopfivnsdklfjgnbldkfjgdbnmlcvjkmbndlcjkvbmjnxlv,mh jbnxlckvbmnxlcvm,nbx,mcvnb.xm,cvnhbx.,cmfghnblkxj,chvbnxkcj,vbhnxkcvjhnbdxcklvj,ghmnxckvghj,nxdclfjgvhjbnxlfcj,hmgnslxcjkfvhnx.klfj,ghnxkcfjg,nbxkcjlvh,gbnxckfjlh,gxcjklfgn,kxchjvnxcgjvbnjkjnklhjkhjklhjklnjnm,lkhjnljnl,jnl,jnm,jnkml,sdfgjklsfgjnklnml,nml,nml,nml,nml,sdfghjklsdfghjklsdfghjkldfgshjklsdfghjklsdfghjklsdfghjklsdfgklhjsdfghjklsdfghjklsdfghjklsdfgklhjfasdl;jkas;slkdfjjjjjsldkfjapsldkfjpqwoeiru;lsdkfja;sdluf"
@@ -92,7 +92,7 @@
       </button>
     </div>
   </div>
-  <app-details></app-details>
+  <app-details [state]="detailsState"></app-details>
 </div>
 
 } @else { "this is the mobile type stuff" }

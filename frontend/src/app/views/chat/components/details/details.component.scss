@@ -1,8 +1,16 @@
 @use "../../../../../styles/styles.scss" as *;
 
 .details-wrapper {
-  width: 340px;
+  width: $mat-sys-side-width;
   height: 100%;
   background-color: $mat-sys-surface-container;
   border-radius: $mat-sys-corner-medium;
+  margin-left: $mat-sys-spacing-sm;
+  transition: all 0.4s ease-in-out;
+}
+
+.details-wrapper[data-state="closed"] {
+  width: 0px;
+  transition: all 0.4 ease-in-out;
+  margin-left: 0px;
 }

@@ -25,7 +25,12 @@ export class ChatComponent {
   platform: DeviceInfo | null = null;
   platformService: PlatformService = inject(PlatformService);
   color = '#ffffff30';
+  detailsState = 'closed';
   constructor() {
     this.platform = this.platformService.info;
+  }
+
+  updateDetailsState(event: string) {
+    this.detailsState = event;
   }
 }
