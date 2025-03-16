@@ -1,5 +1,12 @@
 @use "../../../../../styles/styles.scss" as *;
 
+.details-wrapper[data-state="closed"] {
+  width: 0px;
+  transition: all 0.4 ease-in-out;
+  margin-left: 0px;
+  overflow: hidden;
+}
+
 .details-wrapper {
   width: $mat-sys-side-width;
   height: 100%;
@@ -7,10 +14,65 @@
   border-radius: $mat-sys-corner-medium;
   margin-left: $mat-sys-spacing-sm;
   transition: all 0.4s ease-in-out;
-}
+  overflow: scroll;
+  flex-shrink: 0;
+  &.details-wrapper::-webkit-scrollbar {
+    display: none;
+  }
 
-.details-wrapper[data-state="closed"] {
-  width: 0px;
-  transition: all 0.4 ease-in-out;
-  margin-left: 0px;
+  .inner-wrapper {
+    width: 100%;
+    min-width: calc($mat-sys-side-width - 2 * $mat-sys-spacing-md);
+    height: 100%;
+    display: flex;
+    gap: $mat-sys-spacing-sm;
+    padding: $mat-sys-spacing-sm;
+    flex-direction: column;
+    flex-shrink: 0;
+
+    .group-header-wrapper {
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-start;
+      flex-direction: column;
+
+      .image-wrapper {
+        width: 100%;
+        height: calc(2.5 * $mat-sys-img-profile-extra-large);
+        background-color: $mat-sys-primary-container;
+        border-radius: $mat-sys-corner-small $mat-sys-corner-small 0 0;
+      }
+      .title-wrapper {
+        color: $mat-sys-on-surface;
+        height: fit-content;
+        width: 100%;
+        background-color: $mat-sys-surface-container-high;
+        padding: $mat-sys-spacing-sm;
+        border-radius: 0 0 $mat-sys-corner-small $mat-sys-corner-small;
+      }
+    }
+
+    .group-action-wrapper {
+      width: 100%;
+      border-radius: $mat-sys-corner-small;
+      background-color: $mat-sys-surface-container-high;
+    }
+
+    .group-members-wrapper {
+      width: 100%;
+      border-radius: $mat-sys-corner-small;
+      background-color: $mat-sys-surface-container-high;
+      display: flex;
+      gap: $mat-sys-spacing-sm;
+      flex-direction: column;
+      padding: $mat-sys-spacing-sm;
+      height: 100%;
+      overflow: scroll;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  }
 }
