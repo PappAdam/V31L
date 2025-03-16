@@ -61,8 +61,10 @@
       background-color: $mat-sys-primary;
       color: $mat-sys-on-primary;
       border-radius: $mat-sys-corner-medium;
-      aspect-ratio: 1/1;
-      height: 100%;
+      width: $mat-sys-component-height;
+      height: $mat-sys-component-height;
+      flex-shrink: 0;
+
       cursor: pointer;
     }
 
