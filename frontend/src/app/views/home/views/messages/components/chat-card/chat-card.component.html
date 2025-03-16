@@ -1,11 +1,15 @@
-<div class="card-wrapper">
+<div
+  class="card-wrapper"
+  [attr.data-unread]="unread"
+  [attr.data-selected]="selected"
+>
   <div class="image-wrapper"><img src="" alt="" /></div>
   <div class="text-wrapper">
     <div class="title-wrapper">
-      <p class="group_title">{{ name }}</p>
+      <p class="group_title" [attr.data-unread]="unread">{{ name }}</p>
     </div>
     <div class="last-msg-wrapper">
-      <p class="last_msg">{{ last_msg }}</p>
+      <p class="last-msg" [attr.data-unread]="unread">{{ last_msg }}</p>
     </div>
   </div>
   <div class="info-wrapper">
