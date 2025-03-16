@@ -4,13 +4,17 @@ import {
   PublicMessage,
   ServerChatsPackage,
 } from "@common";
-import { findChatMembersByChat } from "../db/chatMember";
+import { addUserToChat, findChatMembersByChat } from "../db/chatMember";
 import { createMessage, findChatMessages } from "../db/message";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import ServerPackageSender from "./server";
-import { getPublicChats } from "@/db/public";
+import { getPublicChatsWithMessages } from "@/db/public";
 import { findUserById } from "@/db/user";
+import {
+  InvitationDescription,
+  validateChatJoinRequest,
+} from "../encryption/invitation";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
@@ -95,7 +99,7 @@ async function processBasedOnHeader(
       return true;
 
     case "GetChats":
-      const chats = await getPublicChats(
+      const chats = await getPublicChatsWithMessages(
         client.user.id,
         incoming.chatCount,
         incoming.messageCount
@@ -126,10 +130,43 @@ async function processBasedOnHeader(
         id: incoming.chatId,
         messages,
       };
+
       ServerPackageSender.send([client.ws], {
         header: "Chats",
         chats: [responsePayload],
       });
+
+      return true;
+
+    case "CreateInvitation":
+      const newInv = new InvitationDescription(
+        incoming.key,
+        incoming.chatId,
+        60 * 1000
+      );
+
+      ServerPackageSender.send([client.ws], {
+        header: "CreateInvitationResponse",
+        encryptedID: newInv.hashInvitationId(),
+      });
+      return true;
+
+    case "JoinChat":
+      const invitation = validateChatJoinRequest(
+        incoming.invitationID,
+        incoming.key
+      );
+
+      if (!invitation) {
+        return false;
+      }
+
+      const chatMember = addUserToChat(client.user.id, invitation.chatId);
+
+      if (!chatMember) {
+        return false;
+      }
+
       return true;
 
     default:

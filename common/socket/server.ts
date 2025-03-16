@@ -3,7 +3,8 @@ import { PublicChat } from "./public";
 export type ServerPackage =
   | ServerErrorPackage
   | ServerChatsPackage
-  | ServerAcknowledgement;
+  | ServerAcknowledgement
+  | ServerCreateInvitationResponsePackage;
 
 export type ServerHeaderType = ServerPackage["header"];
 export type PackageForHeader<T extends ServerHeaderType> = Extract<
@@ -25,4 +26,9 @@ export type ServerChatsPackage = {
 export type ServerErrorPackage = {
   header: "Error";
   errorMessage: string;
+};
+
+export type ServerCreateInvitationResponsePackage = {
+  header: "CreateInvitationResponse";
+  encryptedID: string;
 };

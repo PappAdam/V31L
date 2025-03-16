@@ -55,10 +55,12 @@ export const missingFieldsResponse = (fields: string[]): AuthErrorResponse => {
     message: `Missing required fields: ${fields.join(", ")}`,
   };
 };
+
 export const invalidTokenResponse: AuthErrorResponse = {
   result: "Error",
   message: "Invalid or expired token",
 };
+
 export const noTokenProvidedResponse: AuthErrorResponse = {
   result: "Error",
   message: "No token provided",
