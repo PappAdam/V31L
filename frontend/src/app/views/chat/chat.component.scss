@@ -1,76 +1,82 @@
 @use "../../../styles/styles.scss" as *;
 @use "@angular/material" as mat;
-.chat-wrapper {
-  width: 100%;
+.chat-outer-wrapper {
   height: 100%;
   display: flex;
-  min-width: 0;
-  flex-direction: column;
+  flex-direction: row;
   gap: $mat-sys-spacing-sm;
-  flex-shrink: 0;
-  min-height: 0;
 
-  min-width: 0;
-  .messages-wrapper {
-    width: 100%;
+  .chat-wrapper {
     height: 100%;
-    background-color: $mat-sys-surface-container;
-    border-radius: $mat-sys-corner-medium;
-    overflow-y: scroll;
-    scroll-behavior: smooth;
-    padding-bottom: $mat-sys-spacing-sm;
-
-    -ms-overflow-style: none; // IE and Edge
-    &::-webkit-scrollbar {
-      display: none; // Chrome, Safari, Opera
-    }
-  }
-
-  .input-wrapper {
-    height: $mat-sys-component-height;
+    width: 100%;
     display: flex;
     min-width: 0;
-    align-items: center;
-    flex-shrink: 0;
+    flex-direction: column;
     gap: $mat-sys-spacing-sm;
+    min-height: 0;
 
     min-width: 0;
-    .text-input {
-      min-width: 0;
-      border-radius: $mat-sys-corner-medium;
-      resize: none;
+    .messages-wrapper {
       width: 100%;
       height: 100%;
-      outline: transparent;
-      font-family: "Roboto";
       background-color: $mat-sys-surface-container;
-      border: none;
-      color: $mat-sys-on-surface;
-      padding: $mat-sys-spacing-sm;
-      font-size: $mat-sys-body-medium;
-      scrollbar-width: none; // Firefox
-      -ms-overflow-style: none; // IE and Edge
+      border-radius: $mat-sys-corner-medium;
+      overflow-y: scroll;
+      scroll-behavior: smooth;
+      padding-bottom: $mat-sys-spacing-sm;
 
+      -ms-overflow-style: none; // IE and Edge
       &::-webkit-scrollbar {
         display: none; // Chrome, Safari, Opera
       }
     }
 
-    button {
-      border: none;
-      background-color: $mat-sys-primary;
-      color: $mat-sys-on-primary;
-      border-radius: $mat-sys-corner-medium;
-      width: $mat-sys-component-height;
+    .input-wrapper {
       height: $mat-sys-component-height;
+      display: flex;
+      min-width: 0;
+      align-items: center;
       flex-shrink: 0;
+      gap: $mat-sys-spacing-sm;
 
-      cursor: pointer;
-    }
+      min-width: 0;
+      .text-input {
+        min-width: 0;
+        border-radius: $mat-sys-corner-medium;
+        resize: none;
+        width: 100%;
+        height: 100%;
+        outline: transparent;
+        font-family: "Roboto";
+        background-color: $mat-sys-surface-container;
+        border: none;
+        color: $mat-sys-on-surface;
+        padding: $mat-sys-spacing-sm;
+        font-size: $mat-sys-body-medium;
+        scrollbar-width: none; // Firefox
+        -ms-overflow-style: none; // IE and Edge
 
-    button:disabled {
-      opacity: 0.2;
-      cursor: default;
+        &::-webkit-scrollbar {
+          display: none; // Chrome, Safari, Opera
+        }
+      }
+
+      button {
+        border: none;
+        background-color: $mat-sys-primary;
+        color: $mat-sys-on-primary;
+        border-radius: $mat-sys-corner-medium;
+        width: $mat-sys-component-height;
+        height: $mat-sys-component-height;
+        flex-shrink: 0;
+
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.2;
+        cursor: default;
+      }
     }
   }
 }

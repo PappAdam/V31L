@@ -32,7 +32,7 @@
 
   .image-wrapper {
     height: $mat-sys-img-profile-large;
-    background-color: $mat-sys-surface-variant;
+    background-color: $mat-sys-primary-container;
     border-radius: $mat-sys-corner-full;
     aspect-ratio: 1/1;
   }
@@ -133,7 +133,7 @@
         min-width: 0;
         justify-content: center;
         align-items: center;
-        background-color: $mat-sys-primary-container;
+        background-color: $mat-sys-secondary;
         height: 100%;
         border-radius: $mat-sys-corner-full;
         padding: $mat-sys-spacing-base;
@@ -142,6 +142,7 @@
         font-weight: $mat-sys-label-medium-weight-prominent;
         line-height: $mat-sys-label-medium-line-height;
         letter-spacing: $mat-sys-label-medium-tracking;
+        color: $mat-sys-on-secondary;
       }
     }
 

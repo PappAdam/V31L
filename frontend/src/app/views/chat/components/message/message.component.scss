@@ -51,7 +51,7 @@
     }
 
     .message-bubble {
-      background-color: $mat-sys-surface-container-high;
+      background-color: $mat-sys-surface-variant;
       border-radius: $mat-sys-corner-large;
       padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
       max-width: 580px;
@@ -67,7 +67,7 @@
 
       .message {
         word-wrap: wrap;
-        color: $mat-sys-on-surface;
+        color: $mat-sys-on-surface-variant;
       }
     }
   }
@@ -84,7 +84,7 @@
     .profile-image {
       visibility: hidden;
       border-radius: $mat-sys-corner-full;
-      background-color: $mat-sys-surface-variant;
+      background-color: $mat-sys-primary-container;
       height: 0;
       width: $mat-sys-img-profile-medium;
     }
