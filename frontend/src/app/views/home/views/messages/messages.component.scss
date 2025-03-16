@@ -9,16 +9,12 @@
   position: relative;
   display: flex;
   flex-direction: column;
-
+  flex-grow: 0;
   @include mat.tabs-overrides(
     (
       container-height: $mat-sys-component-height,
     )
   );
-
-  .card-tab {
-    background-color: red !important;
-  }
 }
 
 .mat-mdc-tab-nav-bar {

@@ -1,5 +1,8 @@
 @use "../../../../../styles/styles.scss" as *;
 
+.group-wrapper {
+  background-color: red;
+}
 .message-wrapper:not([data-sender=""]) {
   flex-direction: row-reverse;
 }
