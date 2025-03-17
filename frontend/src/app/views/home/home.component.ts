@@ -16,7 +16,7 @@ import { SearchComponent } from './views/search/search.component';
 import { MessageComponent } from '../chat/components/message/message.component';
 import { SettingsComponent } from './views/settings/settings.component';
 import { MessagesComponent } from './views/messages/messages.component';
-import { NavigationService } from '@/services/navigation.service';
+import { NavigationService, Target } from '@/services/navigation.service';
 import { NavigationOutletDirectiveDirective } from '@/directives/navigation-outlet-directive.directive';
 import { AfterViewInit } from '@angular/core';
 @Component({
@@ -40,7 +40,11 @@ export class HomeComponent implements AfterViewInit {
   constructor() {
     this.platform = this.platformService.info;
   }
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void {
+    this.navigationService.registerParent(Target.home, this.container, {
+      initialPage: MessagesComponent,
+    });
+  }
   activeTabChangedHandler(tab: ActiveTab) {
     if (this.inital == true) {
       this.inital = false;
