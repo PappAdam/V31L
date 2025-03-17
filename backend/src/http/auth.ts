@@ -16,9 +16,11 @@ import {
   AuthSuccessResponse,
   AuthNextMfaSetupResponse,
   nextSetupMfaResponse,
+  missingFieldsResponse,
+  nextVerifyMfaResponse,
 } from "@common";
 import { User } from "@prisma/client";
-import authenticator, { generateTotpUri } from "authenticator";
+import { generateTotpUri, verifyToken } from "authenticator";
 
 const authRouter = Router();
 authRouter.post(
@@ -90,7 +92,7 @@ async function registerUser(req: Request, res: Response) {
  * {@link validateRequiredFields} middleware runs before this handler, no validation needed
  */
 async function loginUser(req: Request, res: Response) {
-  const { username, password } = req.body;
+  const { username, password, mfaCode } = req.body;
 
   try {
     const user = await findUserByName(username);
@@ -109,8 +111,14 @@ async function loginUser(req: Request, res: Response) {
     }
 
     if (user.authKey) {
-      // TODO: Finish 2fa login.
-      console.error("Logging in with mfa not implemented.");
+      if (!mfaCode) {
+        res.status(400).json(nextVerifyMfaResponse);
+      }
+      const verifyResult = verifyToken(user.authKey, mfaCode);
+      if (!verifyResult) {
+        res.status(400).json(invalidCredentialsResponse);
+        return;
+      }
     }
 
     const token = generateToken(user.id);

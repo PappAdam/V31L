@@ -7,7 +7,7 @@ export type AuthResponse =
 
 export type AuthNextResponse =
   | AuthNextMfaSetupResponse
-  | AuthNextMfaRequiredReponse;
+  | AuthNextMfaVerifyReponse;
 
 export type AuthSuccessResponse = {
   result: "Success";
@@ -20,7 +20,7 @@ export type AuthNextMfaSetupResponse = {
   setupCode: string;
 };
 
-export type AuthNextMfaRequiredReponse = {
+export type AuthNextMfaVerifyReponse = {
   result: "Next";
   to: "Verify";
 };
@@ -57,6 +57,11 @@ export const nextSetupMfaResponse = (
     to: "Setup",
     setupCode,
   };
+};
+
+export const nextVerifyMfaResponse: AuthNextMfaVerifyReponse = {
+  result: "Next",
+  to: "Verify",
 };
 
 export const serverErrorResponse: AuthErrorResponse = {

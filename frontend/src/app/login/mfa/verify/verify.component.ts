@@ -17,25 +17,24 @@ export class MfaVerifyComponent {
   }
 
   private codeValueChanges(value: string): void {
-    // Remove any non-numeric characters
-    const sanitizedValue = value.replace(/\D/g, '');
+    // Remove non-number characters
+    var sanitizedValue = value.replace(/\D/g, '');
 
-    // Limit to 6 digits
+    // Limit length to 6 digits
     if (sanitizedValue.length > 6) {
-      this.code.setValue(sanitizedValue.slice(0, 6), { emitEvent: false });
-      return;
+      sanitizedValue = sanitizedValue.slice(0, 6);
     }
+
     this.code.setValue(sanitizedValue, { emitEvent: false });
 
-    // Automatically submit when 6 digits are entered
     if (sanitizedValue.length === 6) {
-      this.code.disable();
+      this.code.disable({ emitEvent: false });
       this.submitCode();
     }
   }
 
   submitCode() {
     console.log('Code entered:', this.code.value);
-    // Call API or process 6-digit code here
+    // TODO: Make API call here
   }
 }
