@@ -1,5 +1,11 @@
 import { PlatformService } from '@/services/platform.service';
-import { Component, inject } from '@angular/core';
+import {
+  Component,
+  ComponentRef,
+  inject,
+  ViewChild,
+  ViewContainerRef,
+} from '@angular/core';
 import { DeviceInfo } from '@capacitor/device';
 import {
   NavbarComponent,
@@ -10,22 +16,46 @@ import { SearchComponent } from './views/search/search.component';
 import { MessageComponent } from '../chat/components/message/message.component';
 import { SettingsComponent } from './views/settings/settings.component';
 import { MessagesComponent } from './views/messages/messages.component';
-
+import { NavigationService } from '@/services/navigation.service';
+import { NavigationOutletDirectiveDirective } from '@/directives/navigation-outlet-directive.directive';
+import { AfterViewInit } from '@angular/core';
 @Component({
   selector: 'app-home',
-  imports: [NavbarComponent, MessagesComponent],
+  imports: [
+    NavbarComponent,
+    MessagesComponent,
+    NavigationOutletDirectiveDirective,
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
-export class HomeComponent {
+export class HomeComponent implements AfterViewInit {
   platform: DeviceInfo | null = null;
   platformService: PlatformService = inject(PlatformService);
+  navigationService: NavigationService = inject(NavigationService);
+  inital = true;
+  @ViewChild('navOutlet', { read: ViewContainerRef })
+  container!: ViewContainerRef;
 
   constructor() {
     this.platform = this.platformService.info;
   }
-
+  ngAfterViewInit(): void {}
   activeTabChangedHandler(tab: ActiveTab) {
-    console.log(tab);
+    if (this.inital == true) {
+      this.inital = false;
+      console.log('ran treu');
+    } else {
+      console.log('ran false');
+
+      this.container.remove(0);
+    }
+    if (tab.name == 'settings') {
+      this.container.createComponent(SettingsComponent);
+    } else if (tab.name == 'add') {
+      this.container.createComponent(AddComponent);
+    } else if (tab.name == 'search') {
+      this.container.createComponent(SearchComponent);
+    }
   }
 }
