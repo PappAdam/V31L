@@ -16,6 +16,7 @@
   transition: all 0.4s ease-in-out;
   overflow: scroll;
   flex-shrink: 0;
+
   &.details-wrapper::-webkit-scrollbar {
     display: none;
   }

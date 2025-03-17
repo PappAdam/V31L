@@ -1,6 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { NgClass } from '@angular/common';
+
+export interface ActiveTab {
+  index: number;
+  name: string;
+}
+
 @Component({
   selector: 'app-navbar',
   imports: [MatIconModule, NgClass],
@@ -9,9 +15,11 @@ import { NgClass } from '@angular/common';
 })
 export class NavbarComponent {
   tabs = ['settings', 'add', 'search'];
-  activeTab = '';
-
+  activeTab = {} as ActiveTab;
+  @Output() activeTabChanged = new EventEmitter<ActiveTab>();
   selectTab(tab: string): void {
-    this.activeTab = tab;
+    this.activeTab = { index: this.tabs.indexOf(tab), name: tab };
+
+    this.activeTabChanged.emit(this.activeTab);
   }
 }

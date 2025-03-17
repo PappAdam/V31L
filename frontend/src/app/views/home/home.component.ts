@@ -1,7 +1,10 @@
 import { PlatformService } from '@/services/platform.service';
 import { Component, inject } from '@angular/core';
 import { DeviceInfo } from '@capacitor/device';
-import { NavbarComponent } from './components/navbar/navbar.component';
+import {
+  NavbarComponent,
+  ActiveTab,
+} from './components/navbar/navbar.component';
 import { AddComponent } from './views/add/add.component';
 import { SearchComponent } from './views/search/search.component';
 import { MessageComponent } from '../chat/components/message/message.component';
@@ -20,5 +23,9 @@ export class HomeComponent {
 
   constructor() {
     this.platform = this.platformService.info;
+  }
+
+  activeTabChangedHandler(tab: ActiveTab) {
+    console.log(tab);
   }
 }
