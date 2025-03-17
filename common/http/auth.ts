@@ -1,6 +1,9 @@
 import { PublicUser } from "../socket/public";
 
-export type AuthResponse = AuthSuccessResponse | AuthErrorResponse;
+export type AuthResponse =
+  | AuthSuccessResponse
+  | AuthNextResponse
+  | AuthErrorResponse;
 
 export type AuthNextResponse =
   | AuthNextMfaSetupResponse

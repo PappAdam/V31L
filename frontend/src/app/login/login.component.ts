@@ -76,13 +76,32 @@ export class LoginComponent {
       this.mfaEnabled()
     );
 
-    if (response.result == 'Success') {
-      this.router.navigate(['/']);
-      return;
-    }
+    switch (response.result) {
+      case 'Success':
+        this.router.navigate(['/']);
+        return;
 
-    this.errorMessage = response.message;
-    console.warn('Add this error message to login form: ', this.errorMessage);
+      case 'Next':
+        switch (response.to) {
+          case 'Setup':
+            this.router.navigate([`/login/mfa/setup`], {
+              state: { setupCode: response.setupCode },
+            });
+            return;
+          case 'Verify':
+            this.router.navigate([`/login/mfa/verify`]);
+            return;
+        }
+      case 'Error':
+        this.errorMessage = response.message;
+        console.warn(
+          'Add this error message to login form: ',
+          this.errorMessage
+        );
+        break;
+      default:
+        break;
+    }
   }
 
   toggleShowPassword(event: MouseEvent) {

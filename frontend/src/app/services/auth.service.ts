@@ -2,7 +2,12 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, lastValueFrom, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
-import { AuthResponse, AuthSuccessResponse, AuthErrorResponse } from '@common';
+import {
+  AuthResponse,
+  AuthSuccessResponse,
+  AuthErrorResponse,
+  AuthNextResponse,
+} from '@common';
 
 @Injectable({
   providedIn: 'root',
@@ -42,7 +47,7 @@ export class AuthService {
    * @param {'login' | 'register'} authUrlPath - The authentication endpoint to use. Must be either 'login' or 'register'
    * @param {boolean} mfaEnabled - Whether 2FA codes should be generated for the account. Only works when `authUrlPath` is set to `register`
    * @returns {Promise<AuthResponse>} A promise that resolves to the authentication response.
-   * - If the request is successful, it returns an {@link AuthSuccessResponse}
+   * - If the request is successful, it returns an {@link AuthSuccessResponse} | {@link AuthNextResponse}
    * - If the request fails, it returns an {@link AuthErrorResponse}
    */
   async authorize(
@@ -54,12 +59,19 @@ export class AuthService {
     const body = { username, password, mfaEnabled };
     try {
       const response = await lastValueFrom(
-        this.http.post<AuthSuccessResponse>(this.baseUrl + authUrlPath, body)
+        this.http.post<AuthSuccessResponse | AuthNextResponse>(
+          this.baseUrl + authUrlPath,
+          body
+        )
       );
-      this.saveUser(response);
+
+      if (response.result == 'Success') {
+        this.saveUser(response);
+      }
+
       return response;
     } catch (httpError: any) {
-      return httpError.error;
+      return httpError.error as AuthErrorResponse;
     }
   }
 
