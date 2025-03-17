@@ -3,9 +3,7 @@ export type ClientPackageDescription =
   | ClientNewMessagePackage
   | ClientBodyLessPackage
   | ClientGetChatsPackage
-  | ClientGetMessagesPackage
-  | ClientCreateInvitaion
-  | ClientJoinChat;
+  | ClientGetMessagesPackage;
 
 export type ClientPackage = ClientPackageDescription & { id: string };
 
@@ -48,16 +46,4 @@ export type ClientGetMessagesPackage = {
    * MessageId used as cursor if paging is needed
    */
   fromId?: string;
-};
-
-export type ClientCreateInvitaion = {
-  header: "CreateInvitation";
-  chatId: string;
-  key: string;
-};
-
-export type ClientJoinChat = {
-  header: "JoinChat";
-  invitationID: string;
-  key: string;
 };

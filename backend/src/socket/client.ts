@@ -102,9 +102,6 @@ export class Client {
       case "GetChatMessages":
         return this.isAuthorized ? this.user.id : null;
 
-      case "CreateInvitation":
-        return this.isAuthorized ? this.user.id : null;
-
       default:
         throw new Error(
           "Validation for this package type has not been implemented."
