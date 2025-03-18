@@ -4,13 +4,17 @@ import {
   PublicMessage,
   ServerChatsPackage,
 } from "@common";
-import { findChatMembersByChat } from "../db/chatMember";
+import { addUserToChat, findChatMembersByChat } from "../db/chatMember";
 import { createMessage, findChatMessages } from "../db/message";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import ServerPackageSender from "./server";
 import { getPublicChatsWithMessages } from "@/db/public";
 import { findUserById } from "@/db/user";
+import {
+  InvitationDescription,
+  validateChatJoinRequest,
+} from "../encryption/invitation";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
@@ -126,10 +130,12 @@ async function processBasedOnHeader(
         id: incoming.chatId,
         messages,
       };
+
       ServerPackageSender.send([client.ws], {
         header: "Chats",
         chats: [responsePayload],
       });
+
       return true;
 
     default:

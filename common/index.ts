@@ -3,3 +3,4 @@ export * from "./socket/server";
 export * from "./socket/public";
 export * from "./http/_http";
 export * from "./http/auth";
+export * from "./http/invitation";
