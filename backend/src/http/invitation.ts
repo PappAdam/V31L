@@ -3,13 +3,9 @@ import {
   invitationCreateSuccessResponse,
   invitationInvalidResponse,
   invitationJoinSuccessResponse,
-  InviteResponse,
   serverErrorResponse,
 } from "@common";
-import {
-  InvitationDescription,
-  validateChatJoinRequest,
-} from "@/encryption/invitation";
+import { Invitation, validateChatJoinRequest } from "@/encryption/invitation";
 import { addUserToChat, findChatMember } from "@/db/chatMember";
 import { validateRequiredFields } from "./middlewares/validate";
 
@@ -49,12 +45,14 @@ async function createInvitation(req: Request, res: Response) {
   const { key, chatId } = req.body;
 
   try {
-    if (!(await findChatMember(req.user!.id, chatId))) {
+    const chatMember = await findChatMember(req.user!.id, chatId);
+
+    if (!chatMember) {
       res.status(400).json(invitationInvalidResponse);
       return;
     }
 
-    const newInv = new InvitationDescription(key, chatId, 60 * 1000);
+    const newInv = new Invitation(key, chatId, 60 * 1000);
 
     res.status(201).json(invitationCreateSuccessResponse(newInv.id));
   } catch (error) {

@@ -1,8 +1,8 @@
 import { randomUUID, createHmac } from "crypto";
 
-const Invitations: InvitationDescription[] = [];
+const Invitations: Invitation[] = [];
 
-export class InvitationDescription {
+export class Invitation {
   id: string;
   createdAt: number;
   expireTime: number;
@@ -29,17 +29,18 @@ export class InvitationDescription {
 export function validateChatJoinRequest(
   incomingID: string,
   key: string
-): InvitationDescription | undefined {
-  const index = Invitations.findIndex((inv) => {
-    if (incomingID == inv.id && key == inv.joinKey) {
-      if (Date.now() - inv.createdAt < inv.expireTime) {
-        return inv;
-      }
-    }
+): Invitation | null {
+  const i = Invitations.findIndex((inv) => {
+    return incomingID == inv.id && key == inv.joinKey;
   });
 
-  if (index) {
-    const inv = Invitations.splice(index, 1);
-    return inv[0];
-  }
+  if (i == -1) return null;
+
+  const timeSinceCreation = Date.now() - Invitations[i].createdAt;
+  const invitationExpired = timeSinceCreation > Invitations[i].expireTime;
+
+  if (invitationExpired) return null;
+
+  const inv = Invitations.splice(i, 1);
+  return inv[0];
 }

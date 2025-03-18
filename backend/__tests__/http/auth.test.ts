@@ -131,7 +131,7 @@ describe(`POST ${loginRoute}`, () => {
 
   async function success() {
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-    prismaMock.user.findUnique.mockResolvedValue(user);
+    prismaMock.user.findUnique.mockResolvedValue({ ...user, authKey: null });
 
     const response = await request(httpServer)
       .post(loginRoute)
