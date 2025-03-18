@@ -38,16 +38,15 @@ export class HomeComponent {
   protected authService = inject(AuthService);
 
   selectedChatIndex$ = new BehaviorSubject<number>(-1);
-  chatMessages$ = this.messageService.messages$;
-  selectedChatContent$ = combineLatest([
-    this.chatMessages$,
-    this.selectedChatIndex$,
-  ]).pipe(map(([messages, index]) => messages[index]));
+  chats$ = this.messageService.chats$;
+  selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
+    map(([messages, index]) => messages[index])
+  );
 
   messageControl = new FormControl('');
 
   constructor() {
-    this.chatMessages$
+    this.chats$
       .pipe(
         first(),
         tap(() => this.selectedChatIndex$.next(0))
@@ -57,12 +56,9 @@ export class HomeComponent {
 
   async sendMessage() {
     const message = this.messageControl.value?.trim();
-    console.log(this.selectedChatIndex$.value);
     if (!message || this.selectedChatIndex$.value == -1) return;
-    const selectedChat = await firstValueFrom(
-      this.selectedChatContent$.pipe(take(1))
-    );
-    this.messageService.sendMessage(selectedChat.chat.id, message);
+    const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
+    this.messageService.sendMessage(selectedChat.id, message);
     this.messageControl.reset();
   }
 }

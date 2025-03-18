@@ -1,14 +1,17 @@
-import { ClientPackage } from "@common";
-import { findChatMembersByChat } from "../db/chatMember";
+import {
+  ClientPackage,
+  PublicChat,
+  PublicMessage,
+  ServerChatsPackage,
+} from "@common";
+import { addUserToChat, findChatMembersByChat } from "../db/chatMember";
 import { createMessage, findChatMessages } from "../db/message";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import ServerPackageSender from "./server";
-import {
-  initialMessageSync,
-  dbMessageToPublicMessage,
-  toPublicMessage,
-} from "@/db/dbHelpers";
+import { getPublicChatsWithMessages } from "@/db/public";
+import { findUserById } from "@/db/user";
+import { Invitation, validateChatJoinRequest } from "../encryption/invitation";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
@@ -39,84 +42,95 @@ async function processBasedOnHeader(
 ): Promise<boolean> {
   switch (incoming.header) {
     case "Authorization":
-      const token = extractUserIdFromToken(incoming.token);
-      client.userId = token.userId as string;
+      const tokenExtraction = extractUserIdFromToken(incoming.token);
+
+      const user = await findUserById(tokenExtraction.userId!);
+
+      client.user = {
+        username: user!.username,
+        id: user!.id,
+      };
+
       return true;
 
     case "NewMessage":
-      let newMessage = await dbMessageToPublicMessage(
-        await createMessage(
-          incoming.chatId,
-          client.userId,
-          incoming.messageContent
-        )
+      const createdMessage = await createMessage(
+        incoming.chatId,
+        client.user.id,
+        incoming.messageContent
       );
 
-      if (!newMessage) {
+      if (!createdMessage) {
         return false;
       }
 
       const chatMembers = await findChatMembersByChat(incoming.chatId);
-
+      const responsePackage: ServerChatsPackage = {
+        header: "Chats",
+        chats: [
+          {
+            id: incoming.chatId,
+            messages: [
+              {
+                id: createdMessage.id,
+                user: client.user,
+                content: incoming.messageContent,
+                timeStamp: createdMessage.timeStamp,
+              },
+            ],
+          },
+        ],
+      };
       ServerPackageSender.send(
         chatMembers.map((member) => member.userId),
-        {
-          header: "ChatContent",
-          chatMessages: [
-            {
-              chat: {
-                id: incoming.chatId,
-              },
-              messages: [newMessage],
-            },
-          ],
-        }
+        responsePackage
       );
 
       return true;
 
     case "DeAuthorization":
-      client.userId = "";
+      client.user = {
+        username: "",
+        id: "",
+      };
       return true;
 
     case "GetChats":
-      let chatMessages = await initialMessageSync(
-        client.userId,
+      const chats = await getPublicChatsWithMessages(
+        client.user.id,
         incoming.chatCount,
         incoming.messageCount
       );
 
-      if (!chatMessages) {
-        console.error("Failed to sync chat messages for user: ", client.userId);
+      if (!chats) {
+        console.error(
+          "Failed to get chats with messages for user: ",
+          client.user
+        );
         return false;
       }
 
       ServerPackageSender.send([client.ws], {
-        header: "ChatContent",
-        chatMessages: chatMessages,
+        header: "Chats",
+        chats: chats,
       });
-
       return true;
 
     case "GetChatMessages":
-      const syncMessages = (
-        await findChatMessages(
-          incoming.chatId,
-          incoming.messageCount,
-          incoming.fromId
-        )
-      ).map(toPublicMessage);
+      const messages = (await findChatMessages(
+        incoming.chatId,
+        incoming.messageCount,
+        incoming.fromId
+      )) as PublicMessage[];
+
+      var responsePayload: PublicChat = {
+        id: incoming.chatId,
+        messages,
+      };
 
       ServerPackageSender.send([client.ws], {
-        header: "ChatContent",
-        chatMessages: [
-          {
-            chat: {
-              id: incoming.chatId,
-            },
-            messages: syncMessages,
-          },
-        ],
+        header: "Chats",
+        chats: [responsePayload],
       });
 
       return true;

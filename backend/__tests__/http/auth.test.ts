@@ -17,6 +17,7 @@ const user = {
   id: "id-123",
   username: "user-123",
   password: "password-123",
+  authKey: "key-123",
 };
 const token = "mocked-token";
 const expiredJwtPayload = {
@@ -78,7 +79,7 @@ describe(`POST ${registerRoute}`, () => {
       .send({ username: user.username, password: user.password });
 
     expect(response.status).toBe(201);
-    expect(response.body).toEqual(successResponse(token));
+    expect(response.body).toEqual(successResponse(token, user));
     expect(prismaMock.user.create).toHaveBeenCalled();
     expect(jwt.sign).toHaveBeenCalled();
   }
@@ -130,14 +131,14 @@ describe(`POST ${loginRoute}`, () => {
 
   async function success() {
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-    prismaMock.user.findUnique.mockResolvedValue(user);
+    prismaMock.user.findUnique.mockResolvedValue({ ...user, authKey: null });
 
     const response = await request(httpServer)
       .post(loginRoute)
       .send({ username: user.username, password: user.password });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(successResponse(token));
+    expect(response.body).toEqual(successResponse(token, user));
     expect(prismaMock.user.findUnique).toHaveBeenCalled();
     expect(bcrypt.compare).toHaveBeenCalled();
     expect(jwt.sign).toHaveBeenCalled();
@@ -196,6 +197,6 @@ describe(`POST ${refreshRoute}`, () => {
       .set("Authorization", "Bearer " + token)
       .send({ username: user.username, password: user.password });
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(successResponse(newToken));
+    expect(response.body).toEqual(successResponse(newToken, user));
   }
 });

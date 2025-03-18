@@ -1,48 +1,51 @@
 {
-    // Set Prettier as the default formatter
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // Set Prettier as the default formatter
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
 
-    // Enable format on save
-    "editor.formatOnSave": true,
+  // Enable format on save
+  "editor.formatOnSave": true,
 
-    // Configure tab width (4 spaces for this example)
-    "prettier.tabWidth": 2,
+  // Configure tab width (4 spaces for this example)
+  "prettier.tabWidth": 2,
 
-    // Convert tabs to spaces
-    "editor.insertSpaces": true,
+  // Convert tabs to spaces
+  "editor.insertSpaces": true,
 
-    // Enable trim trailing whitespace on save
-    "editor.trimAutoWhitespace": true,
+  // Enable trim trailing whitespace on save
+  "editor.trimAutoWhitespace": true,
 
-    // Automatically format on paste
-    "editor.formatOnPaste": true,
+  // Automatically format on paste
+  "editor.formatOnPaste": true,
 
-    // Enable word wrap
-    "editor.wordWrap": "on",
+  // Enable word wrap
+  "editor.wordWrap": "on",
 
-    // Set the maximum number of lines before word wrapping starts
-    "editor.wordWrapColumn": 80,
+  // Set the maximum number of lines before word wrapping starts
+  "editor.wordWrapColumn": 80,
 
-    // Set the default end of line to LF (Line Feed) for consistency across systems
-    "files.eol": "\n",
+  // Set the default end of line to LF (Line Feed) for consistency across systems
+  "files.eol": "\n",
 
-    // Enable editor render whitespace (helps visualize spaces, tabs, etc.)
-    "editor.renderWhitespace": "boundary",
+  // Enable editor render whitespace (helps visualize spaces, tabs, etc.)
+  "editor.renderWhitespace": "boundary",
 
-    // Set the default language-specific settings (Optional)
-    "[javascript]": {
-        "editor.formatOnSave": true
-    },
-    "[typescript]": {
-        "editor.formatOnSave": true
-    },
-    "[json]": {
-        "editor.formatOnSave": true
-    },
-    "[html]": {
-        "editor.formatOnSave": true
-    },
-    "[css]": {
-        "editor.formatOnSave": true
-    }
+  // Set the default language-specific settings (Optional)
+  "[javascript]": {
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.formatOnSave": true
+  },
+  "[html]": {
+    "editor.formatOnSave": true
+  },
+  "[css]": {
+    "editor.formatOnSave": true
+  },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  }
 }

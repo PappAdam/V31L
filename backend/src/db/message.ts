@@ -1,5 +1,6 @@
 import { Message } from "@prisma/client";
 import prisma from "./_db";
+import { PublicUser } from "@common";
 /**
  * Retrieves a specified number of messages from a chat, ordered by timestamp.
  * On limit = -1 returns all the messages.
@@ -12,20 +13,12 @@ import prisma from "./_db";
  */
 export async function findChatMessages(
   chatId: string,
-  limit: number,
+  limit: number = 20,
   cursor?: string
-): Promise<
-  ({ user: { username: string } } & {
-    id: string;
-    chatId: string;
-    userId: string;
-    timeStamp: Date;
-    content: string;
-  })[]
-> {
+): Promise<({ user: PublicUser } & Message)[]> {
   try {
     if (!chatId || (limit <= 0 && limit != -1)) {
-      console.warn("Invalid chatId or limit provided to getChatMessages.");
+      console.warn("Invalid chatId or limit provided to findChatMessages.");
       return [];
     }
 
@@ -35,12 +28,13 @@ export async function findChatMessages(
           chatId: chatId,
         },
         orderBy: {
-          timeStamp: "desc", // Order by newest to oldest
+          timeStamp: "desc",
         },
         include: {
           user: {
             select: {
-              username: true, // Include the username from the User model
+              username: true,
+              id: true,
             },
           },
         },
