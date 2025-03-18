@@ -1,4 +1,4 @@
-import * as crypto from "crypto";
+import { randomUUID, createHmac } from "crypto";
 
 const Invitations: InvitationDescription[] = [];
 
@@ -10,7 +10,7 @@ export class InvitationDescription {
   joinKey: string;
 
   constructor(key: string, chatId: string, expireTime: number) {
-    this.id = crypto.randomUUID();
+    this.id = randomUUID();
     this.createdAt = Date.now();
     this.expireTime = expireTime;
     this.chatId = chatId;
@@ -20,7 +20,7 @@ export class InvitationDescription {
   }
 
   hashInvitationId() {
-    const hmac = crypto.createHmac("sha256", this.joinKey);
+    const hmac = createHmac("sha256", this.joinKey);
     hmac.update(this.id);
     return hmac.digest("hex");
   }

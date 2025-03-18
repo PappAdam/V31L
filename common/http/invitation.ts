@@ -16,7 +16,29 @@ type JoinSuccess = {
 
 export type InviteError = { message: ErrorMessages } & { result: "Error" };
 
-type ErrorMessages =
-  | "Invalid Request"
-  | "Non-existent User-Chat pair"
-  | "Invalid Invitation";
+type ErrorMessages = "Non-existent User-Chat pair" | "Invalid Invitation";
+
+export const invitationCreateSuccessResponse = (
+  invId: string
+): InviteSuccess => {
+  return {
+    result: "Success",
+    type: "Create",
+    invId,
+  };
+};
+
+export const invitationJoinSuccessResponse = (
+  chatId: string
+): InviteSuccess => {
+  return {
+    result: "Success",
+    type: "Join",
+    chatId,
+  };
+};
+
+export const invitationInvalidResponse: InviteError = {
+  result: "Error",
+  message: "Non-existent User-Chat pair",
+};

@@ -1,19 +1,30 @@
 import { Request, Response, Router } from "express";
-import { InviteResponse, serverErrorResponse } from "@common";
+import {
+  invitationCreateSuccessResponse,
+  invitationInvalidResponse,
+  invitationJoinSuccessResponse,
+  InviteResponse,
+  serverErrorResponse,
+} from "@common";
 import {
   InvitationDescription,
   validateChatJoinRequest,
 } from "@/encryption/invitation";
 import { addUserToChat, findChatMember } from "@/db/chatMember";
+import { validateRequiredFields } from "./middlewares/validate";
 
 const invRouter = Router();
-invRouter.post("/create", createInvitation);
-invRouter.post("/join", joinChat);
+invRouter.post(
+  "/create",
+  validateRequiredFields(["key", "chatId"]),
+  createInvitation
+);
+invRouter.post("/join", validateRequiredFields(["key", "invId"]), joinChat);
 
 export default invRouter;
 
 /**
- * @route POST /api/invitations/create
+ * @route POST /invitations/create
  * @desc Creates a new chat invitation link with a join key
  * @param {string} req.body.key - Unique key required to join the chat
  * @param {string} req.body.chatId - ID of the chat to create invitation for
@@ -38,28 +49,14 @@ async function createInvitation(req: Request, res: Response) {
   const { key, chatId } = req.body;
 
   try {
-    if (!key || !chatId) {
-      res
-        .status(400)
-        .json<InviteResponse>({ result: "Error", message: "Invalid Request" });
-      return;
-    }
-
-    if (!findChatMember(req.user!.id, chatId)) {
-      res.status(400).json<InviteResponse>({
-        result: "Error",
-        message: "Non-existent User-Chat pair",
-      });
+    if (!(await findChatMember(req.user!.id, chatId))) {
+      res.status(400).json(invitationInvalidResponse);
       return;
     }
 
     const newInv = new InvitationDescription(key, chatId, 60 * 1000);
 
-    res.status(201).json<InviteResponse>({
-      result: "Success",
-      type: "Create",
-      invId: newInv.id,
-    });
+    res.status(201).json(invitationCreateSuccessResponse(newInv.id));
   } catch (error) {
     console.error("Error during creating invitation: \n", error);
     res.status(500).json(serverErrorResponse);
@@ -92,19 +89,9 @@ async function joinChat(req: Request, res: Response) {
   const { key, invId } = req.body;
 
   try {
-    if (!key || !invId) {
-      res
-        .status(400)
-        .json<InviteResponse>({ result: "Error", message: "Invalid Request" });
-      return;
-    }
-
     const invitation = validateChatJoinRequest(invId, key);
     if (!invitation) {
-      res.status(400).json<InviteResponse>({
-        result: "Error",
-        message: "Invalid Invitation",
-      });
+      res.status(400).json(invitationInvalidResponse);
       return;
     }
 
@@ -113,13 +100,9 @@ async function joinChat(req: Request, res: Response) {
       throw Error("Failed to add user to chat");
     }
 
-    res.status(201).json<InviteResponse>({
-      result: "Success",
-      type: "Join",
-      chatId: chatMember.chatId,
-    });
+    res.status(201).json(invitationJoinSuccessResponse(chatMember.chatId));
   } catch (error) {
-    console.error("Error during creating invitation: \n", error);
+    console.error("Error during joining invitation: \n", error);
     res.status(500).json(serverErrorResponse);
   }
 }
