@@ -8,6 +8,8 @@ tags:
     description: Authenticating Users
   - name: Logs
     description: Logging for debug
+  - name: Invitations
+    description: Invitation management for joining chats
 
 components:
   securitySchemes:
@@ -44,6 +46,54 @@ components:
         message:
           type: string
           example: "Server error"
+        CreateSuccess:
+      type: object
+      required:
+        - result
+        - type
+        - invId
+      properties:
+        result:
+          type: string
+          enum: ["Success"]
+        type:
+          type: string
+          enum: ["Create"]
+        invId:
+          type: string
+          example: "abc123"
+    JoinSuccess:
+      type: object
+      required:
+        - result
+        - type
+        - chatId
+      properties:
+        result:
+          type: string
+          enum: ["Success"]
+        type:
+          type: string
+          enum: ["Join"]
+        chatId:
+          type: string
+          example: "chat456"
+    InviteError:
+      type: object
+      required:
+        - result
+        - message
+      properties:
+        result:
+          type: string
+          enum: ["Error"]
+        message:
+          type: string
+          enum:
+            - "Invalid Request"
+            - "Non-existent User-Chat pair"
+            - "Invalid Invitation"
+          example: "Invalid Request"
 
   responses:
     AuthSuccess:
@@ -58,6 +108,24 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ServerError"
+    CreateSuccess:
+      description: Invitation created successfully
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateSuccess"
+    JoinSuccess:
+      description: Joined chat successfully
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/JoinSuccess"
+    InviteError:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/InviteError"
 
 paths:
   /auth/login:
@@ -158,3 +226,63 @@ paths:
                   message:
                     type: string
                     example: "Logged auth details on server console."
+
+  /inv/create:
+    post:
+      summary: Create an invitation
+      tags: [Invitations]
+      security:
+        - BearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - key
+                - chatId
+              properties:
+                key:
+                  type: string
+                  example: "join123"
+                chatId:
+                  type: string
+                  example: "chat456"
+      responses:
+        201:
+          $ref: "#/components/responses/CreateSuccess"
+        400:
+          $ref: "#/components/responses/InviteError"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+  /inv/join:
+    post:
+      summary: Join a chat using an invitation
+      tags: [Invitations]
+      security:
+        - BearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - key
+                - invId
+              properties:
+                key:
+                  type: string
+                  example: "key789"
+                invId:
+                  type: string
+                  example: "invite012"
+      responses:
+        201:
+          $ref: "#/components/responses/JoinSuccess"
+        400:
+          $ref: "#/components/responses/InviteError"
+        500:
+          $ref: "#/components/responses/ServerError"

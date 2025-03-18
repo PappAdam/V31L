@@ -6,6 +6,7 @@ import path from "path";
 import YAML from "yamljs";
 import authRouter from "@/http/auth";
 import logRouter from "@/http/log";
+import invRouter from "@/http/invitation";
 import { extractUserFromTokenMiddleWare } from "@/http/middlewares/validate";
 
 const httpServer = express();
@@ -31,5 +32,6 @@ httpServer.use("/auth", authRouter);
 const protectedRoutes = httpServer.use(extractUserFromTokenMiddleWare);
 
 protectedRoutes.use("/log", logRouter);
+protectedRoutes.use("/inv", invRouter);
 
 export default httpServer;
