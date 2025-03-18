@@ -48,7 +48,7 @@
         </button>
       </mat-form-field>
       @if (!signIn) {
-      <mat-checkbox [checked]="mfaEnabled()" (change)="toggleMfaEnabled()">
+      <mat-checkbox [checked]="mfaEnabled" (change)="mfaEnabled = !mfaEnabled">
         Enable 2 factor authentication
       </mat-checkbox>
       }

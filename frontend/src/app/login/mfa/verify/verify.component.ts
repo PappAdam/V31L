@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { AuthService } from '@/services/auth.service';
+import { Component, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-verify',
@@ -10,7 +12,10 @@ import { MatInputModule } from '@angular/material/input';
   styleUrl: './verify.component.scss',
 })
 export class MfaVerifyComponent {
-  code = new FormControl('', [Validators.pattern(/^\d{0,6}$/)]);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  protected code = new FormControl('', [Validators.pattern(/^\d{0,6}$/)]);
 
   constructor() {
     this.code.valueChanges.subscribe((value) => this.codeValueChanges(value!));
@@ -33,8 +38,17 @@ export class MfaVerifyComponent {
     }
   }
 
-  submitCode() {
-    console.log('Code entered:', this.code.value);
-    // TODO: Make API call here
+  protected async submitCode() {
+    const response = await this.authService.authorize2FA(this.code.value!);
+
+    switch (response.result) {
+      case 'Success':
+        this.router.navigate(['/']);
+        return;
+      case 'Error':
+        this.code.enable({ emitEvent: false });
+        this.code.setValue('', { emitEvent: false });
+        this.code.setErrors({ incorrect: true });
+    }
   }
 }

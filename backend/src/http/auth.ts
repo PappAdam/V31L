@@ -14,9 +14,7 @@ import {
   AuthResponse,
   AuthErrorResponse,
   AuthSuccessResponse,
-  AuthNextMfaSetupResponse,
   nextSetupMfaResponse,
-  missingFieldsResponse,
   nextVerifyMfaResponse,
 } from "@common";
 import { User } from "@prisma/client";
@@ -40,6 +38,8 @@ export default authRouter;
  * Register Request handler
  *
  * Creates a new user with the username password combination if a user with that username does not exist
+ *
+ * Creates a 2FA key, if the `mfaEnabled` field in the body is `true`
  *
  * Sends an {@link AuthResponse}. {@link AuthSuccessResponse} on success, {@link AuthErrorResponse} on error.
  *
@@ -85,14 +85,15 @@ async function registerUser(req: Request, res: Response) {
 /**
  * Login Request handler
  *
- * Searches a user with the givem username password combination
+ * Searches a user with the given username password combination,
+ * checks for 2FA code if the account has 2FA enabled
  *
  * Sends an {@link AuthResponse}. {@link AuthSuccessResponse} on success, {@link AuthErrorResponse} on error.
  *
  * {@link validateRequiredFields} middleware runs before this handler, no validation needed
  */
 async function loginUser(req: Request, res: Response) {
-  const { username, password, mfaCode } = req.body;
+  const { username, password, mfa } = req.body;
 
   try {
     const user = await findUserByName(username);
@@ -111,10 +112,11 @@ async function loginUser(req: Request, res: Response) {
     }
 
     if (user.authKey) {
-      if (!mfaCode) {
-        res.status(400).json(nextVerifyMfaResponse);
+      if (!mfa) {
+        res.json(nextVerifyMfaResponse);
+        return;
       }
-      const verifyResult = verifyToken(user.authKey, mfaCode);
+      const verifyResult = verifyToken(user.authKey, mfa);
       if (!verifyResult) {
         res.status(400).json(invalidCredentialsResponse);
         return;

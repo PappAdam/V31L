@@ -27,7 +27,7 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-  loginForm = new FormGroup({
+  protected loginForm = new FormGroup({
     username: new FormControl('', [
       Validators.required,
       // Validators.minLength(8),
@@ -42,14 +42,10 @@ export class LoginComponent {
     ]),
   });
 
-  mfaEnabled = signal(false);
-  toggleMfaEnabled() {
-    this.mfaEnabled.update((value) => !value);
-  }
-
-  errorMessage: string = '';
-  showPassord = false;
-  signIn: boolean = true;
+  // Values used to control the form
+  protected mfaEnabled = false;
+  protected showPassord = false;
+  protected signIn = true;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -73,7 +69,7 @@ export class LoginComponent {
       username,
       password,
       authRoute,
-      this.mfaEnabled()
+      this.mfaEnabled ? '' : null
     );
 
     switch (response.result) {
@@ -93,13 +89,10 @@ export class LoginComponent {
             return;
         }
       case 'Error':
-        this.errorMessage = response.message;
         console.warn(
           'Add this error message to login form: ',
-          this.errorMessage
+          response.message
         );
-        break;
-      default:
         break;
     }
   }
