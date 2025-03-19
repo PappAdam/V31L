@@ -20,7 +20,7 @@ async function encryptText(
   );
 
   return {
-    data: encrypted,
+    data: new Uint8Array(encrypted),
     iv,
   };
 }
