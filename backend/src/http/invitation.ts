@@ -1,9 +1,6 @@
 import { Request, Response, Router } from "express";
 import { InviteResponse, serverErrorResponse } from "@common";
-import {
-  InvitationDescription,
-  validateChatJoinRequest,
-} from "@/encryption/invitation";
+import { InvitationDescription, validateChatJoinRequest } from "@/invitation";
 import { addUserToChat, findChatMember } from "@/db/chatMember";
 
 const invRouter = Router();

@@ -1,6 +1,7 @@
-import { PublicChat } from "@common";
+import { PublicChat, PublicMessage, PublicUser } from "@common";
 import { findChatsByUser } from "./chat";
 import { findChatMessages } from "./message";
+import { Message } from "@prisma/client";
 
 /**
  * Gets chats for a user with `messageCount` number of messages.
@@ -27,12 +28,14 @@ export async function getPublicChatsWithMessages(
     let chats = await findChatsByUser(userId, chatCount);
     const chatMessages = Promise.all(
       chats.map(async (chat) => {
-        let messages = await findChatMessages(chat.id, messageCount);
+        let messages = (await findChatMessages(chat.id, messageCount)).map(
+          toPublicMessage
+        );
 
         return {
           id: chat.id,
           name: chat.name,
-          messages,
+          encryptedMessages: messages,
         };
       })
     );
@@ -41,4 +44,18 @@ export async function getPublicChatsWithMessages(
     console.error("Error retrieving chats with messages: ", error);
     return [];
   }
+}
+
+export type RawPublicMessage = { user: PublicUser } & Message;
+
+export function toPublicMessage(msg: RawPublicMessage): PublicMessage {
+  return {
+    encryptedData: {
+      data: msg.content,
+      iv: msg.iv,
+    },
+    id: msg.id,
+    user: msg.user,
+    timeStamp: msg.timeStamp,
+  };
 }

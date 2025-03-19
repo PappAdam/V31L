@@ -17,6 +17,6 @@ export type PublicChat = {
 };
 
 export type EncryptedMessage = {
-  data: ArrayBuffer;
+  data: Uint8Array;
   iv: Uint8Array;
 };

@@ -9,12 +9,9 @@ import { createMessage, findChatMessages } from "../db/message";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import ServerPackageSender from "./server";
-import { getPublicChatsWithMessages } from "@/db/public";
+import { getPublicChatsWithMessages, toPublicMessage } from "@/db/public";
 import { findUserById } from "@/db/user";
-import {
-  InvitationDescription,
-  validateChatJoinRequest,
-} from "../encryption/invitation";
+import { InvitationDescription, validateChatJoinRequest } from "../invitation";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
@@ -73,11 +70,11 @@ async function processBasedOnHeader(
         chats: [
           {
             id: incoming.chatId,
-            messages: [
+            encryptedMessages: [
               {
                 id: createdMessage.id,
                 user: client.user,
-                content: incoming.messageContent,
+                encryptedData: incoming.messageContent,
                 timeStamp: createdMessage.timeStamp,
               },
             ],
@@ -120,15 +117,17 @@ async function processBasedOnHeader(
       return true;
 
     case "GetChatMessages":
-      const messages = (await findChatMessages(
-        incoming.chatId,
-        incoming.messageCount,
-        incoming.fromId
-      )) as PublicMessage[];
+      const messages: PublicMessage[] = (
+        await findChatMessages(
+          incoming.chatId,
+          incoming.messageCount,
+          incoming.fromId
+        )
+      ).map(toPublicMessage);
 
       var responsePayload: PublicChat = {
         id: incoming.chatId,
-        messages,
+        encryptedMessages: messages,
       };
 
       ServerPackageSender.send([client.ws], {

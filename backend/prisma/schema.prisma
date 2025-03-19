@@ -32,7 +32,8 @@ model Message {
   user      User     @relation(fields: [userId], references: [id]) // No delete cascade for user
   userId    String
   timeStamp DateTime @default(now())
-  content   String
+  content   Bytes
+  iv        Bytes
 
   lastMessageForChat Chat? @relation("ChatLastMessage") // Opposite relation field
 }

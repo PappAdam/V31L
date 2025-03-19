@@ -42,11 +42,16 @@ export class MessageService {
     return chat?.messages[chat.messages.length - 1] || null;
   }
 
-  sendMessage(chatId: string, messageContent: string) {
+  async sendMessage(chatId: string, message: string) {
+    const encrypted = await this.encryptionService.encryptText(
+      this.encryptionService.globalKey,
+      message
+    );
+
     this.socketService.createPackage({
       header: 'NewMessage',
       chatId,
-      messageContent,
+      messageContent: encrypted,
     });
   }
 
@@ -58,8 +63,8 @@ export class MessageService {
 
       const chatMessages: Message[] = await Promise.all(
         rawChatContent.encryptedMessages.map(async (msg) => {
-          const messageConntent = await this.encryptionService.decryptText(
-            new CryptoKey(),
+          const messageContent = await this.encryptionService.decryptText(
+            this.encryptionService.globalKey,
             msg.encryptedData
           );
 
@@ -67,14 +72,20 @@ export class MessageService {
             id: msg.id,
             user: msg.user,
             timeStamp: msg.timeStamp,
-            message: messageConntent,
+            content: messageContent,
           };
         })
       );
 
+      const chatContent: Chat = {
+        id: rawChatContent.id,
+        name: rawChatContent.name,
+        messages: chatMessages,
+      };
+
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
-        // this._chats$.next([...this._chats$.value, chatContent]);
+        this._chats$.next([...this._chats$.value, chatContent]);
         return;
       }
 
@@ -85,12 +96,12 @@ export class MessageService {
         // Pushing new messages to the end of the array
         this._chats$.value[chatIndex].messages = [
           ...this._chats$.value[chatIndex].messages,
-          // ...chatContent.messages,
+          ...chatContent.messages,
         ];
       } else {
         // Pushing new messages to the beginning of the array
         this._chats$.value[chatIndex].messages = [
-          // ...chatContent.encryptedMessages,
+          ...chatContent.messages,
           ...this._chats$.value[chatIndex].messages,
         ];
       }
