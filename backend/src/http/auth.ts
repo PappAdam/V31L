@@ -70,7 +70,7 @@ async function registerUser(req: Request, res: Response) {
         6,
         30
       );
-      res.json(nextSetupMfaResponse(setupCode));
+      res.status(201).json(nextSetupMfaResponse(setupCode));
       return;
     }
 
