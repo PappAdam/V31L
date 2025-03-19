@@ -58,11 +58,35 @@ export class EncryptionService {
         encrypted.data
       );
 
-      console.log(decrypted);
-
       return this.decoder.decode(decrypted);
     } catch {
-      return 'An error occured during encryption. ♫ For give me, my father. For all the sins. ♫ :(';
+      return 'Failed to decrypt message';
     }
+  }
+
+  async wrapKey(
+    chatKey: CryptoKey,
+    masterKey: CryptoKey
+  ): Promise<Uint8Array<ArrayBufferLike>> {
+    return new Uint8Array(
+      await crypto.subtle.wrapKey('raw', chatKey, masterKey, {
+        name: 'AES-KW',
+      })
+    );
+  }
+
+  async unwrapKey(
+    wrappedKey: Uint8Array,
+    masterKey: CryptoKey
+  ): Promise<CryptoKey> {
+    return crypto.subtle.unwrapKey(
+      'raw',
+      wrappedKey,
+      masterKey,
+      { name: 'AES-KW' },
+      { name: 'AES-GCM' },
+      true,
+      ['encrypt', 'decrypt']
+    );
   }
 }

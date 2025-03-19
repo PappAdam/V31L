@@ -36,6 +36,7 @@ export async function getPublicChatsWithMessages(
           id: chat.id,
           name: chat.name,
           encryptedMessages: messages,
+          encryptedChatKey: chat.key,
         };
       })
     );

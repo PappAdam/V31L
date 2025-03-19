@@ -3,9 +3,14 @@ import { SocketService } from './socket.service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { PublicChat, PublicMessage, ServerChatsPackage } from '@common';
 import { EncryptionService, Message } from './encryption.service';
+import { InviteService } from './invite.service';
 
-export type Chat = Omit<PublicChat, 'encryptedMessages'> & {
+export type Chat = Omit<
+  PublicChat,
+  'encryptedMessages' | 'encryptedChatKey'
+> & {
   messages: Message[];
+  chatKey: CryptoKey;
 };
 
 @Injectable({
@@ -14,6 +19,7 @@ export type Chat = Omit<PublicChat, 'encryptedMessages'> & {
 export class MessageService {
   socketService = inject(SocketService);
   encryptionService = inject(EncryptionService);
+  invitationService = inject(InviteService);
 
   private _chats$ = new BehaviorSubject<Chat[]>([]);
   get chats$(): Observable<Chat[]> {
@@ -57,14 +63,39 @@ export class MessageService {
 
   onChatsPackageRecieved = async (chatsPackage: ServerChatsPackage) => {
     chatsPackage.chats.forEach(async (rawChatContent) => {
-      const chatIndex = this._chats$.value.findIndex(
+      let chatIndex = this._chats$.value.findIndex(
         (f) => f.id === rawChatContent.id
       );
+
+      const chatContext: Omit<Chat, 'chatKey' | 'messages'> = {
+        id: rawChatContent.id,
+        name: rawChatContent.name,
+      };
+
+      // Add the chat if it doesn't exist
+      if (chatIndex < 0) {
+        if (rawChatContent.encryptedChatKey) {
+          const chatKey = await this.encryptionService.unwrapKey(
+            rawChatContent.encryptedChatKey,
+            this.invitationService.key
+          );
+          const chat = {
+            ...chatContext,
+            chatKey,
+            messages: [],
+          };
+          this._chats$.next([...this._chats$.value, chat]);
+        } else {
+          throw new Error('Failed to fetch the chat key.');
+        }
+
+        chatIndex = this._chats$.value.length - 1;
+      }
 
       const chatMessages: Message[] = await Promise.all(
         rawChatContent.encryptedMessages.map(async (msg) => {
           const messageContent = await this.encryptionService.decryptText(
-            this.encryptionService.globalKey,
+            this._chats$.value[chatIndex].chatKey,
             msg.encryptedData
           );
 
@@ -77,31 +108,20 @@ export class MessageService {
         })
       );
 
-      const chatContent: Chat = {
-        id: rawChatContent.id,
-        name: rawChatContent.name,
-        messages: chatMessages,
-      };
-
-      // Add the chat if it doesn't exist
-      if (chatIndex < 0) {
-        this._chats$.next([...this._chats$.value, chatContent]);
-        return;
-      }
-
       if (
+        this.lastMessage(rawChatContent.id) &&
         rawChatContent.encryptedMessages[0].timeStamp >
-        this.lastMessage(rawChatContent.id)!.timeStamp
+          this.lastMessage(rawChatContent.id)!.timeStamp
       ) {
         // Pushing new messages to the end of the array
         this._chats$.value[chatIndex].messages = [
           ...this._chats$.value[chatIndex].messages,
-          ...chatContent.messages,
+          ...chatMessages,
         ];
       } else {
         // Pushing new messages to the beginning of the array
         this._chats$.value[chatIndex].messages = [
-          ...chatContent.messages,
+          ...chatMessages,
           ...this._chats$.value[chatIndex].messages,
         ];
       }

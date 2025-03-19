@@ -10,7 +10,8 @@ import prisma from "./_db";
  */
 export async function addUserToChat(
   userId: string,
-  chatId: string
+  chatId: string,
+  key: Uint8Array
 ): Promise<ChatMember | null> {
   if (!userId || !chatId) {
     return null;
@@ -21,7 +22,7 @@ export async function addUserToChat(
       data: {
         userId,
         chatId,
-        key: "Not yet implemented.",
+        key,
       },
     });
     return newChatMember;

@@ -32,10 +32,10 @@ export default invRouter;
  * }
  */
 async function createInvitation(req: Request, res: Response) {
-  const { key, chatId } = req.body;
+  const { chatId } = req.body;
 
   try {
-    if (!key || !chatId) {
+    if (!chatId) {
       res
         .status(400)
         .json<InviteResponse>({ result: "Error", message: "Invalid Request" });
@@ -50,7 +50,7 @@ async function createInvitation(req: Request, res: Response) {
       return;
     }
 
-    const newInv = new InvitationDescription(key, chatId, 60 * 1000);
+    const newInv = new InvitationDescription(chatId, 60 * 1000);
 
     res.status(201).json<InviteResponse>({
       result: "Success",
@@ -96,7 +96,7 @@ async function joinChat(req: Request, res: Response) {
       return;
     }
 
-    const invitation = validateChatJoinRequest(invId, key);
+    const invitation = validateChatJoinRequest(invId);
     if (!invitation) {
       res.status(400).json<InviteResponse>({
         result: "Error",
@@ -105,7 +105,11 @@ async function joinChat(req: Request, res: Response) {
       return;
     }
 
-    const chatMember = await addUserToChat(req.user!.id, invitation.chatId);
+    const chatMember = await addUserToChat(
+      req.user!.id,
+      invitation.chatId,
+      key
+    );
     if (!chatMember) {
       throw Error("Failed to add user to chat");
     }

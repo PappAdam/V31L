@@ -87,7 +87,7 @@ export class AuthService {
       return null;
     }
   }
-  
+
   private saveUser(user: StoredUser): void {
     this._user$.next(user);
     localStorage.setItem('user', JSON.stringify(user));
@@ -100,4 +100,4 @@ export class AuthService {
   }
 }
 
-type StoredUser = Omit<AuthSuccessResponse, 'result'>;
+export type StoredUser = Omit<AuthSuccessResponse, 'result'>;

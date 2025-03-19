@@ -3,6 +3,7 @@ import { createMessage } from "../message";
 import testData from "./testData.json";
 import { createUser } from "../user";
 import { EncryptedMessage } from "@common";
+import { addUserToChat } from "../chatMember";
 
 async function encryptText(
   key: CryptoKey,
@@ -25,6 +26,27 @@ async function encryptText(
   };
 }
 
+async function createUserMasterKey(chatKey: CryptoKey, username: string) {
+  const encoder = new TextEncoder();
+  const encodedUserName = encoder.encode(username);
+
+  const hash = await crypto.subtle.digest("SHA-256", encodedUserName);
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    hash,
+    { name: "AES-KW" },
+    true,
+    ["wrapKey", "unwrapKey"]
+  );
+
+  const wrappedKey = await crypto.subtle.wrapKey("raw", chatKey, key, {
+    name: "AES-KW",
+  });
+
+  return new Uint8Array(wrappedKey);
+}
+
 async function loadData() {
   const key = await crypto.subtle.importKey(
     "raw",
@@ -38,8 +60,11 @@ async function loadData() {
     testData.users.map(async (u) => createUser(u.username, u.password))
   );
   testData.groups.forEach(async (g) => {
-    const groupMembers = g.users.map((u) => users[u]?.id as string);
-    const group = await createChat(g.group_name, groupMembers);
+    const group = await createChat(g.group_name);
+    g.users.forEach(async (u) => {
+      const wkey = await createUserMasterKey(key, users[u]?.username!);
+      addUserToChat(users[u]?.id!, group?.id!, wkey);
+    });
     g.messages.forEach(async (m) => {
       const senderId = users[m.from]?.id as string;
 

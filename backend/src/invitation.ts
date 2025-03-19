@@ -7,31 +7,22 @@ export class InvitationDescription {
   createdAt: number;
   expireTime: number;
   chatId: string;
-  joinKey: string;
 
-  constructor(key: string, chatId: string, expireTime: number) {
+  constructor(chatId: string, expireTime: number) {
     this.id = crypto.randomUUID();
     this.createdAt = Date.now();
     this.expireTime = expireTime;
     this.chatId = chatId;
-    this.joinKey = key;
 
     Invitations.push(this);
-  }
-
-  hashInvitationId() {
-    const hmac = crypto.createHmac("sha256", this.joinKey);
-    hmac.update(this.id);
-    return hmac.digest("hex");
   }
 }
 
 export function validateChatJoinRequest(
-  incomingID: string,
-  key: string
+  incomingID: string
 ): InvitationDescription | undefined {
   const index = Invitations.findIndex((inv) => {
-    if (incomingID == inv.id && key == inv.joinKey) {
+    if (incomingID == inv.id) {
       if (Date.now() - inv.createdAt < inv.expireTime) {
         return inv;
       }

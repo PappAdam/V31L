@@ -14,6 +14,7 @@ export type PublicChat = {
   id: string;
   name?: string;
   encryptedMessages: PublicMessage[];
+  encryptedChatKey?: Uint8Array;
 };
 
 export type EncryptedMessage = {

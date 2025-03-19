@@ -32,11 +32,8 @@ export async function findChatById(chatId: string): Promise<Chat | null> {
  * @param {string[]} userIds - An array of user IDs to be added as members to the new chat.
  * @returns {Promise<Chat | null>} `Chat` if successful, `null` if no users are provided or an error occurs.
  */
-export async function createChat(
-  name: string,
-  userIds: string[]
-): Promise<Chat | null> {
-  if (!name || userIds.length == 0) {
+export async function createChat(name: string): Promise<Chat | null> {
+  if (!name) {
     return null;
   }
 
@@ -44,13 +41,6 @@ export async function createChat(
     const newChat = await prisma.chat.create({
       data: {
         name: name,
-        members: {
-          // Creating ChatMember records
-          create: userIds.map((userId) => ({
-            userId: userId,
-            key: "Not yet implemented.",
-          })),
-        },
       },
     });
     return newChat;
@@ -95,7 +85,7 @@ export async function findChatsByUser(
   userId: string,
   limit: number = -1,
   cursor?: string
-): Promise<Chat[]> {
+): Promise<(Chat & { key: Uint8Array })[]> {
   try {
     if (!userId) {
       console.warn("findChatsByUser called with an empty userId");
@@ -107,10 +97,20 @@ export async function findChatsByUser(
       return [];
     }
 
-    return await prisma.chat.findMany({
+    const chats = await prisma.chat.findMany({
       where: {
         members: {
           some: {
+            userId: userId,
+          },
+        },
+      },
+      include: {
+        members: {
+          select: {
+            key: true,
+          },
+          where: {
             userId: userId,
           },
         },
@@ -123,6 +123,14 @@ export async function findChatsByUser(
       ...(limit > 0 ? { take: limit } : {}),
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     });
+
+    const flattenChats = chats.map((chat) => ({
+      ...chat,
+      key: chat.members[0]?.key,
+      members: undefined,
+    }));
+
+    return flattenChats;
   } catch (error) {
     console.error("Error retrieving chats for user:", error);
     return [];

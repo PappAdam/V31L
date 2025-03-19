@@ -4,14 +4,13 @@ import {
   PublicMessage,
   ServerChatsPackage,
 } from "@common";
-import { addUserToChat, findChatMembersByChat } from "../db/chatMember";
+import { findChatMembersByChat } from "../db/chatMember";
 import { createMessage, findChatMessages } from "../db/message";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import ServerPackageSender from "./server";
 import { getPublicChatsWithMessages, toPublicMessage } from "@/db/public";
 import { findUserById } from "@/db/user";
-import { InvitationDescription, validateChatJoinRequest } from "../invitation";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
