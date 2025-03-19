@@ -1,26 +1,48 @@
-import { inject, Injectable } from '@angular/core';
-import { SocketService } from './socket.service';
-import { filter, map } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { EncryptedMessage, PublicMessage } from '@common';
+
+export type Message = Omit<PublicMessage, 'encryptedData'> & {
+  message: string;
+};
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EncryptionService {
-  private socketService = inject(SocketService)
+  encoder = new TextEncoder();
+  decoder = new TextDecoder();
+  constructor() {}
 
-  public decryptedMessages = this.socketService.getPackagesForHeader("Chats").pipe(
-    map(chats => {
-      return chats[0]
-    })
-  )
+  async encryptText(key: CryptoKey, text: string): Promise<EncryptedMessage> {
+    const iv = crypto.getRandomValues(new Uint8Array(16));
+    const encrypted = await crypto.subtle.encrypt(
+      {
+        name: 'AES-CBC',
+        iv,
+      },
+      key,
+      this.encoder.encode(text)
+    );
 
-  constructor() { }
-
-  encryptText() {
-
+    return {
+      data: encrypted,
+      iv,
+    };
   }
 
-  decryptText() {
+  async decryptText(
+    key: CryptoKey,
+    encrypted: EncryptedMessage
+  ): Promise<string> {
+    const decrypted = await crypto.subtle.decrypt(
+      {
+        name: 'AES-CBC',
+        iv: encrypted.iv,
+      },
+      key,
+      encrypted.data
+    );
 
+    return this.decoder.decode(decrypted);
   }
 }
