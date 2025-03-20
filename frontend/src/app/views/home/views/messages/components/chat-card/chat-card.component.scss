@@ -1,0 +1,153 @@
+@use "../../../../../../../styles/styles.scss" as *;
+
+.card-wrapper:not([data-unread=""]) {
+  color: $mat-sys-on-surface-variant;
+}
+
+.card-wrapper[data-selected="true"] {
+  // border: 0.4px solid $mat-sys-primary;
+  background-color: $mat-sys-surface-container-highest;
+}
+
+.card-wrapper:hover {
+  cursor: pointer;
+  background-color: $mat-sys-surface-container-highest;
+  transition: all 0.25s ease-in-out;
+}
+
+.card-wrapper {
+  transition: all 0.25s ease-in-out; //
+  background-color: $mat-sys-surface-container-high;
+  border-radius: $mat-sys-corner-medium;
+  color: $mat-sys-on-surface;
+  width: 100%;
+  height: $mat-sys-component-height;
+  display: flex;
+  min-width: 0;
+  gap: $mat-sys-spacing-sm;
+  padding: $mat-sys-spacing-sm;
+  align-items: center;
+  margin-top: $mat-sys-spacing-sm;
+  margin-right: $mat-sys-spacing-sm;
+
+  .image-wrapper {
+    height: $mat-sys-img-profile-large;
+    background-color: $mat-sys-primary-container;
+    border-radius: $mat-sys-corner-full;
+    aspect-ratio: 1/1;
+  }
+
+  .text-wrapper {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+
+    .title-wrapper {
+      height: 50%;
+      font: $mat-sys-title-medium-font;
+      font-size: $mat-sys-title-medium-size;
+      font-weight: $mat-sys-title-medium-weight;
+      letter-spacing: $mat-sys-title-medium-tracking;
+
+      .group_title:not([data-unread=""]) {
+        font-weight: 800;
+      }
+    }
+
+    .last-msg-wrapper {
+      display: flex;
+      width: 100%;
+      min-width: 0;
+      height: 50%;
+      align-items: end;
+      font: $mat-sys-body-medium-font;
+      font-size: $mat-sys-body-small-size;
+      letter-spacing: $mat-sys-body-medium-tracking;
+      .last-msg {
+        flex-grow: 1; // Allows it to take up remaining space
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .last-msg:not([data-unread=""]) {
+        font-weight: bold;
+      }
+    }
+  }
+
+  .info-wrapper {
+    height: 100%;
+    width: 25%;
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: end;
+    gap: $mat-sys-spacing-sm;
+
+    .status-wrapper {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      justify-content: end;
+      height: $mat-sys-spacing-md;
+      visibility: hidden;
+
+      .status {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        justify-content: center;
+        padding: $mat-sys-spacing-base;
+        background-color: $mat-sys-primary-container;
+        height: 100%;
+        border-radius: $mat-sys-corner-extra-small;
+        font: $mat-sys-label-medium-font;
+        font-size: $mat-sys-label-medium-size;
+        font-weight: $mat-sys-label-medium-weight-prominent;
+        line-height: $mat-sys-label-medium-line-height;
+        letter-spacing: $mat-sys-label-medium-tracking;
+      }
+    }
+
+    .status-wrapper:not([data-status=""]) {
+      visibility: visible;
+    }
+
+    .unread-wrapper {
+      height: $mat-sys-spacing-md;
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      justify-content: end;
+      visibility: hidden;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      .unread {
+        display: flex;
+        min-width: 0;
+        justify-content: center;
+        align-items: center;
+        background-color: $mat-sys-secondary;
+        height: 100%;
+        border-radius: $mat-sys-corner-full;
+        padding: $mat-sys-spacing-base;
+        font: $mat-sys-label-medium-font;
+        font-size: $mat-sys-label-medium-size;
+        font-weight: $mat-sys-label-medium-weight-prominent;
+        line-height: $mat-sys-label-medium-line-height;
+        letter-spacing: $mat-sys-label-medium-tracking;
+        color: $mat-sys-on-secondary;
+      }
+    }
+
+    .unread-wrapper:not([data-unread=""]) {
+      visibility: visible;
+    }
+  }
+}

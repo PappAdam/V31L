@@ -1,0 +1,102 @@
+@use "../../../../../styles/styles.scss" as *;
+
+.message-wrapper:not([data-sender=""]) {
+  flex-direction: row-reverse;
+}
+
+.message-wrapper[data-first="true"] {
+  padding: $mat-sys-spacing-sm $mat-sys-spacing-sm 0 $mat-sys-spacing-sm;
+}
+
+.message-wrapper {
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  justify-content: flex-end;
+  gap: calc(#{$mat-sys-spacing-sm} / 2);
+  padding: calc(#{$mat-sys-spacing-sm} / 4) $mat-sys-spacing-sm 0
+    $mat-sys-spacing-sm;
+  color: $mat-sys-on-surface;
+
+  .message-bubble-wrapper:not([data-sender=""]) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .message-bubble-wrapper {
+    display: flex;
+    flex-direction: column-reverse;
+    min-width: 0;
+    justify-content: flex-start;
+
+    .profile-name-wrapper {
+      padding-left: $mat-sys-spacing-md;
+      visibility: hidden;
+      font: $mat-sys-label-large-font;
+      font-size: $mat-sys-label-medium-size;
+      font-weight: $mat-sys-label-large-weight;
+      line-height: $mat-sys-label-large-line-height;
+      letter-spacing: $mat-sys-label-large-tracking;
+      height: 0;
+
+      &[data-first="true"]:not([data-sender=""]) {
+        visibility: visible;
+        height: calc($mat-sys-label-medium-size * 1.4);
+      }
+    }
+
+    .profile-name-wrapper[data-first="true"] {
+      visibility: visible;
+      height: fit-content;
+    }
+
+    .message-bubble {
+      background-color: $mat-sys-surface-variant;
+      border-radius: $mat-sys-corner-large;
+      padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
+      max-width: 580px;
+      min-height: $mat-sys-img-profile-medium;
+      font: $mat-sys-body-medium-font;
+      font-size: $mat-sys-body-medium-size;
+      line-height: $mat-sys-body-medium-line-height;
+      letter-spacing: $mat-sys-body-medium-tracking;
+      height: fit-content;
+      flex-shrink: 1;
+      word-wrap: break-word;
+      min-width: none;
+
+      .message {
+        word-wrap: wrap;
+        color: $mat-sys-on-surface-variant;
+      }
+    }
+  }
+
+  .message-profile-wrapper {
+    flex-shrink: 0;
+    margin-top: calc(#{$mat-sys-label-large-size} + 2px);
+    align-self: flex-start;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+
+    .profile-image {
+      visibility: hidden;
+      border-radius: $mat-sys-corner-full;
+      background-color: $mat-sys-primary-container;
+      height: 0;
+      width: $mat-sys-img-profile-medium;
+    }
+
+    .profile-image[data-first="true"] {
+      visibility: visible;
+      width: $mat-sys-img-profile-medium;
+      height: $mat-sys-img-profile-medium;
+    }
+  }
+
+  .message-profile-wrapper[data-sender=""][data-first="true"] {
+    margin-top: 0px;
+  }
+}

@@ -19,6 +19,7 @@ mat-checkbox {
 
 .button-container {
   display: flex;
+  min-width: 0;
   justify-content: space-between;
   width: 100%;
 }

@@ -1,0 +1,56 @@
+@use "./../../../../../styles/styles.scss" as *;
+
+.navbar-wrapper {
+  display: flex;
+  min-width: 0;
+  padding: 8px 8px 10px 8px;
+  gap: $mat-sys-spacing-md;
+  background-color: $mat-sys-surface-container;
+  border-radius: $mat-sys-corner-medium;
+  justify-content: space-evenly;
+  align-items: center;
+  cursor: pointer;
+
+  .option-wrapper {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: $mat-sys-spacing-base;
+
+    // Default styles
+    .option-icon {
+      width: $mat-sys-component-height;
+      padding: 1.5px;
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        color: $mat-sys-on-surface;
+      }
+    }
+
+    .option-label {
+      color: $mat-sys-on-surface;
+      font-size: $mat-sys-label-medium-size;
+    }
+
+    // Active state styles
+    &.active {
+      .option-icon {
+        border-radius: $mat-sys-corner-full;
+        background-color: $mat-sys-primary;
+      }
+
+      .option-label {
+        color: $mat-sys-primary;
+      }
+
+      .nav-icon {
+        color: $mat-sys-on-primary !important; // Your custom color variable
+      }
+    }
+  }
+}

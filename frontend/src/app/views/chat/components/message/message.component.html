@@ -1,0 +1,28 @@
+<div
+  class="message-wrapper"
+  [attr.data-sender]="sender"
+  [attr.data-first]="first"
+>
+  <div class="message-bubble-wrapper" [attr.data-sender]="sender">
+    <div
+      class="profile-name-wrapper"
+      [attr.data-first]="first"
+      [attr.data-sender]="sender"
+    >
+      {{ sender }}
+      <div class="profile-name"></div>
+    </div>
+    <div class="message-bubble" [attr.data-first]="first">
+      <p class="message">
+        {{ msg }}
+      </p>
+    </div>
+  </div>
+  <div
+    class="message-profile-wrapper"
+    [attr.data-first]="first"
+    [attr.data-sender]="sender"
+  >
+    <div class="profile-image" [attr.data-first]="first"></div>
+  </div>
+</div>

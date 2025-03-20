@@ -1,0 +1,40 @@
+@use "../../../../../../../styles/styles.scss" as *;
+.member-wrapper {
+  display: flex;
+  gap: $mat-sys-spacing-sm;
+  width: 100%; // Add this
+  max-width: 100%; // Add this
+
+  .profile-image-wrapper {
+    flex-shrink: 0; // Prevent image from shrinking
+    background-color: $mat-sys-primary-container;
+    height: $mat-sys-img-profile-medium;
+    aspect-ratio: 1/1;
+    border-radius: $mat-sys-corner-full;
+  }
+
+  .name-wrapper {
+    flex: 1; // Take available space
+    min-width: 0; // Override flex default
+    color: $mat-sys-on-surface;
+    font-size: $mat-sys-label-large-size;
+    font-weight: $mat-sys-body-small-weight;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    // Optional: Ensure text container is properly constrained
+    span {
+      display: inline-block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .options-wrapper {
+    flex-shrink: 0; // Prevent options from shrinking
+    color: $mat-sys-on-surface;
+  }
+}

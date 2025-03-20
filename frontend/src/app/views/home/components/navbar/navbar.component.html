@@ -1,0 +1,16 @@
+<div class="navbar-wrapper">
+  @for (tab of tabs; track $index) {
+  <div
+    class="option-wrapper"
+    (click)="selectTab(tab)"
+    [ngClass]="{ active: activeTab.name === tab }"
+  >
+    <div class="option-icon">
+      <mat-icon fontIcon="{{ tab }}" class="nav-icon"></mat-icon>
+    </div>
+    <div class="option-label">
+      {{ tab }}
+    </div>
+  </div>
+  }
+</div>
