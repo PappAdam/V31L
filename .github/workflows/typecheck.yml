@@ -10,6 +10,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Cache Node modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.npm
+            frontend/node_modules
+            backend/node_modules
+            common/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
@@ -18,17 +30,17 @@ jobs:
       - name: Build common folder
         run: |
           cd common
-          npm i typescript
+          npm ci
           npx tsc
 
       - name: Typecheck frontend folder
         run: |
           cd frontend
-          npm i
+          npm ci
           npx tsc --noEmit
 
       - name: Typecheck backend folder
         run: |
           cd backend
-          npm i
+          npm ci
           npx tsc --noEmit

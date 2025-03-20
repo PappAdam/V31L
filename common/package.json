@@ -1,3 +1,6 @@
 {
-    "main": "index.ts"
+    "main": "index.ts",
+    "dependencies": {
+        "typescript": "^5.8.2"
+    }
 }
