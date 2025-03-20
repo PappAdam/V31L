@@ -1,0 +1,34 @@
+name: Test Workflow
+
+on: [push]
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "22"
+
+      - name: Build common folder
+        run: |
+          cd common
+          npm i typescript
+          npx tsc
+
+      - name: Typecheck frontend folder
+        run: |
+          cd frontend
+          npm i
+          npx tsc --noEmit
+
+      - name: Typecheck backend folder
+        run: |
+          cd backend
+          npm i
+          npx tsc --noEmit

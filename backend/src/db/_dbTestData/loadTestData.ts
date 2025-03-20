@@ -5,7 +5,7 @@ import { createUser } from "../user";
 
 async function loadData() {
   const users = await Promise.all(
-    testData.users.map(async (u) => createUser(u.username, u.password))
+    testData.users.map(async (u) => createUser(u.username, u.password, false))
   );
   testData.groups.forEach(async (g) => {
     const groupMembers = g.users.map((u) => users[u]?.id as string);
