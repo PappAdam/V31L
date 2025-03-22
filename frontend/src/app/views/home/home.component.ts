@@ -19,12 +19,14 @@ import { MessagesComponent } from './views/messages/messages.component';
 import { NavigationService, Target } from '@/services/navigation.service';
 import { NavigationOutletDirectiveDirective } from '@/directives/navigation-outlet-directive.directive';
 import { AfterViewInit } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-home',
   imports: [
     NavbarComponent,
     MessagesComponent,
     NavigationOutletDirectiveDirective,
+    RouterOutlet,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -44,22 +46,5 @@ export class HomeComponent implements AfterViewInit {
     this.navigationService.registerParent(Target.home, this.container, {
       initialPage: MessagesComponent,
     });
-  }
-  activeTabChangedHandler(tab: ActiveTab) {
-    if (this.inital == true) {
-      this.inital = false;
-      console.log('ran treu');
-    } else {
-      console.log('ran false');
-
-      this.container.remove(0);
-    }
-    if (tab.name == 'settings') {
-      this.container.createComponent(SettingsComponent);
-    } else if (tab.name == 'add') {
-      this.container.createComponent(AddComponent);
-    } else if (tab.name == 'search') {
-      this.container.createComponent(SearchComponent);
-    }
   }
 }

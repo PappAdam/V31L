@@ -2,8 +2,9 @@
   @for (tab of tabs; track $index) {
   <div
     class="option-wrapper"
-    (click)="selectTab(tab)"
+    [routerLink]="[{ outlets: { home: [tab] } }]"
     [ngClass]="{ active: activeTab.name === tab }"
+    (click)="selectTab(tab)"
   >
     <div class="option-icon">
       <mat-icon fontIcon="{{ tab }}" class="nav-icon"></mat-icon>

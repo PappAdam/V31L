@@ -26,6 +26,7 @@ export class ChatComponent {
   platformService: PlatformService = inject(PlatformService);
   color = '#ffffff30';
   detailsState = 'closed';
+
   constructor() {
     this.platform = this.platformService.info;
   }

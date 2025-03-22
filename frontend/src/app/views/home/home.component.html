@@ -1,10 +1,8 @@
 @if (this.platform?.platform == "web") {
 <div class="home-desktop-wrapper">
-  <!-- <div class="tab-outlet"><app-messages></app-messages></div> -->
   <div class="tab-outlet">
-    <div #navOutlet></div>
+    <router-outlet name="home"> </router-outlet>
   </div>
-
-  <app-navbar (activeTabChanged)="activeTabChangedHandler($event)"></app-navbar>
+  <app-navbar></app-navbar>
 </div>
 } @else { "this is the mobile type stuff" }
