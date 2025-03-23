@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { User } from "@prisma/client";
 import prisma from "./_db";
+import authenticator from "authenticator";
 
 /**
  * Creates a new user.
@@ -11,19 +12,24 @@ import prisma from "./_db";
  */
 export async function createUser(
   username: string,
-  password: string
+  password: string,
+  mfaEnabled: boolean
 ): Promise<User | null> {
   if (!username || !password) {
     return null;
   }
   try {
     password = await bcrypt.hash(password, 10);
+    const authKey = mfaEnabled ? authenticator.generateKey() : null;
+
     const newUser = await prisma.user.create({
       data: {
         username,
         password,
+        authKey,
       },
     });
+
     return newUser;
   } catch (error) {
     console.error("Error creating user:\n", error);

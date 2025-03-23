@@ -17,6 +17,8 @@ import {
   first,
 } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { InviteService } from '@/services/invite.service';
+import { EncryptionService } from '@/services/encryption.service';
 
 @Component({
   selector: 'app-home',
@@ -36,6 +38,10 @@ import { tap } from 'rxjs/operators';
 export class HomeComponent {
   protected messageService = inject(MessageService);
   protected authService = inject(AuthService);
+  protected inviteService = inject(InviteService);
+  protected encryptionService = inject(EncryptionService);
+
+  protected inviteId = '';
 
   selectedChatIndex$ = new BehaviorSubject<number>(-1);
   chats$ = this.messageService.chats$;
@@ -44,6 +50,7 @@ export class HomeComponent {
   );
 
   messageControl = new FormControl('');
+  joinControl = new FormControl('');
 
   constructor() {
     this.chats$
@@ -60,5 +67,24 @@ export class HomeComponent {
     const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
     this.messageService.sendMessage(selectedChat.id, message);
     this.messageControl.reset();
+  }
+
+  async sendJoin() {
+    const invId = this.joinControl.value?.trim();
+    if (!invId) {
+      return;
+    }
+
+    this.inviteService.sendJoinRequest(invId, this.encryptionService.globalKey);
+  }
+
+  async createInvite() {
+    const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
+    const invite = await this.inviteService.createInvitation(selectedChat.id);
+    if (invite.result == 'Success' && invite.type == 'Create') {
+      this.inviteId = invite.invId;
+    }
+
+    navigator.clipboard.writeText(this.inviteId);
   }
 }

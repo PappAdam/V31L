@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 @Component({
@@ -20,12 +21,13 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
     MatInputModule,
     MatIconModule,
     MatButtonModule,
+    MatCheckboxModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
-  loginForm = new FormGroup({
+  protected loginForm = new FormGroup({
     username: new FormControl('', [
       Validators.required,
       // Validators.minLength(8),
@@ -39,22 +41,13 @@ export class LoginComponent {
       // Ensures at least one uppercase letter, one lowercase letter, and one digit
     ]),
   });
-  errorMessage: string = '';
-  showPassord = false;
-  signIn: boolean = true;
+
+  // Values used to control the form
+  protected mfaEnabled = false;
+  protected showPassord = false;
+  protected signIn = true;
 
   constructor(private authService: AuthService, private router: Router) {}
-
-  // If a token is stored in localstorage, refresh it, navigate to frontpage if the refresh was successful
-  ngOnInit() {
-    if (this.authService.user) {
-      this.authService.refreshToken().then((token) => {
-        if (token) {
-          this.router.navigate(['../']);
-        }
-      });
-    }
-  }
 
   get promptText() {
     return this.signIn ? 'Sign In' : 'Sign Up';
@@ -75,16 +68,33 @@ export class LoginComponent {
     const response = await this.authService.authorize(
       username,
       password,
-      authRoute
+      authRoute,
+      this.mfaEnabled ? '' : null
     );
 
-    if (response.result == 'Success') {
-      this.router.navigate(['/']);
-      return;
-    }
+    switch (response.result) {
+      case 'Success':
+        this.router.navigate(['/']);
+        return;
 
-    this.errorMessage = response.message;
-    console.warn('Add this error message to login form: ', this.errorMessage);
+      case 'Next':
+        switch (response.to) {
+          case 'Setup':
+            this.router.navigate([`/login/mfa/setup`], {
+              state: { setupCode: response.setupCode },
+            });
+            return;
+          case 'Verify':
+            this.router.navigate([`/login/mfa/verify`]);
+            return;
+        }
+      case 'Error':
+        console.warn(
+          'Add this error message to login form: ',
+          response.message
+        );
+        break;
+    }
   }
 
   toggleShowPassword(event: MouseEvent) {

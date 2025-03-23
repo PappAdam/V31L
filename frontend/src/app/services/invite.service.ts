@@ -13,11 +13,12 @@ export class InviteService {
   http = inject(HttpClient);
   enc = inject(EncryptionService);
   key!: CryptoKey;
+  user: StoredUser;
 
   constructor() {
     const rawUser = localStorage.getItem('user');
-    const user: StoredUser = JSON.parse(rawUser!);
-    const encodedUserName = this.enc.encoder.encode(user.username);
+    this.user = JSON.parse(rawUser!);
+    const encodedUserName = this.enc.encoder.encode(this.user.username);
     // TODO use real keys, randomly generated
     crypto.subtle
       .digest('SHA-256', encodedUserName)
@@ -42,7 +43,9 @@ export class InviteService {
     const body = { chatId };
     try {
       const response = await lastValueFrom(
-        this.http.post<InviteResponse>(this.baseUrl + 'create', body)
+        this.http.post<InviteResponse>(this.baseUrl + 'create', body, {
+          headers: { Authorization: this.user.token },
+        })
       );
       return response;
     } catch (error: any) {
@@ -60,13 +63,18 @@ export class InviteService {
     key: CryptoKey
   ): Promise<InviteResponse> {
     try {
-      const wrappedKey = await crypto.subtle.wrapKey('raw', key, this.key, {
+      const rawKey = await crypto.subtle.wrapKey('raw', key, this.key, {
         name: 'AES-KW',
       });
 
-      const body = { key: new Uint8Array(wrappedKey), invId };
+      const wrappedKey = String.fromCharCode(...new Uint8Array(rawKey));
+
+      const body = { key: wrappedKey, invId };
+
       const response = await lastValueFrom(
-        this.http.post<InviteResponse>(this.baseUrl + 'join', body)
+        this.http.post<InviteResponse>(this.baseUrl + 'join', body, {
+          headers: { Authorization: this.user.token },
+        })
       );
       return response;
     } catch (error: any) {

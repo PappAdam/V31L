@@ -17,6 +17,13 @@
       </li>
       }
     </ul>
+    <textarea
+      placeholder="Type your join key..."
+      cols="32"
+      rows="1"
+      [formControl]="joinControl"
+      (keydown.enter)="$event.preventDefault(); sendJoin()"
+    ></textarea>
   </div>
   <div class="content">
     <div class="chat-header">
@@ -25,6 +32,10 @@
         {{ selectedChat.name }}
         }
       </span>
+      <button mat-flat-button color="secondary" (click)="createInvite()">
+        create invite
+      </button>
+      <span class="inv-id">{{ inviteId }}</span>
     </div>
     <ul #messagesContainer>
       @for (message of (this.selectedChat$ | async)?.messages; track $index) {

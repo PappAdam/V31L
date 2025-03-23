@@ -57,7 +57,7 @@ async function loadData() {
   );
 
   const users = await Promise.all(
-    testData.users.map(async (u) => createUser(u.username, u.password))
+    testData.users.map(async (u) => createUser(u.username, u.password, false))
   );
   testData.groups.forEach(async (g) => {
     const group = await createChat(g.group_name);

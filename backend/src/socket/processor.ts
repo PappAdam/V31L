@@ -11,6 +11,7 @@ import { Client } from "./client";
 import ServerPackageSender from "./server";
 import { getPublicChatsWithMessages, toPublicMessage } from "@/db/public";
 import { findUserById } from "@/db/user";
+import { Invitation, validateChatJoinRequest } from "../encryption/invitation";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(

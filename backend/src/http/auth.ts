@@ -14,8 +14,11 @@ import {
   AuthResponse,
   AuthErrorResponse,
   AuthSuccessResponse,
+  nextSetupMfaResponse,
+  nextVerifyMfaResponse,
 } from "@common";
 import { User } from "@prisma/client";
+import { generateTotpUri, verifyToken } from "authenticator";
 
 const authRouter = Router();
 authRouter.post(
@@ -36,12 +39,14 @@ export default authRouter;
  *
  * Creates a new user with the username password combination if a user with that username does not exist
  *
+ * Creates a 2FA key, if the `mfaEnabled` field in the body is `true`
+ *
  * Sends an {@link AuthResponse}. {@link AuthSuccessResponse} on success, {@link AuthErrorResponse} on error.
  *
  * {@link validateRequiredFields} middleware runs before this handler, no validation needed
  */
 async function registerUser(req: Request, res: Response) {
-  const { username, password } = req.body;
+  const { username, password, mfaEnabled } = req.body;
 
   try {
     const existingUser = await findUserByName(username);
@@ -51,9 +56,22 @@ async function registerUser(req: Request, res: Response) {
       return;
     }
 
-    const newUser = await createUser(username, password);
+    const newUser = await createUser(username, password, mfaEnabled);
     if (!newUser) {
       throw new Error("Error creating user in database");
+    }
+
+    if (mfaEnabled) {
+      const setupCode = generateTotpUri(
+        newUser.authKey!,
+        newUser.username,
+        "Veil",
+        "SHA1",
+        6,
+        30
+      );
+      res.status(201).json(nextSetupMfaResponse(setupCode));
+      return;
     }
 
     const token = generateToken(newUser.id);
@@ -67,14 +85,15 @@ async function registerUser(req: Request, res: Response) {
 /**
  * Login Request handler
  *
- * Searches a user with the givem username password combination
+ * Searches a user with the given username password combination,
+ * checks for 2FA code if the account has 2FA enabled
  *
  * Sends an {@link AuthResponse}. {@link AuthSuccessResponse} on success, {@link AuthErrorResponse} on error.
  *
  * {@link validateRequiredFields} middleware runs before this handler, no validation needed
  */
 async function loginUser(req: Request, res: Response) {
-  const { username, password } = req.body;
+  const { username, password, mfa } = req.body;
 
   try {
     const user = await findUserByName(username);
@@ -90,6 +109,18 @@ async function loginUser(req: Request, res: Response) {
     if (!isPasswordMatch) {
       res.status(400).json(invalidCredentialsResponse);
       return;
+    }
+
+    if (user.authKey) {
+      if (!mfa) {
+        res.json(nextVerifyMfaResponse);
+        return;
+      }
+      const verifyResult = verifyToken(user.authKey, mfa);
+      if (!verifyResult) {
+        res.status(400).json(invalidCredentialsResponse);
+        return;
+      }
     }
 
     const token = generateToken(user.id);
