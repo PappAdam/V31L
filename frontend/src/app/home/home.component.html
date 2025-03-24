@@ -6,7 +6,7 @@
     <ul>
       @for (chat of chats$ | async; track $index) {
       <li
-        (click)="selectedChatIndex$.next($index)"
+        (click)="messageService.selectedChatIndex = $index"
         [class.active]="(selectedChatIndex$ | async) === $index"
       >
         <h1>{{ chat.name }}</h1>

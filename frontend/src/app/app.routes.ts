@@ -10,6 +10,7 @@ import { SettingsComponent } from './views/home/views/settings/settings.componen
 import { SearchComponent } from './views/home/views/search/search.component';
 import { MessagesComponent } from './views/home/views/messages/messages.component';
 import { AddComponent } from './views/home/views/add/add.component';
+import { NotFoundComponent } from './views/not-found/not-found.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -26,4 +27,5 @@ export const routes: Routes = [
       { path: 'add', component: AddComponent, outlet: 'home' },
     ],
   },
+  { path: '**', component: NotFoundComponent },
 ];

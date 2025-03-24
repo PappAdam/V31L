@@ -15,7 +15,7 @@ export interface ActiveTab {
   styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent {
-  tabs = ['settings', 'add', 'search'];
+  tabs = ['settings', 'add', 'search', 'messages'];
   activeTab = {} as ActiveTab;
   selectTab(tab: string): void {
     this.activeTab = { index: this.tabs.indexOf(tab), name: tab };
