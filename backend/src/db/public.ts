@@ -2,6 +2,7 @@ import { PublicChat, PublicMessage, PublicUser } from "@common";
 import { findChatsByUser } from "./chat";
 import { findChatMessages } from "./message";
 import { Message } from "@prisma/client";
+import { decryptData } from "@/utils/encryption";
 
 /**
  * Gets chats for a user with `messageCount` number of messages.
@@ -52,8 +53,12 @@ export type RawPublicMessage = { user: PublicUser } & Message;
 export function toPublicMessage(msg: RawPublicMessage): PublicMessage {
   return {
     encryptedData: {
-      data: msg.content,
-      iv: msg.iv,
+      data: decryptData({
+        encrypted: msg.content,
+        iv: msg.outIv,
+        authTag: msg.authTag,
+      }),
+      iv: msg.inIv,
     },
     id: msg.id,
     user: msg.user,

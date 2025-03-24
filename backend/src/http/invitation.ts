@@ -8,6 +8,7 @@ import {
 import { Invitation, validateChatJoinRequest } from "@/invitation";
 import { addUserToChat, findChatMember } from "@/db/chatMember";
 import { validateRequiredFields } from "./middlewares/validate";
+import { stringToUint8Array } from "@/utils/buffers";
 
 const invRouter = Router();
 invRouter.post("/create", validateRequiredFields(["chatId"]), createInvitation);
@@ -89,14 +90,10 @@ async function joinChat(req: Request, res: Response) {
       return;
     }
 
-    const unwrappedKey = new Uint8Array(key.length);
-    for (let i = 0; i < key.length; i++) {
-      unwrappedKey[i] = key.charCodeAt(i);
-    }
-    console.log(unwrappedKey);
+    const unwrappedKey = stringToUint8Array(key);
 
     if (!unwrappedKey) {
-      res.status(400).json("MEGIN SZAR A KEY");
+      res.status(400).json("Bad key");
     }
 
     const chatMember = await addUserToChat(

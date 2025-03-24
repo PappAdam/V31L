@@ -1,5 +1,6 @@
 import { Chat, Message } from "@prisma/client";
 import prisma from "./_db";
+import { encryptData } from "@/utils/encryption";
 
 /**
  * Gets a chat with the given id.
@@ -75,6 +76,7 @@ export async function deleteChat(chatId: string): Promise<Chat | null> {
     return null;
   }
 }
+
 /**
  * Finds all chats that a user is a member of, sorted by the date of the last message.
  *
