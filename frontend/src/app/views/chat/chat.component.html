@@ -22,7 +22,12 @@
       }
     </div>
     <div class="input-wrapper">
-      <textarea name="message" class="text-input"></textarea>
+      <textarea
+        matInput
+        name="message"
+        class="text-input"
+        [formControl]="messageControl"
+      ></textarea>
       <button
         class="message-button"
         matRipple

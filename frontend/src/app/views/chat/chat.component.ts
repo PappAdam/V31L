@@ -11,7 +11,8 @@ import { MessageService } from '@/services/message.service';
 import { combineLatest, firstValueFrom, map, take, tap } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { AuthService } from '@/services/auth.service';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
 @Component({
   selector: 'app-chat',
   imports: [
@@ -22,6 +23,9 @@ import { FormControl } from '@angular/forms';
     MatIconModule,
     MatRipple,
     AsyncPipe,
+    FormsModule,
+    MatInputModule,
+    ReactiveFormsModule,
   ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
@@ -41,6 +45,8 @@ export class ChatComponent {
     map(([messages, index]) => messages[index])
   );
   messageControl = new FormControl('');
+
+  message = '';
 
   previousUser = '';
 
