@@ -5,7 +5,11 @@ import {
   ServerChatsPackage,
 } from "@common";
 import { findChatMembersByChat } from "../db/chatMember";
-import { createMessage, findChatMessages } from "../db/message";
+import {
+  createMessage,
+  findChatMessages,
+  updateMessageById,
+} from "../db/message";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import ServerPackageSender from "./server";
@@ -136,6 +140,14 @@ async function processBasedOnHeader(
       });
 
       return true;
+
+    case "PinMessage":
+      const message = await updateMessageById({
+        id: incoming.messageId,
+        pinned: true,
+      });
+
+      return !!message;
 
     default:
       console.error(

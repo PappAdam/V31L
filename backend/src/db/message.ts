@@ -95,5 +95,54 @@ export async function createMessage(
   }
 }
 
+/**
+ * Gets a message with the given id.
+ *
+ * @param messageId The id of the message to get.
+ *
+ * @returns `Message` if found, `null` if no message with the given id exists.
+ */
+export async function findMessageById(
+  messageId: string
+): Promise<Message | null> {
+  if (!messageId) {
+    return null;
+  }
+  try {
+    return await prisma.message.findUnique({
+      where: {
+        id: messageId,
+      },
+    });
+  } catch (error) {
+    console.error("Error finding message:\n", error);
+    return null;
+  }
+}
+
+/**
+ * Gets a message with the given id.
+ *
+ * @param messageId The id of the message to get.
+ *
+ * @returns `Message` if found, `null` if no message with the given id exists.
+ */
+export async function updateMessageById(
+  message: Partial<Message> & { id: string }
+): Promise<Message | null> {
+  if (!message.id) {
+    return null;
+  }
+  try {
+    return await prisma.message.update({
+      where: { id: message.id },
+      data: message,
+    });
+  } catch (error) {
+    console.error("Error updating message:\n", error);
+    return null;
+  }
+}
+
 // Update and Delete can be implemented later here, no need for it now.
 // I WAS HERE BEFORE DELETE WAS IMPLEMENTED

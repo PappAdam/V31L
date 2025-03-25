@@ -5,6 +5,8 @@ import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { findUserById } from "../db/user";
 import { findChatMember } from "../db/chatMember";
 import processPackage from "./processor";
+import { findMessageById } from "@/db/message";
+import { findChatById } from "@/db/chat";
 
 export const clients: Client[] = [];
 
@@ -46,8 +48,8 @@ export class Client {
   onIncomingPackage = async (event: MessageEvent) => {
     try {
       const decoded = msgpack.decode(event.data as Uint8Array) as ClientPackage;
-      const userId = await this.validateIncomingPackage(decoded);
-      if (userId) {
+      const packageValid = await this.validateIncomingPackage(decoded);
+      if (packageValid) {
         processPackage(this, decoded);
       }
     } catch (error) {
@@ -71,41 +73,40 @@ export class Client {
    * It queries the database, validates that the required data for the package exists
    *
    * @param incoming The incoming package to validate
-   * @returns {Promise<string | null>} `userId` if the package is valid, `null` otherwise
+   * @returns {Promise<boolean>} `true` if the package is valid, `false` otherwise
    */
   validateIncomingPackage = async (
     incoming: ClientPackageDescription
-  ): Promise<string | null> => {
+  ): Promise<boolean> => {
     switch (incoming.header) {
       case "Authorization":
         const token = extractUserIdFromToken(incoming.token);
-        if (!token.userId || token.expired) {
-          return null;
-        }
-        const user = await findUserById(token.userId);
-        return user ? user.id : null;
+        const user = await findUserById(token.userId || "");
+        return !!user && !token.expired;
 
       case "NewMessage":
-        if (!incoming.chatId || !incoming.messageContent || !this.user.id) {
-          return null;
-        }
         const chatMember = await findChatMember(this.user.id, incoming.chatId);
-        // If the user is not a member of the chat, incoming is invalid
-        return chatMember ? this.user.id : null;
+        return this.isAuthorized && !!chatMember && !!incoming.messageContent;
 
       case "DeAuthorization":
-        return this.isAuthorized ? this.user.id : null;
+        return this.isAuthorized;
 
       case "GetChats":
-        return this.isAuthorized ? this.user.id : null;
+        const fromChat = findChatById(incoming.fromId || "");
+        return (
+          this.isAuthorized &&
+          !!fromChat &&
+          incoming.chatCount > 0 &&
+          incoming.messageCount > 0
+        );
 
       case "GetChatMessages":
-        return this.isAuthorized ? this.user.id : null;
+        const fromMessage = findMessageById(incoming.fromId || "");
+        return this.isAuthorized && !!fromMessage && incoming.messageCount > 0;
 
       case "PinMessage":
-        if (!incoming.messageId || !this.user.id) {
-          return null;
-        }
+        const message = await findMessageById(incoming.messageId);
+        return this.isAuthorized && !!message;
 
       default:
         throw new Error(
