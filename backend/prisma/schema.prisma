@@ -11,7 +11,9 @@ model User {
   id       String       @id @default(uuid())
   username String       @unique
   password String
-  authKey  String? // Key for 2FA code generation (TOTP)
+  authKey  Bytes? // Key for 2FA code generation (TOTP)
+  iv       Bytes?
+  authTag  Bytes?
   messages Message[]
   chats    ChatMember[]
 }
@@ -33,7 +35,10 @@ model Message {
   user      User     @relation(fields: [userId], references: [id]) // No delete cascade for user
   userId    String
   timeStamp DateTime @default(now())
-  content   String
+  content   Bytes
+  inIv      Bytes
+  outIv     Bytes
+  authTag   Bytes
 
   lastMessageForChat Chat? @relation("ChatLastMessage") // Opposite relation field
 }
@@ -47,7 +52,7 @@ model ChatMember {
   chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade) // Delete members if chat is deleted
   chatId String
 
-  key String
+  key Bytes
 
   @@unique([userId, chatId])
 }

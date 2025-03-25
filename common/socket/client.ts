@@ -1,3 +1,5 @@
+import { EncryptedMessage } from "./public";
+
 export type ClientPackageDescription =
   | ClientConnectionPackage
   | ClientNewMessagePackage
@@ -10,7 +12,7 @@ export type ClientPackage = ClientPackageDescription & { id: string };
 export type ClientNewMessagePackage = {
   header: "NewMessage";
   chatId: string;
-  messageContent: string;
+  messageContent: EncryptedMessage;
 };
 
 export type ClientConnectionPackage = {

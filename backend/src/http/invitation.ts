@@ -5,16 +5,13 @@ import {
   invitationJoinSuccessResponse,
   serverErrorResponse,
 } from "@common";
-import { Invitation, validateChatJoinRequest } from "@/encryption/invitation";
+import { Invitation, validateChatJoinRequest } from "@/invitation";
 import { addUserToChat, findChatMember } from "@/db/chatMember";
 import { validateRequiredFields } from "./middlewares/validate";
+import { stringToUint8Array } from "@/utils/buffers";
 
 const invRouter = Router();
-invRouter.post(
-  "/create",
-  validateRequiredFields(["key", "chatId"]),
-  createInvitation
-);
+invRouter.post("/create", validateRequiredFields(["chatId"]), createInvitation);
 invRouter.post("/join", validateRequiredFields(["key", "invId"]), joinChat);
 
 export default invRouter;
@@ -42,7 +39,7 @@ export default invRouter;
  * }
  */
 async function createInvitation(req: Request, res: Response) {
-  const { key, chatId } = req.body;
+  const { chatId } = req.body;
 
   try {
     const chatMember = await findChatMember(req.user!.id, chatId);
@@ -52,7 +49,7 @@ async function createInvitation(req: Request, res: Response) {
       return;
     }
 
-    const newInv = new Invitation(key, chatId, 60 * 1000);
+    const newInv = new Invitation(chatId, 60 * 1000);
 
     res.status(201).json(invitationCreateSuccessResponse(newInv.id));
   } catch (error) {
@@ -87,13 +84,23 @@ async function joinChat(req: Request, res: Response) {
   const { key, invId } = req.body;
 
   try {
-    const invitation = validateChatJoinRequest(invId, key);
+    const invitation = validateChatJoinRequest(invId);
     if (!invitation) {
       res.status(400).json(invitationInvalidResponse);
       return;
     }
 
-    const chatMember = await addUserToChat(req.user!.id, invitation.chatId);
+    const unwrappedKey = stringToUint8Array(key);
+
+    if (!unwrappedKey) {
+      res.status(400).json("Bad key");
+    }
+
+    const chatMember = await addUserToChat(
+      req.user!.id,
+      invitation.chatId,
+      unwrappedKey
+    );
     if (!chatMember) {
       throw Error("Failed to add user to chat");
     }

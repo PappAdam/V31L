@@ -2,15 +2,27 @@ import { inject, Injectable } from '@angular/core';
 import { SocketService } from './socket.service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { PublicChat, PublicMessage, ServerChatsPackage } from '@common';
+import { EncryptionService, Message } from './encryption.service';
+import { InviteService } from './invite.service';
+
+export type Chat = Omit<
+  PublicChat,
+  'encryptedMessages' | 'encryptedChatKey'
+> & {
+  messages: Message[];
+  chatKey: CryptoKey;
+};
 
 @Injectable({
   providedIn: 'root',
 })
 export class MessageService {
   socketService = inject(SocketService);
+  encryptionService = inject(EncryptionService);
+  invitationService = inject(InviteService);
 
-  private _chats$ = new BehaviorSubject<PublicChat[]>([]);
-  get chats$(): Observable<PublicChat[]> {
+  private _chats$ = new BehaviorSubject<Chat[]>([]);
+  get chats$(): Observable<Chat[]> {
     return this._chats$.asObservable();
   }
 
@@ -31,44 +43,85 @@ export class MessageService {
     });
   }
 
-  lastMessage(chatId: string): PublicMessage | null {
+  lastMessage(chatId: string): Message | null {
     const chat = this._chats$.value.find((c) => c.id === chatId);
     return chat?.messages[chat.messages.length - 1] || null;
   }
 
-  sendMessage(chatId: string, messageContent: string) {
+  async sendMessage(chatId: string, message: string) {
+    const encrypted = await this.encryptionService.encryptText(
+      this.encryptionService.globalKey,
+      message
+    );
+
     this.socketService.createPackage({
       header: 'NewMessage',
       chatId,
-      messageContent,
+      messageContent: encrypted,
     });
   }
 
-  onChatsPackageRecieved = (chatsPackage: ServerChatsPackage) => {
-    chatsPackage.chats.forEach((chatContent) => {
-      const chatIndex = this._chats$.value.findIndex(
-        (f) => f.id === chatContent.id
+  onChatsPackageRecieved = async (chatsPackage: ServerChatsPackage) => {
+    chatsPackage.chats.forEach(async (rawChatContent) => {
+      let chatIndex = this._chats$.value.findIndex(
+        (f) => f.id === rawChatContent.id
       );
+
+      const chatContext: Omit<Chat, 'chatKey' | 'messages'> = {
+        id: rawChatContent.id,
+        name: rawChatContent.name,
+      };
 
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
-        this._chats$.next([...this._chats$.value, chatContent]);
-        return;
+        if (rawChatContent.encryptedChatKey) {
+          const chatKey = await this.encryptionService.unwrapKey(
+            rawChatContent.encryptedChatKey,
+            this.invitationService.key
+          );
+          const chat = {
+            ...chatContext,
+            chatKey,
+            messages: [],
+          };
+          this._chats$.next([...this._chats$.value, chat]);
+        } else {
+          throw new Error('Failed to fetch the chat key.');
+        }
+
+        chatIndex = this._chats$.value.length - 1;
       }
 
+      const chatMessages: Message[] = await Promise.all(
+        rawChatContent.encryptedMessages.map(async (msg) => {
+          const messageContent = await this.encryptionService.decryptText(
+            this._chats$.value[chatIndex].chatKey,
+            msg.encryptedData
+          );
+
+          return {
+            id: msg.id,
+            user: msg.user,
+            timeStamp: msg.timeStamp,
+            content: messageContent,
+          };
+        })
+      );
+
       if (
-        chatContent.messages[0].timeStamp >
-        this.lastMessage(chatContent.id)!.timeStamp
+        this.lastMessage(rawChatContent.id) &&
+        rawChatContent.encryptedMessages[0].timeStamp >
+          this.lastMessage(rawChatContent.id)!.timeStamp
       ) {
         // Pushing new messages to the end of the array
         this._chats$.value[chatIndex].messages = [
           ...this._chats$.value[chatIndex].messages,
-          ...chatContent.messages,
+          ...chatMessages,
         ];
       } else {
         // Pushing new messages to the beginning of the array
         this._chats$.value[chatIndex].messages = [
-          ...chatContent.messages,
+          ...chatMessages,
           ...this._chats$.value[chatIndex].messages,
         ];
       }

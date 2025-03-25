@@ -1,6 +1,7 @@
 import { Message } from "@prisma/client";
 import prisma from "./_db";
-import { PublicUser } from "@common";
+import { EncryptedMessage, PublicUser } from "@common";
+import { encryptData } from "@/utils/encryption";
 /**
  * Retrieves a specified number of messages from a chat, ordered by timestamp.
  * On limit = -1 returns all the messages.
@@ -59,17 +60,22 @@ export async function findChatMessages(
 export async function createMessage(
   chatId: string,
   userId: string,
-  content: string
+  content: EncryptedMessage
 ): Promise<Message | null> {
   if (!chatId || !userId || !content) {
     return null;
   }
   try {
+    const encryptedContent = encryptData(content.data);
+
     const newMessage = await prisma.message.create({
       data: {
         chatId,
         userId,
-        content,
+        content: encryptedContent.encrypted,
+        inIv: content.iv,
+        outIv: encryptedContent.iv,
+        authTag: encryptedContent.authTag,
       },
     });
 
