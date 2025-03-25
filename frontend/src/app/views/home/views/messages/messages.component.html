@@ -1,0 +1,17 @@
+<div class="messages-wrapper">
+  <mat-tab-group>
+    <mat-tab label="Direct">
+      @for (chat of chats$ | async; track $index) {
+      <app-chat-card
+        (click)="messageService.selectedChatIndex = $index"
+        name="{{ chat.name }}"
+        last_msg="{{ chat.messages[0].content }}"
+        unread=""
+      ></app-chat-card>
+      }
+    </mat-tab>
+    <mat-tab label="Group">
+      <div class="group-wrapper"></div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

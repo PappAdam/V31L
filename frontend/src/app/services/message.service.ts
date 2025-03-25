@@ -26,6 +26,19 @@ export class MessageService {
     return this._chats$.asObservable();
   }
 
+  private _selectedChatIndex$ = new BehaviorSubject<number>(-1);
+  get selectedChatIndex$(): Observable<number> {
+    return this._selectedChatIndex$.asObservable();
+  }
+
+  currentSelectedChatIndex(): number {
+    return this._selectedChatIndex$.value;
+  }
+
+  set selectedChatIndex(index: number) {
+    this._selectedChatIndex$.next(index);
+  }
+
   constructor() {
     this.socketService
       .addPackageListener('Chats')

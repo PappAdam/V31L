@@ -1,0 +1,15 @@
+@if (this.platform?.platform == "web") {
+<div class="header-wrapper">
+  <div class="title-wrapper">
+    <div class="image"></div>
+    <div class="title">
+      @if (this.selectedChat$ | async; as selectedChat) {
+      {{ selectedChat.name }}
+      }
+    </div>
+  </div>
+  <div class="details" (click)="openDetails()">
+    <mat-icon fontIcon="more_vert"></mat-icon>
+  </div>
+</div>
+} @else { "this is mobile stuff" }

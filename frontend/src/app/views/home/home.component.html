@@ -1,0 +1,8 @@
+@if (this.platform?.platform == "web") {
+<div class="home-desktop-wrapper">
+  <div class="tab-outlet">
+    <router-outlet name="home"> </router-outlet>
+  </div>
+  <app-navbar></app-navbar>
+</div>
+} @else { "this is the mobile type stuff" }

@@ -1,0 +1,63 @@
+// not-found.component.scss
+@use "@angular/material" as mat;
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: $mat-sys-background;
+  padding: $mat-sys-spacing-xxl;
+}
+
+.content {
+  text-align: center;
+  max-width: 600px;
+  padding: $mat-sys-spacing-xxl;
+  background-color: $mat-sys-surface;
+  border-radius: $mat-sys-corner-extra-large;
+  box-shadow: 0 $mat-sys-level1 0 0 $mat-sys-shadow;
+}
+
+.error-code {
+  font: $mat-sys-display-large-font;
+  font-size: $mat-sys-display-large-size;
+  line-height: $mat-sys-display-large-line-height;
+  font-weight: $mat-sys-display-large-weight;
+  color: $mat-sys-error;
+  margin-bottom: $mat-sys-spacing-xl;
+}
+
+.title {
+  font: $mat-sys-headline-medium-font;
+  font-size: $mat-sys-headline-medium-size;
+  line-height: $mat-sys-headline-medium-line-height;
+  font-weight: $mat-sys-headline-medium-weight;
+  color: $mat-sys-on-surface;
+  margin-bottom: $mat-sys-spacing-md;
+}
+
+.description {
+  font: $mat-sys-body-large-font;
+  font-size: $mat-sys-body-large-size;
+  line-height: $mat-sys-body-large-line-height;
+  color: $mat-sys-on-surface-variant;
+  margin-bottom: $mat-sys-spacing-xxl;
+}
+
+.home-button {
+  height: $mat-sys-btn-height-md;
+  padding: $mat-sys-btn-padding-md;
+  font: $mat-sys-label-large-font;
+  font-weight: $mat-sys-label-large-weight-prominent;
+  border-radius: $mat-sys-corner-large;
+
+  &:hover {
+    background-color: $mat-sys-primary-container;
+    color: $mat-sys-on-primary-container;
+  }
+
+  &:active {
+    background-color: $mat-sys-primary-fixed-dim;
+  }
+}

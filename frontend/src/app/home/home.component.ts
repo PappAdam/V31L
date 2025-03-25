@@ -43,8 +43,9 @@ export class HomeComponent {
 
   protected inviteId = '';
 
-  selectedChatIndex$ = new BehaviorSubject<number>(-1);
   chats$ = this.messageService.chats$;
+  selectedChatIndex$ = this.messageService.selectedChatIndex$;
+
   selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
     map(([messages, index]) => messages[index])
   );
@@ -52,18 +53,12 @@ export class HomeComponent {
   messageControl = new FormControl('');
   joinControl = new FormControl('');
 
-  constructor() {
-    this.chats$
-      .pipe(
-        first(),
-        tap(() => this.selectedChatIndex$.next(0))
-      )
-      .subscribe();
-  }
+  constructor() {}
 
   async sendMessage() {
     const message = this.messageControl.value?.trim();
-    if (!message || this.selectedChatIndex$.value == -1) return;
+    if (!message || this.messageService.currentSelectedChatIndex() == -1)
+      return;
     const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
     this.messageService.sendMessage(selectedChat.id, message);
     this.messageControl.reset();

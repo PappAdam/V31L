@@ -1,0 +1,50 @@
+@if (this.platform?.platform == "web") {
+<div class="chat-outer-wrapper">
+  <div class="chat-wrapper">
+    <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
+    <div class="messages-wrapper">
+      @for (message of (this.selectedChat$ | async)?.messages; track $index) {
+
+      <app-message
+        msg="{{ message.content }}"
+        first="{{
+          message.user.username == this.previousUser ? 'false' : 'true'
+        }}"
+        sender="{{
+          message.user.username == authService.user?.username
+            ? ''
+            : message.user.username
+        }}"
+      ></app-message>
+
+      {{ updatePreviousUser(message.user.username) }}
+
+      }
+    </div>
+    <div class="input-wrapper">
+      <textarea
+        matInput
+        name="message"
+        class="text-input"
+        [formControl]="messageControl"
+      ></textarea>
+      <button
+        class="message-button"
+        matRipple
+        [matRippleColor]="color"
+        (click)="sendMessage()"
+      >
+        <mat-icon fontIcon="send"></mat-icon>
+      </button>
+      <button class="message-button" disabled>
+        <mat-icon fontIcon="image"></mat-icon>
+      </button>
+      <button class="message-button" disabled>
+        <mat-icon fontIcon="microphone"></mat-icon>
+      </button>
+    </div>
+  </div>
+  <app-details [state]="detailsState"></app-details>
+</div>
+
+} @else { "this is the mobile type stuff" }

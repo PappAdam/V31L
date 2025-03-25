@@ -1,0 +1,22 @@
+@use "../../../../../../../styles/styles.scss" as *;
+
+.action {
+  width: 100%;
+  padding: $mat-sys-spacing-sm;
+  color: $mat-sys-on-surface;
+  display: flex;
+  gap: $mat-sys-spacing-sm;
+  cursor: pointer;
+  .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .option-label-wrapper {
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    font-size: $mat-sys-label-large-size;
+    font-weight: $mat-sys-label-large-weight;
+  }
+}
