@@ -6,6 +6,7 @@ const socketServer = new WebSocketServer({ port: 8080 });
 
 socketServer.on("listening", () => {
   console.info("WebSocket server listening on port 8080");
+  console.log(process.env.PRIVATE_KEY);
 });
 
 socketServer.on("connection", (connection) => {

@@ -82,6 +82,10 @@ main {
     border-bottom: 1px solid var(--mat-sys-outline-variant);
     background-color: var(--mat-sys-surface);
 
+    .inv-id {
+      color: var(--mat-sys-on-surface);
+    }
+
     .chat-username {
       font-size: 1.25rem;
       font-weight: 500;

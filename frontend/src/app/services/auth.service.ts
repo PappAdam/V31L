@@ -163,4 +163,4 @@ export class AuthService {
   }
 }
 
-type StoredUser = Omit<AuthSuccessResponse, 'result'>;
+export type StoredUser = Omit<AuthSuccessResponse, 'result'>;

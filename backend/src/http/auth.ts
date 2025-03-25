@@ -19,6 +19,11 @@ import {
 } from "@common";
 import { User } from "@prisma/client";
 import { generateTotpUri, verifyToken } from "authenticator";
+import { decryptData } from "@/utils/encryption";
+import {
+  arrayToString,
+  arrayToString as charCodeArrayToString,
+} from "@/utils/buffers";
 
 const authRouter = Router();
 authRouter.post(
@@ -62,15 +67,24 @@ async function registerUser(req: Request, res: Response) {
     }
 
     if (mfaEnabled) {
+      const authKey = decryptData({
+        encrypted: newUser.authKey!,
+        iv: newUser.iv!,
+        authTag: newUser.authTag!,
+      });
+
       const setupCode = generateTotpUri(
-        newUser.authKey!,
+        arrayToString(authKey),
         newUser.username,
         "Veil",
         "SHA1",
         6,
         30
       );
-      res.json(nextSetupMfaResponse(setupCode));
+
+      console.log(setupCode);
+
+      res.status(201).json(nextSetupMfaResponse(setupCode));
       return;
     }
 
@@ -112,11 +126,16 @@ async function loginUser(req: Request, res: Response) {
     }
 
     if (user.authKey) {
+      const decrypted2FA = decryptData({
+        encrypted: user.authKey!,
+        iv: user.iv!,
+        authTag: user.authTag!,
+      });
       if (!mfa) {
         res.json(nextVerifyMfaResponse);
         return;
       }
-      const verifyResult = verifyToken(user.authKey, mfa);
+      const verifyResult = verifyToken(arrayToString(decrypted2FA), mfa);
       if (!verifyResult) {
         res.status(400).json(invalidCredentialsResponse);
         return;

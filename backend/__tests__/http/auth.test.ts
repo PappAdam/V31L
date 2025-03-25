@@ -8,10 +8,13 @@ import { Request, Response, NextFunction } from "express";
 import {
   invalidCredentialsResponse,
   missingFieldsResponse,
+  nextSetupMfaResponse,
+  nextVerifyMfaResponse,
   serverErrorResponse,
   successResponse,
   userExistsResponse,
 } from "@common";
+import { generateToken } from "authenticator";
 
 const user = {
   id: "id-123",
@@ -65,12 +68,13 @@ jest.mock("bcryptjs", () => {
 
 const registerRoute = "/auth/register";
 describe(`POST ${registerRoute}`, () => {
-  it("201 Success", success);
+  it("201 Success no mfa", successNoMfa);
+  it("201 Next with mfa", nextWithMfa);
   it("400 Missing required fields", missingFields);
   it("400 User with username already exists", userExists);
   it("500 Server error (caused by prisma error)", prismaError);
 
-  async function success() {
+  async function successNoMfa() {
     prismaMock.user.findUnique.mockResolvedValue(null);
     prismaMock.user.create.mockResolvedValue(user);
 
@@ -82,6 +86,24 @@ describe(`POST ${registerRoute}`, () => {
     expect(response.body).toEqual(successResponse(token, user));
     expect(prismaMock.user.create).toHaveBeenCalled();
     expect(jwt.sign).toHaveBeenCalled();
+  }
+
+  async function nextWithMfa() {
+    prismaMock.user.findUnique.mockResolvedValue(null);
+    prismaMock.user.create.mockResolvedValue(user);
+
+    const response = await request(httpServer).post(registerRoute).send({
+      username: user.username,
+      password: user.password,
+      mfaEnabled: true,
+    });
+
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual(
+      nextSetupMfaResponse(response.body.setupCode)
+    );
+    expect(prismaMock.user.create).toHaveBeenCalled();
+    expect(jwt.sign).not.toHaveBeenCalled();
   }
 
   async function missingFields() {
@@ -124,18 +146,54 @@ describe(`POST ${registerRoute}`, () => {
 
 const loginRoute = "/auth/login";
 describe(`POST ${loginRoute}`, () => {
-  it("201 Success", success);
+  it("200 Success no MFA", successNoMfa);
+  it("200 Next with MFA", nextWithMfa);
+  it("200 Success with MFA", successWithMfa);
   it("400 Missing required fields", missingFields);
   it("400 Invalid credentials (Invalid username)", invalidUsername);
   it("400 Invalid credentials (Invalid password)", invalidPassword);
 
-  async function success() {
+  async function successNoMfa() {
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     prismaMock.user.findUnique.mockResolvedValue({ ...user, authKey: null });
 
     const response = await request(httpServer)
       .post(loginRoute)
       .send({ username: user.username, password: user.password });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(successResponse(token, user));
+    expect(prismaMock.user.findUnique).toHaveBeenCalled();
+    expect(bcrypt.compare).toHaveBeenCalled();
+    expect(jwt.sign).toHaveBeenCalled();
+  }
+
+  async function nextWithMfa() {
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    prismaMock.user.findUnique.mockResolvedValue({ ...user });
+
+    const response = await request(httpServer)
+      .post(loginRoute)
+      .send({ username: user.username, password: user.password });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(nextVerifyMfaResponse);
+    expect(prismaMock.user.findUnique).toHaveBeenCalled();
+    expect(bcrypt.compare).toHaveBeenCalled();
+    expect(jwt.sign).not.toHaveBeenCalled();
+  }
+
+  async function successWithMfa() {
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    prismaMock.user.findUnique.mockResolvedValue({ ...user });
+
+    const response = await request(httpServer)
+      .post(loginRoute)
+      .send({
+        username: user.username,
+        password: user.password,
+        mfa: generateToken(user.authKey),
+      });
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(successResponse(token, user));

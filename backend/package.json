@@ -6,8 +6,8 @@
   "scripts": {
     "test": "jest --verbose --silent",
     "install": "prisma migrate reset -f && npm run load:test-data",
-    "start": "tsx src/index.ts",
-    "dev": "tsx watch src/index.ts",
+    "start": "tsx --env-file=.env src/index.ts",
+    "dev": "tsx watch --env-file=.env src/index.ts",
     "load:test-data": "tsx src/db/_dbTestData/loadTestData.ts"
   },
   "author": "",
@@ -38,6 +38,7 @@
     "@types/ws": "^8.5.14",
     "@types/yamljs": "^0.2.34",
     "jest": "^29.7.0",
+    "jest-ctrf-json-reporter": "^0.0.9",
     "jest-html-reporters": "^3.1.7",
     "jest-mock-extended": "^4.0.0-beta1",
     "prisma": "^6.3.1",

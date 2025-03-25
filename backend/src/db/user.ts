@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import { User } from "@prisma/client";
 import prisma from "./_db";
 import authenticator from "authenticator";
+import { decryptData, encryptData } from "@/utils/encryption";
+import { arrayToString } from "@/utils/buffers";
 
 /**
  * Creates a new user.
@@ -20,13 +22,19 @@ export async function createUser(
   }
   try {
     password = await bcrypt.hash(password, 10);
-    const authKey = mfaEnabled ? authenticator.generateKey() : null;
+    const authKey = encryptData(authenticator.generateKey());
 
     const newUser = await prisma.user.create({
       data: {
         username,
         password,
-        authKey,
+        ...(mfaEnabled
+          ? {
+              authKey: authKey.encrypted,
+              iv: authKey.iv,
+              authTag: authKey.authTag,
+            }
+          : null),
       },
     });
 

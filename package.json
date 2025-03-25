@@ -1,0 +1,9 @@
+{
+  "name": "veil",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "common"
+  ]
+}

@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-not-found',
   standalone: true,
   imports: [CommonModule, MatButtonModule, RouterModule],
-  template: './not-found.component.html',
+  templateUrl: './not-found.component.html',
   styleUrls: ['./not-found.component.scss'],
 })
 export class NotFoundComponent {}
