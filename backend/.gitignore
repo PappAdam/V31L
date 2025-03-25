@@ -1,4 +1,4 @@
 /node_modules
 /prisma/*.db
 /prisma/*.db-journal
-/__tests__/report/jest-html-reporters-attach
+/__tests__/report
