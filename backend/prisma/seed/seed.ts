@@ -50,7 +50,7 @@ async function createUserMasterKey(chatKey: CryptoKey, username: string) {
 }
 
 async function seedDatabase(): Promise<{
-  users: User[];
+  users: (User & { passwordNotHashed: string })[];
   chats: Chat[];
   chatMembers: ChatMember[];
   messages: Message[];
@@ -68,9 +68,12 @@ async function seedDatabase(): Promise<{
   );
 
   const users = await Promise.all(
-    testData.users.map(
-      async (u) => (await createUser(u.username, u.password, false))!
-    )
+    testData.users.map(async (u) => {
+      return {
+        ...(await createUser(u.username, u.password, false))!,
+        passwordNotHashed: u.password,
+      };
+    })
   );
 
   const chats = await Promise.all(
@@ -98,10 +101,10 @@ async function seedDatabase(): Promise<{
 
   let messages: Message[] = [];
   testData.chats.forEach(async (chat) => {
+    const chatId = chats.find((c) => c.name == chat.name)!.id;
     const newMessages = await Promise.all(
       chat.messages.map(async (message) => {
         const senderId = users[message.authorIndex]!.id as string;
-        const chatId = chats.find((c) => c.name == chat.name)!.id;
         const encryptedMessage = await encryptText(key, message.text);
         return (await createMessage(chatId, senderId, encryptedMessage))!;
       })

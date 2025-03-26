@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "dotenv -e .env.test -- prisma migrate reset -f && dotenv -e .env.test -- jest --verbose --silent",
+    "test": "dotenv -e .env.test -- prisma migrate reset -f && dotenv -e .env.test -- jest --verbose",
     "install": "prisma migrate reset -f && npm run load:test-data",
     "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts",

@@ -65,6 +65,7 @@ export async function createMessage(
   if (!chatId || !userId || !content) {
     return null;
   }
+  console.log(userId, chatId);
   try {
     const encryptedContent = encryptData(content.data);
 
