@@ -1,4 +1,4 @@
-import seedDatabase from "prisma/seed/seed";
+import seedDatabase from "@/../prisma/seed/seed";
 
 export let database: Awaited<ReturnType<typeof seedDatabase>> = {
   users: [],

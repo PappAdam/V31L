@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --verbose --silent",
+    "test": "dotenv -e .env.test -- prisma migrate reset -f && dotenv -e .env.test -- jest --verbose --silent",
     "install": "prisma migrate reset -f && npm run load:test-data",
-    "start": "tsx --env-file=.env src/index.ts",
-    "dev": "tsx watch --env-file=.env src/index.ts",
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "load:test-data": "tsx prisma/seed/runSeed.ts"
   },
   "author": "",

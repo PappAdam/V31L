@@ -1,5 +1,3 @@
-import { mockDeep } from "jest-mock-extended";
-import prismaMock from "../_setup/prismaMock";
 import {
   extractUserFromTokenMiddleWare,
   validateRequiredFields,
@@ -11,6 +9,7 @@ import {
   missingFieldsResponse,
   noTokenProvidedResponse,
 } from "@common";
+import prisma from "@/db/_db";
 
 let req: Partial<Request> = {};
 let res: Partial<Response> = {
@@ -35,27 +34,6 @@ const validJwtPayload = {
   exp: Math.floor(Date.now() / 1000) + 1000,
 };
 
-jest.mock("jsonwebtoken", () => {
-  const jwtMock = mockDeep<typeof import("jsonwebtoken")>();
-
-  (jwtMock.sign as jest.Mock).mockReturnValue("mocked-token");
-  (jwtMock.verify as jest.Mock).mockReturnValue("id-123");
-
-  return {
-    __esModule: true,
-    default: jwtMock,
-  };
-});
-
-jest.mock("bcryptjs", () => {
-  const bcryptMock = mockDeep<typeof import("bcryptjs")>();
-
-  return {
-    __esModule: true,
-    default: bcryptMock,
-  };
-});
-
 describe("extractUserFromTokenMiddleWare", () => {
   it("Call next() if token is valid", validToken);
   it("401 No token provided", noToken);
@@ -66,12 +44,10 @@ describe("extractUserFromTokenMiddleWare", () => {
   async function validToken() {
     const validToken = "valid-token";
     req.header = jest.fn().mockReturnValue(`Bearer ${validToken}`);
-    prismaMock.user.findUniqueOrThrow.mockResolvedValue(user);
-    (jwt.verify as jest.Mock).mockReturnValue(validJwtPayload);
 
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 
-    expect(prismaMock.user.findUniqueOrThrow).toHaveBeenCalledWith({
+    expect(prisma.user.findUniqueOrThrow).toHaveBeenCalledWith({
       where: { id: "id-123" },
     });
     expect(req.user).toEqual(user);
@@ -90,7 +66,6 @@ describe("extractUserFromTokenMiddleWare", () => {
 
   async function expiredToken() {
     req.header = jest.fn().mockReturnValue(`Bearer ${token}`);
-    (jwt.verify as jest.Mock).mockReturnValue(expiredJwtPayload);
 
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 
@@ -101,9 +76,6 @@ describe("extractUserFromTokenMiddleWare", () => {
 
   async function invalidToken() {
     req.header = jest.fn().mockReturnValue(`Bearer ${token}`);
-    (jwt.verify as jest.Mock).mockImplementation(() => {
-      throw new Error();
-    });
 
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 
@@ -116,9 +88,6 @@ describe("extractUserFromTokenMiddleWare", () => {
     const validToken = "valid-token";
     req.header = jest.fn().mockReturnValue(`Bearer ${validToken}`);
     (jwt.verify as jest.Mock).mockReturnValue(validJwtPayload);
-    prismaMock.user.findUniqueOrThrow.mockRejectedValueOnce(
-      new Error("Database error")
-    );
 
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 
