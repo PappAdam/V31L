@@ -10,6 +10,8 @@ import {
   noTokenProvidedResponse,
 } from "@common";
 import prisma from "@/db/_db";
+import { database } from "../_setup/setup";
+import { generateToken as generateJWT } from "@/http/auth";
 
 let req: Partial<Request> = {};
 let res: Partial<Response> = {
@@ -18,39 +20,27 @@ let res: Partial<Response> = {
 };
 let next: NextFunction = jest.fn();
 
-const user = {
-  id: "id-123",
-  username: "user-123",
-  password: "password-123",
-  authKey: "key-123",
-};
-const token = "mocked-token";
-const expiredJwtPayload = {
-  userId: user.id,
-  exp: Math.floor(Date.now() / 1000) - 1000,
-};
-const validJwtPayload = {
-  userId: user.id,
-  exp: Math.floor(Date.now() / 1000) + 1000,
-};
-
 describe("extractUserFromTokenMiddleWare", () => {
   it("Call next() if token is valid", validToken);
   it("401 No token provided", noToken);
-  it("401 Invalid or expired token (Expired token)", expiredToken);
-  it("401 Invalid or expired token (Invalid token)", invalidToken);
+  it("401 Invalid or expired token (Invalid Token)", invalidToken);
+  it("401 Invalid or expired token (Expired Token)", expiredToken);
   it("401 Invalid or expired token (User with UserId not found)", userNotFound);
 
   async function validToken() {
-    const validToken = "valid-token";
-    req.header = jest.fn().mockReturnValue(`Bearer ${validToken}`);
+    const user = database.users[0];
+    const bearerToken = generateJWT(user.id);
+
+    const { passwordNotHashed, ...userResponse } = user;
+
+    req.header = jest.fn().mockReturnValue(`Bearer ${bearerToken}`);
 
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 
     expect(prisma.user.findUniqueOrThrow).toHaveBeenCalledWith({
-      where: { id: "id-123" },
+      where: { id: user.id },
     });
-    expect(req.user).toEqual(user);
+    expect(req.user).toEqual(userResponse);
     expect(next).toHaveBeenCalled();
   }
 
@@ -64,8 +54,8 @@ describe("extractUserFromTokenMiddleWare", () => {
     expect(next).not.toHaveBeenCalled();
   }
 
-  async function expiredToken() {
-    req.header = jest.fn().mockReturnValue(`Bearer ${token}`);
+  async function invalidToken() {
+    req.header = jest.fn().mockReturnValue(`Bearer invalidToken`);
 
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 
@@ -74,8 +64,12 @@ describe("extractUserFromTokenMiddleWare", () => {
     expect(next).not.toHaveBeenCalled();
   }
 
-  async function invalidToken() {
-    req.header = jest.fn().mockReturnValue(`Bearer ${token}`);
+  async function expiredToken() {
+    const user = database.users[0]!;
+    const bearerToken = jwt.sign({ userId: user.id }, "your_secret_key", {
+      expiresIn: "-1h",
+    });
+    req.header = jest.fn().mockReturnValue(`Bearer ${bearerToken}`);
 
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 
@@ -85,9 +79,8 @@ describe("extractUserFromTokenMiddleWare", () => {
   }
 
   async function userNotFound() {
-    const validToken = "valid-token";
-    req.header = jest.fn().mockReturnValue(`Bearer ${validToken}`);
-    (jwt.verify as jest.Mock).mockReturnValue(validJwtPayload);
+    const bearerToken = generateJWT("nonExistentUserId");
+    req.header = jest.fn().mockReturnValue(`Bearer ${bearerToken}`);
 
     await extractUserFromTokenMiddleWare(req as Request, res as Response, next);
 

@@ -1,11 +1,12 @@
 import { createChat } from "@/db/chat";
-import { addUserToChat } from "@/db/chatMember";
+import { createChatMember } from "@/db/chatMember";
 import { createMessage } from "@/db/message";
 import { createUser } from "@/db/user";
 import { EncryptedMessage } from "@common";
 import testData from "./testData.json";
 import prisma from "@/db/_db";
 import { Chat, ChatMember, Message, User } from "@prisma/client";
+import { time } from "console";
 
 async function encryptText(
   key: CryptoKey,
@@ -70,7 +71,7 @@ async function seedDatabase(): Promise<{
   const users = await Promise.all(
     testData.users.map(async (u) => {
       return {
-        ...(await createUser(u.username, u.password, false))!,
+        ...(await createUser(u.username, u.password, u.mfaEnabled || false))!,
         passwordNotHashed: u.password,
       };
     })
@@ -82,36 +83,38 @@ async function seedDatabase(): Promise<{
 
   // For each chat, create new chatMembers, and push them into the `chatMembers` list.
   let chatMembers: ChatMember[] = [];
-  testData.chats.forEach(async (chat) => {
+  for (const chat of testData.chats) {
     const newChatMembers = await Promise.all(
       chat.users.map(async (chatMemberIndex) => {
         const wkey = await createUserMasterKey(
           key,
           users[chatMemberIndex]!.username
         );
-        return (await addUserToChat(
+        const chatMember = await createChatMember(
           users[chatMemberIndex]!.id,
           chats.find((c) => c.name == chat.name)!.id,
           wkey
-        ))!;
+        );
+
+        return chatMember!;
       })
     );
     chatMembers = [...chatMembers, ...newChatMembers];
-  });
+  }
 
   let messages: Message[] = [];
-  testData.chats.forEach(async (chat) => {
+  for (const chat of testData.chats) {
     const chatId = chats.find((c) => c.name == chat.name)!.id;
     const newMessages = await Promise.all(
       chat.messages.map(async (message) => {
         const senderId = users[message.authorIndex]!.id as string;
         const encryptedMessage = await encryptText(key, message.text);
+
         return (await createMessage(chatId, senderId, encryptedMessage))!;
       })
     );
-
     messages = [...messages, ...newMessages];
-  });
+  }
 
   return {
     users,

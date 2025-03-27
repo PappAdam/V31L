@@ -7,16 +7,17 @@ import {
   missingFieldsResponse,
   nextSetupMfaResponse,
   nextVerifyMfaResponse,
-  PublicUser,
-  serverErrorResponse,
   successResponse,
   userExistsResponse,
 } from "@common";
 import { generateToken } from "authenticator";
 import prisma from "@/db/_db";
 import { database } from "../_setup/setup";
+import { decryptData } from "@/utils/encryption";
+import { arrayToString } from "@/utils/buffers";
 
 jest.spyOn(jwt, "sign");
+jest.spyOn(bcrypt, "compare");
 
 const registerRoute = "/auth/register";
 describe(`POST ${registerRoute}`, () => {
@@ -70,10 +71,10 @@ describe(`POST ${registerRoute}`, () => {
   }
 
   async function userExists() {
-    console.log(database.users[0]);
-    const response = await request(httpServer)
-      .post(registerRoute)
-      .send(database.users[0]);
+    const response = await request(httpServer).post(registerRoute).send({
+      username: database.users[0].username,
+      password: database.users[0].passwordNotHashed,
+    });
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual(userExistsResponse);
@@ -82,87 +83,104 @@ describe(`POST ${registerRoute}`, () => {
   }
 });
 
-// const loginRoute = "/auth/login";
-// describe(`POST ${loginRoute}`, () => {
-//   it("200 Success no MFA", successNoMfa);
-//   it("200 Next with MFA", nextWithMfa);
-//   it("200 Success with MFA", successWithMfa);
-//   it("400 Missing required fields", missingFields);
-//   it("400 Invalid credentials (Invalid username)", invalidUsername);
-//   it("400 Invalid credentials (Invalid password)", invalidPassword);
+const loginRoute = "/auth/login";
+describe(`POST ${loginRoute}`, () => {
+  it("200 Success no MFA", successNoMfa);
+  it("200 Next with MFA", nextWithMfa);
+  it("200 Success with MFA", successWithMfa);
+  it("400 Missing required fields", missingFields);
+  it("400 Invalid credentials (Invalid username)", invalidUsername);
+  it("400 Invalid credentials (Invalid password)", invalidPassword);
 
-//   async function successNoMfa() {
-//     const response = await request(httpServer)
-//       .post(loginRoute)
-//       .send({ username: user.username, password: user.password });
+  async function successNoMfa() {
+    const existingUserNoMfa = database.users.find((u) => !u.authKey)!;
+    const response = await request(httpServer).post(loginRoute).send({
+      username: existingUserNoMfa.username,
+      password: existingUserNoMfa.passwordNotHashed,
+    });
 
-//     expect(response.status).toBe(200);
-//     expect(response.body).toEqual(successResponse(token, user));
-//     expect(prisma.user.findUnique).toHaveBeenCalled();
-//     expect(bcrypt.compare).toHaveBeenCalled();
-//     expect(jwt.sign).toHaveBeenCalled();
-//   }
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      successResponse(response.body.token, existingUserNoMfa)
+    );
+    expect(prisma.user.findUnique).toHaveBeenCalled();
+    expect(bcrypt.compare).toHaveBeenCalled();
+    expect(jwt.sign).toHaveBeenCalled();
+  }
 
-//   async function nextWithMfa() {
-//     const response = await request(httpServer)
-//       .post(loginRoute)
-//       .send({ username: user.username, password: user.password });
+  async function nextWithMfa() {
+    const existingUserWithMfa = database.users.find((u) => u.authKey)!;
+    const response = await request(httpServer).post(loginRoute).send({
+      username: existingUserWithMfa.username,
+      password: existingUserWithMfa.passwordNotHashed,
+    });
 
-//     expect(response.status).toBe(200);
-//     expect(response.body).toEqual(nextVerifyMfaResponse);
-//     expect(prisma.user.findUnique).toHaveBeenCalled();
-//     expect(bcrypt.compare).toHaveBeenCalled();
-//     expect(jwt.sign).not.toHaveBeenCalled();
-//   }
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(nextVerifyMfaResponse);
+    expect(prisma.user.findUnique).toHaveBeenCalled();
+    expect(bcrypt.compare).toHaveBeenCalled();
+    expect(jwt.sign).not.toHaveBeenCalled();
+  }
 
-//   async function successWithMfa() {
-//     const response = await request(httpServer)
-//       .post(loginRoute)
-//       .send({
-//         username: user.username,
-//         password: user.password,
-//         mfa: generateToken(user.authKey),
-//       });
+  async function successWithMfa() {
+    const existingUserWithMfa = database.users.find((u) => u.authKey)!;
+    const decrypted2FA = decryptData({
+      encrypted: existingUserWithMfa.authKey!,
+      iv: existingUserWithMfa.iv!,
+      authTag: existingUserWithMfa.authTag!,
+    });
 
-//     expect(response.status).toBe(200);
-//     expect(response.body).toEqual(successResponse(token, user));
-//     expect(prisma.user.findUnique).toHaveBeenCalled();
-//     expect(bcrypt.compare).toHaveBeenCalled();
-//     expect(jwt.sign).toHaveBeenCalled();
-//   }
+    const response = await request(httpServer)
+      .post(loginRoute)
+      .send({
+        username: existingUserWithMfa.username,
+        password: existingUserWithMfa.passwordNotHashed,
+        mfa: generateToken(arrayToString(decrypted2FA)),
+      });
 
-//   async function missingFields() {
-//     const response = await request(httpServer).post(loginRoute);
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      successResponse(response.body.token, existingUserWithMfa)
+    );
+    expect(prisma.user.findUnique).toHaveBeenCalled();
+    expect(bcrypt.compare).toHaveBeenCalled();
+    expect(jwt.sign).toHaveBeenCalled();
+  }
 
-//     expect(response.status).toBe(400);
-//     expect(response.body).toEqual(
-//       missingFieldsResponse(["username", "password"])
-//     );
-//     expect(prisma.user.findUnique).not.toHaveBeenCalled();
-//   }
+  async function missingFields() {
+    const response = await request(httpServer).post(loginRoute);
 
-//   async function invalidUsername() {
-//     const response = await request(httpServer)
-//       .post(loginRoute)
-//       .send({ username: user.username, password: user.password });
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual(
+      missingFieldsResponse(["username", "password"])
+    );
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+  }
 
-//     expect(response.status).toBe(400);
-//     expect(response.body).toEqual(invalidCredentialsResponse);
-//     expect(prisma.user.findUnique).toHaveBeenCalled();
-//     expect(bcrypt.compare).not.toHaveBeenCalled();
-//   }
+  async function invalidUsername() {
+    const response = await request(httpServer)
+      .post(loginRoute)
+      .send({ username: "invalidUsername", password: "thisDoesNotMatter" });
 
-//   async function invalidPassword() {
-//     const response = await request(httpServer)
-//       .post(loginRoute)
-//       .send({ username: user.username, password: user.password });
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual(invalidCredentialsResponse);
+    expect(prisma.user.findUnique).toHaveBeenCalled();
+    expect(bcrypt.compare).not.toHaveBeenCalled();
+  }
 
-//     expect(response.status).toBe(400);
-//     expect(response.body).toEqual(invalidCredentialsResponse);
-//     expect(bcrypt.compare).toHaveBeenCalled();
-//     expect(jwt.sign).not.toHaveBeenCalled();
-//   }
-// });
+  async function invalidPassword() {
+    const existingUserNoMfa = database.users.find((u) => !u.authKey)!;
+    const response = await request(httpServer).post(loginRoute).send({
+      username: existingUserNoMfa.username,
+      password: "invalidPassword",
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual(invalidCredentialsResponse);
+    expect(bcrypt.compare).toHaveBeenCalled();
+    expect(jwt.sign).not.toHaveBeenCalled();
+  }
+});
 
 // const refreshRoute = "/auth/refresh";
 // describe(`POST ${refreshRoute}`, () => {

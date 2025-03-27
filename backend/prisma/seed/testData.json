@@ -8,7 +8,11 @@
     { "username": "gamerTom", "password": "fragMaster3000" },
     { "username": "noobSlayer", "password": "proGamer007" },
     { "username": "securityGuru", "password": "encryptMe" },
-    { "username": "movieFanatic", "password": "cinemaLover" }
+    {
+      "username": "movieFanatic",
+      "password": "cinemaLover",
+      "mfaEnabled": true
+    }
   ],
   "chats": [
     {
@@ -19,13 +23,22 @@
           "authorIndex": 0,
           "text": "Hey everyone, what do you think about AI ethics?"
         },
-        { "authorIndex": 1, "text": "AI is powerful, but we need regulations." },
+        {
+          "authorIndex": 1,
+          "text": "AI is powerful, but we need regulations."
+        },
         {
           "authorIndex": 2,
           "text": "I think AI should be open-source for transparency."
         },
-        { "authorIndex": 3, "text": "Does anyone here use TensorFlow for projects?" },
-        { "authorIndex": 4, "text": "Quantum computing will change AI entirely." },
+        {
+          "authorIndex": 3,
+          "text": "Does anyone here use TensorFlow for projects?"
+        },
+        {
+          "authorIndex": 4,
+          "text": "Quantum computing will change AI entirely."
+        },
         {
           "authorIndex": 0,
           "text": "What are your favorite programming languages for AI?"
@@ -41,7 +54,10 @@
         { "authorIndex": 2, "text": "What’s the best gaming setup?" },
         { "authorIndex": 0, "text": "Have you tried the new VR game?" },
         { "authorIndex": 4, "text": "Ray tracing makes games look amazing!" },
-        { "authorIndex": 5, "text": "Who wants to join a tournament this weekend?" }
+        {
+          "authorIndex": 5,
+          "text": "Who wants to join a tournament this weekend?"
+        }
       ]
     },
     {
@@ -49,7 +65,10 @@
       "users": [1, 2, 3, 7, 4],
       "messages": [
         { "authorIndex": 7, "text": "Always use two-factor authentication!" },
-        { "authorIndex": 3, "text": "Just implemented a new encryption algorithm." },
+        {
+          "authorIndex": 3,
+          "text": "Just implemented a new encryption algorithm."
+        },
         { "authorIndex": 2, "text": "What’s the best VPN to use?" },
         { "authorIndex": 1, "text": "Zero-trust security is the future." },
         { "authorIndex": 4, "text": "Quantum encryption is coming soon!" },
@@ -65,7 +84,10 @@
         { "authorIndex": 1, "text": "I love classic noir films." },
         { "authorIndex": 5, "text": "Marvel or DC?" },
         { "authorIndex": 6, "text": "The new horror movie is terrifying!" },
-        { "authorIndex": 8, "text": "Who’s excited for the upcoming Oscar season?" }
+        {
+          "authorIndex": 8,
+          "text": "Who’s excited for the upcoming Oscar season?"
+        }
       ]
     }
   ]
