@@ -8,7 +8,7 @@ import prisma from "./_db";
  * @param {string} chatId - The ID of the chat to which the user will be added.
  * @returns {Promise<ChatMember | null>} `ChatMember` if the user was successfully added, `null` if the user was already a member or an error occurred.
  */
-export async function addUserToChat(
+export async function createChatMember(
   userId: string,
   chatId: string,
   key: Uint8Array
@@ -39,7 +39,7 @@ export async function addUserToChat(
  * @param {string} chatId - The ID of the chat from which the user will be removed.
  * @returns {Promise<ChatMember | null>} `ChatMember` if the user was successfully removed, `null` if the user was not a member or an error occurred.
  */
-export async function removeUserFromChat(
+export async function deleteChatMember(
   userId: string,
   chatId: string
 ): Promise<ChatMember | null> {

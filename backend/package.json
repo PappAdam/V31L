@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --verbose --silent",
+    "test": "dotenv -e .env.test -- prisma migrate reset -f && dotenv -e .env.test -- jest --verbose --silent --runInBand",
     "install": "prisma migrate reset -f && npm run load:test-data",
-    "start": "tsx --env-file=.env src/index.ts",
-    "dev": "tsx watch --env-file=.env src/index.ts",
-    "load:test-data": "tsx src/db/_dbTestData/loadTestData.ts"
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "load:test-data": "tsx prisma/seed/runSeed.ts"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +19,7 @@
     "bcryptjs": "^3.0.0",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
+    "dotenv-cli": "^8.0.0",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "ws": "^8.18.0",

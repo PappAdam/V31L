@@ -6,7 +6,7 @@ import {
   serverErrorResponse,
 } from "@common";
 import { Invitation, validateChatJoinRequest } from "@/invitation";
-import { addUserToChat, findChatMember } from "@/db/chatMember";
+import { createChatMember, findChatMember } from "@/db/chatMember";
 import { validateRequiredFields } from "./middlewares/validate";
 import { stringToUint8Array } from "@/utils/buffers";
 
@@ -96,7 +96,7 @@ async function joinChat(req: Request, res: Response) {
       res.status(400).json("Bad key");
     }
 
-    const chatMember = await addUserToChat(
+    const chatMember = await createChatMember(
       req.user!.id,
       invitation.chatId,
       unwrappedKey

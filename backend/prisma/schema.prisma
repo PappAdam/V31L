@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -21,18 +21,18 @@ model User {
 model Chat {
   id       String       @id @default(uuid())
   name     String
-  messages Message[]    @relation("ChatMessages") // Named relation for messages
+  messages Message[]    @relation("ChatMessages")
   members  ChatMember[]
 
   lastMessageId String?  @unique
-  lastMessage   Message? @relation("ChatLastMessage", fields: [lastMessageId], references: [id], onDelete: Cascade)
+  lastMessage   Message? @relation("ChatLastMessage", fields: [lastMessageId], references: [id], onDelete: SetNull)
 }
 
 model Message {
   id        String   @id @default(uuid())
-  chat      Chat     @relation("ChatMessages", fields: [chatId], references: [id], onDelete: Cascade) // Matches "ChatMessages"
+  chat      Chat     @relation("ChatMessages", fields: [chatId], references: [id], onDelete: Cascade)
   chatId    String
-  user      User     @relation(fields: [userId], references: [id]) // No delete cascade for user
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   timeStamp DateTime @default(now())
   content   Bytes
@@ -40,7 +40,7 @@ model Message {
   outIv     Bytes
   authTag   Bytes
 
-  lastMessageForChat Chat? @relation("ChatLastMessage") // Opposite relation field
+  lastMessageForChat Chat? @relation("ChatLastMessage")
 }
 
 model ChatMember {

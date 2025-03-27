@@ -1,5 +1,3 @@
-import { randomUUID, createHmac } from "crypto";
-
 const Invitations: Invitation[] = [];
 
 export class Invitation {
