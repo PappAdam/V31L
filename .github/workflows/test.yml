@@ -30,7 +30,7 @@ jobs:
       - name: Publish Test Report
         uses: ctrf-io/github-test-reporter@v1
         with:
-          report-path: "./backend/ctrf/*.json"
+          report-path: "**/*.testreport.json"
           template-path: "./templates/custom-summary.hbs"
 
           # Enable reports to show failed suites/tests
