@@ -39,9 +39,15 @@ export class MessageService {
     this._selectedChatIndex$.next(index);
   }
 
-  selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
-    map(([messages, index]) => messages[index])
-  );
+  get selectedChat$() {
+    return combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
+      map(([messages, index]) => messages[index])
+    );
+  }
+
+  get selectedChat() {
+    return this._chats$.value[this._selectedChatIndex$.value];
+  }
 
   constructor() {
     this.socketService
