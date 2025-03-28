@@ -1,9 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 
+@forward "./mat-map.scss";
 @use "@angular/material" as mat;
-@import "./mat-map.scss";
-@import "./themes/t1_theme-colors";
-
+@use "./mat-map.scss" as *;
+@use "./themes/t1_theme-colors" as *;
 html {
   @include mat.theme(
     (
