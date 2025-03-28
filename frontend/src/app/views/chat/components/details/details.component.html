@@ -1,12 +1,6 @@
 <div class="details-wrapper" [attr.data-state]="state">
   <div class="inner-wrapper">
     <div class="group-action-wrapper">
-      <app-group-option-card fontIcon="logout" label="Leave chat">
-      </app-group-option-card>
-      <app-group-option-card
-        fontIcon="snooze"
-        label="Suspend notifications"
-      ></app-group-option-card>
       <app-group-option-card fontIcon="group" label="Members">
         <div class="group-members-wrapper">
           @for (chatMember of (messageService.selectedChat$ | async)?.users;
@@ -18,13 +12,18 @@
         </div>
       </app-group-option-card>
       <app-group-option-card
-        fontIcon="report"
-        label="Report bug"
-      ></app-group-option-card>
-      <app-group-option-card
         fontIcon="add"
         label="Add member"
-      ></app-group-option-card>
+        (expanded)="onAddMemberClick()"
+      >
+        <p>{{ invitationId }}</p>
+        <!-- This is weird, if the botton element is a button, it has to have a bottom margin of 4px (or higher), or a scrollbar will appear -->
+        <button mat-flat-button [style.margin-bottom]="'4px'">
+          Implement stuff here
+        </button>
+      </app-group-option-card>
+      <app-group-option-card fontIcon="logout" label="Leave chat">
+      </app-group-option-card>
     </div>
   </div>
 </div>

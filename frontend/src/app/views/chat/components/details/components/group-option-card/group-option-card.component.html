@@ -1,4 +1,4 @@
-<div class="action-container">
+<div class="action-container" mat-ripple>
   <div class="action" (click)="toggle()">
     <div class="icon-wrapper">
       <mat-icon [fontIcon]="fontIcon"></mat-icon>
@@ -18,7 +18,7 @@
   <div
     #content
     class="content"
-    [style.maxHeight]="isExpanded ? '500px' : '0px'"
+    [style.maxHeight]="isExpanded ? '100vh' : '0vh'"
   >
     <ng-content></ng-content>
   </div>

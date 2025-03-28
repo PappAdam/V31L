@@ -2,6 +2,7 @@
 
 .action-container {
   padding: $mat-sys-spacing-sm;
+  overflow: hidden;
 }
 
 .action {
@@ -9,6 +10,10 @@
   color: $mat-sys-on-surface;
   display: flex;
   gap: $mat-sys-spacing-sm;
+
+  &:hover {
+    color: $mat-sys-primary;
+  }
 
   .expand-arrow {
     transition: 0.1s ease;

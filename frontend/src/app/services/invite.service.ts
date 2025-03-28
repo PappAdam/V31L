@@ -2,7 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { EncryptionService } from './encryption.service';
 import { StoredUser } from './auth.service';
-import { InviteResponse, InviteSuccess } from '@common';
+import {
+  CreateSuccess,
+  InviteError,
+  InviteResponse,
+  InviteSuccess,
+  JoinSuccess,
+} from '@common';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable({
@@ -39,13 +45,17 @@ export class InviteService {
    * @returns {Promise<InviteResponse>}
    * {@link InviteResponse}
    */
-  async createInvitation(chatId: string): Promise<InviteResponse> {
+  async createInvitation(chatId: string): Promise<CreateSuccess | InviteError> {
     const body = { chatId };
     try {
       const response = await lastValueFrom(
-        this.http.post<InviteResponse>(this.baseUrl + 'create', body, {
-          headers: { Authorization: this.user.token },
-        })
+        this.http.post<CreateSuccess | InviteError>(
+          this.baseUrl + 'create',
+          body,
+          {
+            headers: { Authorization: this.user.token },
+          }
+        )
       );
       return response;
     } catch (error: any) {
@@ -61,7 +71,7 @@ export class InviteService {
   async sendJoinRequest(
     invId: string,
     key: CryptoKey
-  ): Promise<InviteResponse> {
+  ): Promise<JoinSuccess | InviteError> {
     try {
       const rawKey = await crypto.subtle.wrapKey('raw', key, this.key, {
         name: 'AES-KW',
@@ -72,7 +82,7 @@ export class InviteService {
       const body = { key: wrappedKey, invId };
 
       const response = await lastValueFrom(
-        this.http.post<InviteResponse>(this.baseUrl + 'join', body, {
+        this.http.post<JoinSuccess | InviteError>(this.baseUrl + 'join', body, {
           headers: { Authorization: this.user.token },
         })
       );
