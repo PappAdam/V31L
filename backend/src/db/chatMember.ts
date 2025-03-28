@@ -1,4 +1,4 @@
-import { ChatMember } from "@prisma/client";
+import { ChatMember, User } from "@prisma/client";
 import prisma from "./_db";
 
 /**
@@ -96,7 +96,7 @@ export async function findChatMembersByUser(
  */
 export async function findChatMembersByChat(
   chatId: string
-): Promise<ChatMember[]> {
+): Promise<(ChatMember & { user: User })[]> {
   if (!chatId) {
     return [];
   }
@@ -104,6 +104,9 @@ export async function findChatMembersByChat(
     const chatMembers = await prisma.chatMember.findMany({
       where: {
         chatId: chatId,
+      },
+      include: {
+        user: true,
       },
     });
 

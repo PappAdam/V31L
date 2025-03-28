@@ -13,6 +13,7 @@ export type PublicMessage = {
 export type PublicChat = {
   id: string;
   name?: string;
+  users: PublicUser[];
   encryptedMessages: PublicMessage[];
   encryptedChatKey?: Uint8Array;
 };
