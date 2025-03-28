@@ -1,24 +1,22 @@
 <div class="details-wrapper" [attr.data-state]="state">
   <div class="inner-wrapper">
-    <div class="group-header-wrapper">
-      <div class="image-wrapper"></div>
-      <div class="title-wrapper">
-        <h2>{{ (messageService.selectedChat$ | async)?.name }}</h2>
-      </div>
-    </div>
     <div class="group-action-wrapper">
-      <app-group-option-card
-        fontIcon="logout"
-        label="Leave chat"
-      ></app-group-option-card>
+      <app-group-option-card fontIcon="logout" label="Leave chat">
+      </app-group-option-card>
       <app-group-option-card
         fontIcon="snooze"
         label="Suspend notifications"
       ></app-group-option-card>
-      <app-group-option-card
-        fontIcon="notifications_off"
-        label="Disable notifications"
-      ></app-group-option-card>
+      <app-group-option-card fontIcon="group" label="Members">
+        <div class="group-members-wrapper">
+          @for (chatMember of (messageService.selectedChat$ | async)?.users;
+          track $index) {
+          <app-group-member-card
+            [name]="chatMember.username"
+          ></app-group-member-card>
+          }
+        </div>
+      </app-group-option-card>
       <app-group-option-card
         fontIcon="report"
         label="Report bug"
@@ -27,14 +25,6 @@
         fontIcon="add"
         label="Add member"
       ></app-group-option-card>
-    </div>
-    <div class="group-members-wrapper">
-      @for (chatMember of (messageService.selectedChat$ | async)?.users; track
-      $index) {
-      <app-group-member-card
-        [name]="chatMember.username"
-      ></app-group-member-card>
-      }
     </div>
   </div>
 </div>

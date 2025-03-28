@@ -1,11 +1,18 @@
 @use "../../../../../../../styles/styles.scss" as *;
 
+.action-container {
+  padding: $mat-sys-spacing-sm;
+}
+
 .action {
   width: 100%;
-  padding: $mat-sys-spacing-sm;
   color: $mat-sys-on-surface;
   display: flex;
   gap: $mat-sys-spacing-sm;
+
+  .expand-arrow {
+    transition: 0.1s ease;
+  }
   cursor: pointer;
   .icon-wrapper {
     display: flex;
@@ -19,4 +26,9 @@
     font-size: $mat-sys-label-large-size;
     font-weight: $mat-sys-label-large-weight;
   }
+}
+
+.content {
+  transition: 0.2s;
+  overflow-y: auto;
 }

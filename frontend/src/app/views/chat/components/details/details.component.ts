@@ -1,5 +1,5 @@
 import { Component, inject, Input } from '@angular/core';
-import { MatIcon, MatIconModule } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 import { GroupOptionCardComponent } from './components/group-option-card/group-option-card.component';
 import { GroupMemberCardComponent } from './components/group-member-card/group-member-card.component';
 import { MessageService } from '@/services/message.service';

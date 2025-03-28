@@ -1,6 +1,25 @@
-<div class="action">
-  <div class="icon-wrapper">
-    <mat-icon [fontIcon]="fontIcon"></mat-icon>
+<div class="action-container">
+  <div class="action" (click)="toggle()">
+    <div class="icon-wrapper">
+      <mat-icon [fontIcon]="fontIcon"></mat-icon>
+    </div>
+    <div class="option-label-wrapper">{{ label }}</div>
+    <div class="spacer"></div>
+    <div class="toggle-icon">
+      @if (hasContent) {
+      <mat-icon
+        class="expand-arrow"
+        fontIcon="expand_less"
+        [style.transform]="'rotate(' + (isExpanded ? 0 : 180) + 'deg)'"
+      ></mat-icon>
+      }
+    </div>
   </div>
-  <div class="option-label-wrapper">{{ label }}</div>
+  <div
+    #content
+    class="content"
+    [style.maxHeight]="isExpanded ? '500px' : '0px'"
+  >
+    <ng-content></ng-content>
+  </div>
 </div>

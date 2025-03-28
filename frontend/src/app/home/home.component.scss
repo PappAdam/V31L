@@ -1,4 +1,5 @@
 @use "@angular/material" as mat;
+@use "../../styles/mat-map.scss" as *;
 
 main {
   display: flex;
