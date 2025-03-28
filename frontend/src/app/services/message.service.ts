@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { SocketService } from './socket.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { PublicChat, PublicMessage, ServerChatsPackage } from '@common';
 import { EncryptionService, Message } from './encryption.service';
 import { InviteService } from './invite.service';
@@ -31,13 +31,17 @@ export class MessageService {
     return this._selectedChatIndex$.asObservable();
   }
 
-  currentSelectedChatIndex(): number {
+  get selectedChatIndex(): number {
     return this._selectedChatIndex$.value;
   }
 
   set selectedChatIndex(index: number) {
     this._selectedChatIndex$.next(index);
   }
+
+  selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
+    map(([messages, index]) => messages[index])
+  );
 
   constructor() {
     this.socketService
@@ -80,11 +84,6 @@ export class MessageService {
         (f) => f.id === rawChatContent.id
       );
 
-      const chatContext: Omit<Chat, 'chatKey' | 'messages'> = {
-        id: rawChatContent.id,
-        name: rawChatContent.name,
-      };
-
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
         if (rawChatContent.encryptedChatKey) {
@@ -93,7 +92,7 @@ export class MessageService {
             this.invitationService.key
           );
           const chat = {
-            ...chatContext,
+            ...rawChatContent,
             chatKey,
             messages: [],
           };

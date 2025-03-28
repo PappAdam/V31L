@@ -2,7 +2,9 @@
   <div class="inner-wrapper">
     <div class="group-header-wrapper">
       <div class="image-wrapper"></div>
-      <div class="title-wrapper"><h2>Gaming Lovers</h2></div>
+      <div class="title-wrapper">
+        <h2>{{ (messageService.selectedChat$ | async)?.name }}</h2>
+      </div>
     </div>
     <div class="group-action-wrapper">
       <app-group-option-card
@@ -27,39 +29,12 @@
       ></app-group-option-card>
     </div>
     <div class="group-members-wrapper">
-      <app-group-member-card name="Abos Gergo"></app-group-member-card>
-      <app-group-member-card name="Csizmadia Barnabas"></app-group-member-card>
-      <app-group-member-card name="asdasda"></app-group-member-card>
+      @for (chatMember of (messageService.selectedChat$ | async)?.users; track
+      $index) {
       <app-group-member-card
-        name="Csizmadia sdassadaBarnabas"
+        [name]="chatMember.username"
       ></app-group-member-card>
-      <app-group-member-card
-        name="Csizmadia asdasdBarnabas"
-      ></app-group-member-card>
-      <app-group-member-card name="Csizmadia Barnabas"></app-group-member-card>
-      <app-group-member-card
-        name="Csizmadia asdasdas Barnabas"
-      ></app-group-member-card>
-      <app-group-member-card
-        name="Csizmadia Baadsfasdfadfadfasdfrnabas"
-      ></app-group-member-card>
-      <app-group-member-card
-        name="Csizmqweadia Bweqearnabas"
-      ></app-group-member-card>
-      <app-group-member-card name="Csizmadia Barnabas"></app-group-member-card>
-      <app-group-member-card
-        name="Csizmqweqweadia qweqweq"
-      ></app-group-member-card>
-      <app-group-member-card name="Csizmadia Barnabas"></app-group-member-card>
-      <app-group-member-card
-        name="Csizqweqwemadia Barnabas"
-      ></app-group-member-card>
-      <app-group-member-card
-        name="Csizmadia Baqwernabas"
-      ></app-group-member-card>
-      <app-group-member-card
-        name="Csizmadia Barqweqwenabas"
-      ></app-group-member-card>
+      }
     </div>
   </div>
 </div>
