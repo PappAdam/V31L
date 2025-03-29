@@ -39,6 +39,7 @@ model Message {
   inIv      Bytes
   outIv     Bytes
   authTag   Bytes
+  pinned    Boolean  @default(false)
 
   lastMessageForChat Chat? @relation("ChatLastMessage")
 }
