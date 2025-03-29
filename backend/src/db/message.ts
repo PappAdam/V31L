@@ -14,6 +14,7 @@ import { encryptData } from "@/utils/encryption";
  */
 export async function findChatMessages(
   chatId: string,
+  pinnedOnly: boolean = false,
   limit: number = 20,
   cursor?: string
 ): Promise<({ user: PublicUser } & Message)[]> {
@@ -27,6 +28,7 @@ export async function findChatMessages(
       await prisma.message.findMany({
         where: {
           chatId: chatId,
+          pinned: pinnedOnly ? { equals: true } : {},
         },
         orderBy: {
           timeStamp: "desc",

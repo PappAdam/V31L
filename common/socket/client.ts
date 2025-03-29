@@ -45,6 +45,7 @@ export type ClientGetMessagesPackage = {
   header: "GetChatMessages";
   messageCount: number;
   chatId: string;
+  pinnedOnly?: boolean;
   /**
    * MessageId used as cursor if paging is needed
    */

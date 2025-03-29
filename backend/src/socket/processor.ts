@@ -124,6 +124,7 @@ async function processBasedOnHeader(
       const messages: PublicMessage[] = (
         await findChatMessages(
           incoming.chatId,
+          incoming.pinnedOnly,
           incoming.messageCount,
           incoming.fromId
         )
