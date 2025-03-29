@@ -14,8 +14,8 @@ import { encryptData } from "@/utils/encryption";
  */
 export async function findChatMessages(
   chatId: string,
-  pinnedOnly: boolean = false,
   limit: number = 20,
+  pinnedOnly: boolean = false,
   cursor?: string
 ): Promise<({ user: PublicUser } & Message)[]> {
   try {
