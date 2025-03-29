@@ -22,7 +22,13 @@ module.exports = {
   setupFilesAfterEnv: ["./__tests__/_setup/setup.ts"],
   reporters: [
     "default",
-    ["jest-ctrf-json-reporter", {}],
+    [
+      "jest-ctrf-json-reporter",
+      {
+        outputFile: "backend.testreport.json",
+        outputDir: "__tests__/report",
+      },
+    ],
     [
       "jest-html-reporters",
       {

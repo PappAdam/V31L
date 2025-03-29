@@ -81,6 +81,7 @@ async function processBasedOnHeader(
                 timeStamp: createdMessage.timeStamp,
               },
             ],
+            users: [],
           },
         ],
       };
@@ -100,7 +101,7 @@ async function processBasedOnHeader(
       return true;
 
     case "GetChats":
-      const chats = await getPublicChatsWithMessages(
+      const chats: PublicChat[] = await getPublicChatsWithMessages(
         client.user.id,
         incoming.chatCount,
         incoming.messageCount
@@ -116,7 +117,7 @@ async function processBasedOnHeader(
 
       ServerPackageSender.send([client.ws], {
         header: "Chats",
-        chats: chats,
+        chats,
       });
       return true;
 
@@ -133,6 +134,7 @@ async function processBasedOnHeader(
       var responsePayload: PublicChat = {
         id: incoming.chatId,
         encryptedMessages: messages,
+        users: [],
       };
 
       ServerPackageSender.send([client.ws], {

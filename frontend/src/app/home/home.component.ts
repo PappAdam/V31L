@@ -57,8 +57,7 @@ export class HomeComponent {
 
   async sendMessage() {
     const message = this.messageControl.value?.trim();
-    if (!message || this.messageService.currentSelectedChatIndex() == -1)
-      return;
+    if (!message || this.messageService.selectedChatIndex == -1) return;
     const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
     this.messageService.sendMessage(selectedChat.id, message);
     this.messageControl.reset();

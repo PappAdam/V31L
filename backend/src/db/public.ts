@@ -3,6 +3,7 @@ import { findChatsByUser } from "./chat";
 import { findChatMessages } from "./message";
 import { Message } from "@prisma/client";
 import { decryptData } from "@/utils/encryption";
+import { findChatMembersByChat } from "./chatMember";
 
 /**
  * Gets chats for a user with `messageCount` number of messages.
@@ -32,12 +33,16 @@ export async function getPublicChatsWithMessages(
         let messages = (await findChatMessages(chat.id, messageCount)).map(
           toPublicMessage
         );
+        let users = (await findChatMembersByChat(chat.id)).map((m) => {
+          return { username: m.user.username, id: m.user.id };
+        });
 
         return {
           id: chat.id,
           name: chat.name,
           encryptedMessages: messages,
           encryptedChatKey: chat.key,
+          users,
         };
       })
     );
