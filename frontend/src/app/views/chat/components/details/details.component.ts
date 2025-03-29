@@ -66,10 +66,10 @@ export class DetailsComponent {
   template: `
     <h3 mat-dialog-title>Are you sure you want to leave this chat?</h3>
     <mat-dialog-actions>
-      <button mat-flat-button cdkFocusInitial [mat-dialog-close]="false">
-        No
+      <button mat-button [mat-dialog-close]="false">No</button>
+      <button mat-flat-button cdkFocusInitial [mat-dialog-close]="true">
+        Yes
       </button>
-      <button mat-button [mat-dialog-close]="true">Yes</button>
     </mat-dialog-actions>
   `,
 

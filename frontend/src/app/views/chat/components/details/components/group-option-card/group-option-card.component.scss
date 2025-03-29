@@ -9,20 +9,31 @@
   width: 100%;
   color: $mat-sys-on-surface;
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   gap: $mat-sys-spacing-sm;
+  cursor: pointer;
 
   &:hover {
     color: $mat-sys-primary;
   }
 
+  .action-left {
+    display: flex;
+    flex-direction: row;
+    gap: $mat-sys-spacing-sm;
+  }
+
+  .action-right {
+    display: flex;
+    justify-content: center;
+    .toggle {
+      transform: scale(0.7);
+    }
+  }
+
   .expand-arrow {
     transition: 0.1s ease;
-  }
-  cursor: pointer;
-  .icon-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
   .option-label-wrapper {
     display: flex;
