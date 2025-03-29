@@ -2,7 +2,10 @@
 CREATE TABLE "User" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "username" TEXT NOT NULL,
-    "password" TEXT NOT NULL
+    "password" TEXT NOT NULL,
+    "authKey" BLOB,
+    "iv" BLOB,
+    "authTag" BLOB
 );
 
 -- CreateTable
@@ -10,7 +13,7 @@ CREATE TABLE "Chat" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "lastMessageId" TEXT,
-    CONSTRAINT "Chat_lastMessageId_fkey" FOREIGN KEY ("lastMessageId") REFERENCES "Message" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "Chat_lastMessageId_fkey" FOREIGN KEY ("lastMessageId") REFERENCES "Message" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -19,9 +22,13 @@ CREATE TABLE "Message" (
     "chatId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "timeStamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "content" TEXT NOT NULL,
+    "content" BLOB NOT NULL,
+    "inIv" BLOB NOT NULL,
+    "outIv" BLOB NOT NULL,
+    "authTag" BLOB NOT NULL,
+    "pinned" BOOLEAN NOT NULL DEFAULT false,
     CONSTRAINT "Message_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "Message_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "Message_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -29,7 +36,7 @@ CREATE TABLE "ChatMember" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "userId" TEXT NOT NULL,
     "chatId" TEXT NOT NULL,
-    "key" TEXT NOT NULL,
+    "key" BLOB NOT NULL,
     CONSTRAINT "ChatMember_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "ChatMember_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chat" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
