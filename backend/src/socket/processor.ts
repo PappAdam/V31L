@@ -4,7 +4,7 @@ import {
   PublicMessage,
   ServerChatsPackage,
 } from "@common";
-import { findChatMembersByChat } from "../db/chatMember";
+import { deleteChatMember, findChatMembersByChat } from "../db/chatMember";
 import {
   createMessage,
   findChatMessages,
@@ -151,6 +151,19 @@ async function processBasedOnHeader(
       });
 
       return !!message;
+
+    case "LeaveChat":
+      const deletedChatMember = await deleteChatMember(
+        client.user.id,
+        incoming.chatId
+      );
+
+      ServerPackageSender.send([client.ws], {
+        header: "LeaveChat",
+        chatId: incoming.chatId,
+      });
+
+      return !!deletedChatMember;
 
     default:
       console.error(

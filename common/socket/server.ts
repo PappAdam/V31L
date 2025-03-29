@@ -1,9 +1,10 @@
 import { PublicChat } from "./public";
 
 export type ServerPackage =
-  | ServerErrorPackage
+  | ServerAcknowledgement
   | ServerChatsPackage
-  | ServerAcknowledgement;
+  | ServerLeaveChatPackage
+  | ServerErrorPackage;
 
 export type ServerHeaderType = ServerPackage["header"];
 export type PackageForHeader<T extends ServerHeaderType> = Extract<
@@ -20,6 +21,11 @@ export type ServerAcknowledgement = {
 export type ServerChatsPackage = {
   header: "Chats";
   chats: PublicChat[];
+};
+
+export type ServerLeaveChatPackage = {
+  header: "LeaveChat";
+  chatId: string;
 };
 
 export type ServerErrorPackage = {

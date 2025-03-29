@@ -22,7 +22,13 @@
           Implement stuff here
         </button>
       </app-group-option-card>
-      <app-group-option-card fontIcon="logout" label="Leave chat">
+      <app-group-option-card fontIcon="push_pin" label="Pinned messages">
+      </app-group-option-card>
+      <app-group-option-card
+        fontIcon="logout"
+        label="Leave chat"
+        (click)="onLeaveChat()"
+      >
       </app-group-option-card>
     </div>
   </div>

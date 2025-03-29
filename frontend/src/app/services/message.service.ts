@@ -1,6 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { SocketService } from './socket.service';
-import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  map,
+  merge,
+  Observable,
+  tap,
+} from 'rxjs';
 import { PublicChat, PublicMessage, ServerChatsPackage } from '@common';
 import { EncryptionService, Message } from './encryption.service';
 import { InviteService } from './invite.service';
@@ -26,6 +33,33 @@ export class MessageService {
     return this._chats$.asObservable();
   }
 
+  //#region Subscriptions - These subscriptions modify the _chats$ BehaviorSubject, they just show up as unused varibles, don't remove them.
+  private loadOnAuthozition = this.socketService.authorized$.subscribe(
+    (authorized) => {
+      this._chats$.next([]);
+      if (authorized) {
+        this.socketService.createPackage({
+          header: 'GetChats',
+          chatCount: 10,
+          messageCount: 20,
+        });
+      }
+    }
+  );
+
+  private chatsPackageSubscription = this.socketService
+    .addPackageListener('Chats')
+    .subscribe((p) => this.onChatsPackageRecieved(p));
+
+  private removeChatSubscription = this.socketService
+    .addPackageListener('LeaveChat')
+    .subscribe((p) =>
+      this._chats$.next(
+        this._chats$.value.filter((chat) => chat.id != p.chatId)
+      )
+    );
+  //#endregion
+
   private _selectedChatIndex$ = new BehaviorSubject<number>(-1);
   get selectedChatIndex$(): Observable<number> {
     return this._selectedChatIndex$.asObservable();
@@ -49,28 +83,6 @@ export class MessageService {
     return this._chats$.value[this._selectedChatIndex$.value];
   }
 
-  constructor() {
-    this.socketService
-      .addPackageListener('Chats')
-      .subscribe(this.onChatsPackageRecieved);
-
-    this.socketService.authorized$.subscribe((authorized) => {
-      if (authorized) {
-        this._chats$.next([]);
-        this.socketService.createPackage({
-          header: 'GetChats',
-          chatCount: 10,
-          messageCount: 20,
-        });
-      }
-    });
-  }
-
-  lastMessage(chatId: string): Message | null {
-    const chat = this._chats$.value.find((c) => c.id === chatId);
-    return chat?.messages[chat.messages.length - 1] || null;
-  }
-
   async sendMessage(chatId: string, message: string) {
     const encrypted = await this.encryptionService.encryptText(
       this.encryptionService.globalKey,
@@ -82,6 +94,10 @@ export class MessageService {
       chatId,
       messageContent: encrypted,
     });
+  }
+
+  leaveChat(chatId: string) {
+    this.socketService.createPackage({ header: 'LeaveChat', chatId });
   }
 
   onChatsPackageRecieved = async (chatsPackage: ServerChatsPackage) => {
@@ -127,9 +143,9 @@ export class MessageService {
       );
 
       if (
-        this.lastMessage(rawChatContent.id) &&
+        this.lastMessageOfChat(rawChatContent.id) &&
         rawChatContent.encryptedMessages[0].timeStamp >
-          this.lastMessage(rawChatContent.id)!.timeStamp
+          this.lastMessageOfChat(rawChatContent.id)!.timeStamp
       ) {
         // Pushing new messages to the end of the array
         this._chats$.value[chatIndex].messages = [
@@ -145,4 +161,9 @@ export class MessageService {
       }
     });
   };
+
+  lastMessageOfChat(chatId: string): Message | null {
+    const chat = this._chats$.value.find((c) => c.id === chatId);
+    return chat?.messages[chat.messages.length - 1] || null;
+  }
 }

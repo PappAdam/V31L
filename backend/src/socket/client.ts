@@ -85,7 +85,7 @@ export class Client {
         return !!user && !token.expired;
 
       case "NewMessage":
-        const chatMember = await findChatMember(this.user.id, incoming.chatId);
+        var chatMember = await findChatMember(this.user.id, incoming.chatId);
         return this.isAuthorized && !!chatMember && !!incoming.messageContent;
 
       case "DeAuthorization":
@@ -107,6 +107,10 @@ export class Client {
       case "PinMessage":
         const message = await findMessageById(incoming.messageId);
         return this.isAuthorized && !!message;
+
+      case "LeaveChat":
+        var chatMember = await findChatMember(this.user.id, incoming.chatId);
+        return this.isAuthorized && !!chatMember;
 
       default:
         throw new Error(

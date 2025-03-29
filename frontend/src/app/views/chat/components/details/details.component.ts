@@ -7,6 +7,11 @@ import { AsyncPipe } from '@angular/common';
 import { InviteService } from '@/services/invite.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 
 GroupMemberCardComponent;
 @Component({
@@ -27,6 +32,7 @@ export class DetailsComponent {
 
   messageService = inject(MessageService);
   inviteService = inject(InviteService);
+  dialog = inject(MatDialog);
 
   invitationId: string = 'Creating you invitation...';
 
@@ -42,4 +48,33 @@ export class DetailsComponent {
 
     this.invitationId = createInvitationResponse.invId;
   }
+
+  async onLeaveChat() {
+    const leaveDialogRef = this.dialog.open(LeaveChatDialog);
+
+    leaveDialogRef.afterClosed().subscribe((leaveConfirmed: boolean) => {
+      if (leaveConfirmed) {
+        this.messageService.leaveChat(this.messageService.selectedChat.id);
+      }
+    });
+  }
+}
+
+@Component({
+  selector: 'dialog-leave-chat',
+  imports: [MatDialogModule, MatButtonModule],
+  template: `
+    <h3 mat-dialog-title>Are you sure you want to leave this chat?</h3>
+    <mat-dialog-actions>
+      <button mat-flat-button cdkFocusInitial [mat-dialog-close]="false">
+        No
+      </button>
+      <button mat-button [mat-dialog-close]="true">Yes</button>
+    </mat-dialog-actions>
+  `,
+
+  styles: '',
+})
+export class LeaveChatDialog {
+  readonly dialogRef = inject(MatDialogRef<LeaveChatDialog>);
 }
