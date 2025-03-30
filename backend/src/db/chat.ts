@@ -1,6 +1,6 @@
 import { Chat, Message } from "@prisma/client";
 import prisma from "./_db";
-import { encryptData } from "@/utils/encryption";
+import { encryptData } from "@/encryption";
 
 /**
  * Gets a chat with the given id.

@@ -19,8 +19,8 @@ import {
 } from "@common";
 import { User } from "@prisma/client";
 import { generateTotpUri, verifyToken } from "authenticator";
-import { decryptData } from "@/utils/encryption";
-import { arrayToString } from "@/utils/buffers";
+import { decryptData } from "@/encryption";
+import { arrayToString } from "@common";
 
 const authRouter = Router();
 authRouter.post(

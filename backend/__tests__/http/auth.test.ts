@@ -13,8 +13,8 @@ import {
 import { generateToken } from "authenticator";
 import prisma from "@/db/_db";
 import { database } from "../_setup/setup";
-import { decryptData } from "@/utils/encryption";
-import { arrayToString } from "@/utils/buffers";
+import { decryptData } from "@/encryption";
+import { arrayToString } from "@common";
 
 jest.spyOn(jwt, "sign");
 jest.spyOn(bcrypt, "compare");

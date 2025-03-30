@@ -2,7 +2,7 @@ import { PublicChat, PublicMessage, PublicUser } from "@common";
 import { findChatsByUser } from "./chat";
 import { findChatMessages } from "./message";
 import { Message } from "@prisma/client";
-import { decryptData } from "@/utils/encryption";
+import { decryptData } from "@/encryption";
 import { findChatMembersByChat } from "./chatMember";
 
 /**

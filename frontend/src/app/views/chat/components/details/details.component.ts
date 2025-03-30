@@ -7,6 +7,7 @@ import { AsyncPipe } from '@angular/common';
 import { InviteService } from '@/services/invite.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
+import { QRcodeComponent } from '../../../../qrcode/qrcode.component';
 import {
   MatDialog,
   MatDialogModule,
@@ -23,6 +24,7 @@ GroupMemberCardComponent;
     MatButtonModule,
     MatDividerModule,
     AsyncPipe,
+    QRcodeComponent,
   ],
   templateUrl: './details.component.html',
   styleUrl: './details.component.scss',
@@ -34,19 +36,16 @@ export class DetailsComponent {
   inviteService = inject(InviteService);
   dialog = inject(MatDialog);
 
-  invitationId: string = 'Creating you invitation...';
+  invitation: string = 'Creating you invitation...';
 
   async onAddMemberClick() {
     if (!this.messageService.selectedChat) return;
 
-    const createInvitationResponse = await this.inviteService.createInvitation(
+    const invitation = await this.inviteService.createInvitation(
       this.messageService.selectedChat.id
     );
 
-    // TODO Proper error handling
-    if (createInvitationResponse.result == 'Error') return;
-
-    this.invitationId = createInvitationResponse.invId;
+    console.log(this.invitation);
   }
 
   async onLeaveChat() {

@@ -11,8 +11,16 @@ export class Invitation {
     this.createdAt = Date.now();
     this.expireTime = expireTime;
     this.chatId = chatId;
+    setTimeout(this.remove, this.expireTime);
 
     Invitations.push(this);
+  }
+
+  remove() {
+    const index = Invitations.findIndex((inv) => inv.id == this.id);
+    if (index) {
+      Invitations.splice(index, 1);
+    }
   }
 }
 

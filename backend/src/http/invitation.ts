@@ -4,11 +4,11 @@ import {
   invitationInvalidResponse,
   invitationJoinSuccessResponse,
   serverErrorResponse,
+  stringToUint8Array,
 } from "@common";
 import { Invitation, validateChatJoinRequest } from "@/invitation";
 import { createChatMember, findChatMember } from "@/db/chatMember";
 import { validateRequiredFields } from "./middlewares/validate";
-import { stringToUint8Array } from "@/utils/buffers";
 
 const invRouter = Router();
 invRouter.post("/create", validateRequiredFields(["chatId"]), createInvitation);

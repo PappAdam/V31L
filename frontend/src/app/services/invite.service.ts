@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { EncryptionService } from './encryption.service';
 import { StoredUser } from './auth.service';
 import {
+  arrayToString,
   CreateSuccess,
   InviteError,
   InviteResponse,
@@ -10,6 +11,11 @@ import {
   JoinSuccess,
 } from '@common';
 import { lastValueFrom } from 'rxjs';
+
+export type InvIdKeyPair = {
+  id: string;
+  key: CryptoKey;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -40,13 +46,24 @@ export class InviteService {
       );
   }
 
+  async wrapInvitation(invId: string): Promise<string> {
+    const binKey = new Uint8Array(
+      await crypto.subtle.exportKey('raw', this.key)
+    );
+
+    const key = arrayToString(binKey);
+    const inv = JSON.stringify({ id: invId, key: key });
+
+    return inv;
+  }
+
   /**
    * Creates a invitation for a given chat
-   * @returns {Promise<InviteResponse>}
    * {@link InviteResponse}
    */
-  async createInvitation(chatId: string): Promise<CreateSuccess | InviteError> {
+  async createInvitation(chatId: string): Promise<string | null> {
     const body = { chatId };
+    let result: string | null = null;
     try {
       const response = await lastValueFrom(
         this.http.post<CreateSuccess | InviteError>(
@@ -57,10 +74,16 @@ export class InviteService {
           }
         )
       );
-      return response;
+
+      if (response.result == 'Success') {
+        result = await this.wrapInvitation(response.invId);
+        console.log(result);
+      }
     } catch (error: any) {
-      return error.error;
+      console.error(error.error);
     }
+
+    return result;
   }
 
   /**
