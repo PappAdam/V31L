@@ -13,6 +13,7 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
 
 GroupMemberCardComponent;
 @Component({
@@ -25,6 +26,8 @@ GroupMemberCardComponent;
     MatDividerModule,
     AsyncPipe,
     QRcodeComponent,
+    MatTabGroup,
+    MatTab,
   ],
   templateUrl: './details.component.html',
   styleUrl: './details.component.scss',
@@ -38,6 +41,16 @@ export class DetailsComponent {
 
   invitation: string = 'Creating you invitation...';
 
+  selectedOption: 'qrcode' | 'manual' = 'qrcode';
+
+  copyToClipboard() {
+    if (!this.invitation) return;
+
+    navigator.clipboard.writeText(this.invitation).catch((err) => {
+      console.error('Failed to copy text:', err);
+    });
+  }
+
   async onAddMemberClick() {
     if (!this.messageService.selectedChat) return;
 
@@ -45,7 +58,9 @@ export class DetailsComponent {
       this.messageService.selectedChat.id
     );
 
-    console.log(this.invitation);
+    if (invitation) {
+      this.invitation = invitation;
+    }
   }
 
   async onLeaveChat() {

@@ -17,9 +17,12 @@
         type="expand"
         (expanded)="onAddMemberClick()"
       >
-        <app-qrcode [from]="this.invitation"></app-qrcode>
-        <!-- This is weird, if the botton element is a button, it has to have a bottom margin of 4px (or higher), or a scrollbar will appear -->
-        <button mat-flat-button [style.margin-bottom]="'4px'">Recreate</button>
+        <mat-tab-group>
+          <mat-tab label="QR code">
+            <app-qrcode [from]="this.invitation" />
+          </mat-tab>
+          <mat-tab label="Manual"> </mat-tab>
+        </mat-tab-group>
       </app-group-option-card>
       <app-group-option-card
         fontIcon="push_pin"

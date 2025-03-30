@@ -27,6 +27,8 @@ export class InviteService {
   key!: CryptoKey;
   user: StoredUser;
 
+  sensitiveDataWarning = true;
+
   constructor() {
     const rawUser = localStorage.getItem('user');
     this.user = JSON.parse(rawUser!);
@@ -77,7 +79,6 @@ export class InviteService {
 
       if (response.result == 'Success') {
         result = await this.wrapInvitation(response.invId);
-        console.log(result);
       }
     } catch (error: any) {
       console.error(error.error);

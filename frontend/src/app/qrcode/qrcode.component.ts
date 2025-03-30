@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import QRCode from 'qrcode';
 
 @Component({
@@ -7,17 +7,17 @@ import QRCode from 'qrcode';
   templateUrl: './qrcode.component.html',
   styleUrl: './qrcode.component.scss',
 })
-export class QRcodeComponent {
+export class QRcodeComponent implements OnChanges {
   @Input() from?: string;
-  url? = '';
+  url?: string;
 
-  constructor() {}
-
-  ngOnInit() {
-    this.generateQrCode();
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['from']) {
+      this.generateQrCode();
+    }
   }
 
-  protected async generateQrCode() {
+  private async generateQrCode() {
     if (!this.from) {
       this.url = undefined;
       return;

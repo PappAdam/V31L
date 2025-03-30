@@ -11,17 +11,19 @@ export class Invitation {
     this.createdAt = Date.now();
     this.expireTime = expireTime;
     this.chatId = chatId;
-    setTimeout(this.remove, this.expireTime);
+    setTimeout(this.remove, 10);
 
     Invitations.push(this);
   }
 
-  remove() {
+  remove = () => {
     const index = Invitations.findIndex((inv) => inv.id == this.id);
     if (index) {
       Invitations.splice(index, 1);
     }
-  }
+
+    console.log("Invitation removed on index: ", index);
+  };
 }
 
 export function validateChatJoinRequest(incomingID: string): Invitation | null {
