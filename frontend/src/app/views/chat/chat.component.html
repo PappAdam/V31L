@@ -2,7 +2,7 @@
 <div class="chat-outer-wrapper">
   <div class="chat-wrapper">
     <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
-    <div class="messages-wrapper">
+    <div class="messages-wrapper" #scrollContainer (scroll)="onScroll()">
       @for (message of (this.selectedChat$ | async)?.messages; track $index) {
 
       <app-message

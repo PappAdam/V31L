@@ -166,4 +166,17 @@ export class MessageService {
     const chat = this._chats$.value.find((c) => c.id === chatId);
     return chat?.messages[chat.messages.length - 1] || null;
   }
+
+  scrollLoadMessages(chatId: string) {
+    const chat = this._chats$.value.find((c) => c.id === chatId);
+    if (!chat) {
+      return;
+    }
+    this.socketService.createPackage({
+      header: 'GetChatMessages',
+      chatId: chat.id,
+      messageCount: 10,
+      fromId: chat.messages[0].id,
+    });
+  }
 }

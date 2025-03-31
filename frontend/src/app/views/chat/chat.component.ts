@@ -1,5 +1,5 @@
 import { PlatformService } from '@/services/platform.service';
-import { Component, inject, Input } from '@angular/core';
+import { Component, ElementRef, inject, Input, ViewChild } from '@angular/core';
 import { DeviceInfo } from '@capacitor/device';
 import { HeaderComponent } from './components/header/header.component';
 import { MessageComponent } from './components/message/message.component';
@@ -32,6 +32,9 @@ import { MatInputModule } from '@angular/material/input';
 })
 export class ChatComponent {
   @Input() chatTitle: string = '';
+  @ViewChild('scrollContainer') scrollContainer: ElementRef | undefined;
+  scrollOffset = 0;
+
   platform: DeviceInfo | null = null;
   platformService: PlatformService = inject(PlatformService);
   color = '#ffffff30';
@@ -47,7 +50,6 @@ export class ChatComponent {
   messageControl = new FormControl('');
 
   message = '';
-
   previousUser = '';
 
   constructor() {
@@ -61,9 +63,33 @@ export class ChatComponent {
       )
       .subscribe();
   }
+
+  onScroll() {
+    const elem = this.scrollContainer?.nativeElement;
+    if (!elem) {
+      return;
+    }
+    this.scrollOffset = elem.scollHeight - elem.scrollTop;
+
+    if (elem.scrollTop <= 0) {
+      this.messageService.scrollLoadMessages(
+        this.messageService.selectedChat.id
+      );
+      // elem.scrollTo({
+      //   bottom: height - this.scrollOffset,
+      // });
+    }
+  }
+
   onSelectedIndexChanged(index: number) {
     console.log(index);
+    const elem = this.scrollContainer?.nativeElement;
+    if (!elem) {
+      return;
+    }
+    elem.scrollTop = elem.scrollHeight;
   }
+
   updateDetailsState(event: string) {
     this.detailsState = event;
   }
