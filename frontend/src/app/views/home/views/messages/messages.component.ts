@@ -9,13 +9,7 @@ import { FormControl } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'app-messages',
-  imports: [
-    ChatCardComponent,
-    DirectsComponent,
-    GroupsComponent,
-    MatTabsModule,
-    AsyncPipe,
-  ],
+  imports: [ChatCardComponent, MatTabsModule, AsyncPipe],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })

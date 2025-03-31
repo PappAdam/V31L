@@ -79,6 +79,7 @@ async function processBasedOnHeader(
                 user: client.user,
                 encryptedData: incoming.messageContent,
                 timeStamp: createdMessage.timeStamp,
+                pinned: createdMessage.pinned,
               },
             ],
             users: [],
@@ -131,16 +132,23 @@ async function processBasedOnHeader(
         )
       ).map(toPublicMessage);
 
-      var responsePayload: PublicChat = {
+      var publicChat: PublicChat = {
         id: incoming.chatId,
         encryptedMessages: messages,
         users: [],
       };
 
-      ServerPackageSender.send([client.ws], {
-        header: "Chats",
-        chats: [responsePayload],
-      });
+      if (incoming.pinnedOnly) {
+        ServerPackageSender.send([client.ws], {
+          header: "PinnedMessages",
+          messages,
+        });
+      } else {
+        ServerPackageSender.send([client.ws], {
+          header: "Chats",
+          chats: [publicChat],
+        });
+      }
 
       return true;
 

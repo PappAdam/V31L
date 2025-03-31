@@ -14,7 +14,7 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { MatTab, MatTabGroup } from '@angular/material/tabs';
+import { MessageComponent } from '../message/message.component';
 
 GroupMemberCardComponent;
 @Component({
@@ -26,9 +26,7 @@ GroupMemberCardComponent;
     MatButtonModule,
     MatDividerModule,
     AsyncPipe,
-    QRcodeComponent,
-    MatTabGroup,
-    MatTab,
+    MessageComponent,
   ],
   templateUrl: './details.component.html',
   styleUrl: './details.component.scss',
@@ -62,7 +60,7 @@ export class DetailsComponent {
     });
   }
 
-  async onAddMemberClick() {
+  async onAddMemberExpand() {
     if (!this.messageService.selectedChat) return;
 
     const invitation = await this.inviteService.createInvitation(
@@ -72,6 +70,10 @@ export class DetailsComponent {
     if (invitation) {
       this.invitation = invitation;
     }
+  }
+
+  async onPinnedMessageExpand() {
+    this.messageService.getPinnedMessages(this.messageService.selectedChat.id);
   }
 
   async onLeaveChat() {

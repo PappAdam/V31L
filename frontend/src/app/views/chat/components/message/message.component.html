@@ -1,28 +1,25 @@
 <div
   class="message-wrapper"
-  [attr.data-sender]="sender"
-  [attr.data-first]="first"
+  [style.flexDirection]="sender ? 'row-reverse' : 'row'"
 >
-  <div class="message-bubble-wrapper" [attr.data-sender]="sender">
-    <div
-      class="profile-name-wrapper"
-      [attr.data-first]="first"
-      [attr.data-sender]="sender"
-    >
-      {{ sender }}
-      <div class="profile-name"></div>
-    </div>
-    <div class="message-bubble" [attr.data-first]="first">
-      <p class="message">
-        {{ msg }}
-      </p>
+  <div class="message-options" [class.has-text-above]="sender">
+    <div class="option pin" [class.active]="pinned">
+      <mat-icon fontIcon="push_pin"></mat-icon>
     </div>
   </div>
-  <div
-    class="message-profile-wrapper"
-    [attr.data-first]="first"
-    [attr.data-sender]="sender"
-  >
-    <div class="profile-image" [attr.data-first]="first"></div>
+  <div class="message-bubble-wrapper">
+    @if (first) {
+    <div class="profile-name">
+      {{ sender }}
+    </div>
+    }
+    <div class="message-bubble">
+      {{ msg }}
+    </div>
+  </div>
+  <div class="message-profile-wrapper">
+    @if (first) {
+    <div class="profile-image" [class.has-text-above]="sender"></div>
+    }
   </div>
 </div>

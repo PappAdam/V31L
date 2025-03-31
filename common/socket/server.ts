@@ -1,8 +1,9 @@
-import { PublicChat } from "./public";
+import { PublicChat, PublicMessage } from "./public";
 
 export type ServerPackage =
   | ServerAcknowledgement
   | ServerChatsPackage
+  | ServerPinnedMessagesPackage
   | ServerLeaveChatPackage
   | ServerErrorPackage;
 
@@ -21,6 +22,11 @@ export type ServerAcknowledgement = {
 export type ServerChatsPackage = {
   header: "Chats";
   chats: PublicChat[];
+};
+
+export type ServerPinnedMessagesPackage = {
+  header: "PinnedMessages";
+  messages: PublicMessage[];
 };
 
 export type ServerLeaveChatPackage = {

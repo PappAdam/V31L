@@ -65,6 +65,7 @@ export function toPublicMessage(msg: RawPublicMessage): PublicMessage {
       }),
       iv: msg.inIv,
     },
+    pinned: msg.pinned,
     id: msg.id,
     user: msg.user,
     timeStamp: msg.timeStamp,
