@@ -3,9 +3,11 @@ import { SocketService } from './socket.service';
 import {
   BehaviorSubject,
   combineLatest,
+  filter,
   map,
   merge,
   Observable,
+  switchMap,
   tap,
 } from 'rxjs';
 import { PublicChat, PublicMessage, ServerChatsPackage } from '@common';
@@ -75,13 +77,30 @@ export class MessageService {
 
   get selectedChat$() {
     return combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
-      map(([messages, index]) => messages[index])
+      map(([messages, index]) => messages[index]),
+      filter((chat) => !!chat)
     );
   }
 
   get selectedChat() {
     return this._chats$.value[this._selectedChatIndex$.value];
   }
+
+  pinnedMessages$: Observable<Message[]> = merge(
+    this.socketService.addPackageListener('PinnedMessages').pipe(
+      switchMap((pkg) => {
+        const messages = this.decryptMessages(
+          pkg.messages,
+          this.selectedChat.chatKey
+        );
+        return messages;
+      })
+    ),
+    this.selectedChat$.pipe(
+      tap((chat) => this.getPinnedMessages(chat.id)),
+      map(() => [])
+    )
+  );
 
   async sendMessage(chatId: string, message: string) {
     const encrypted = await this.encryptionService.encryptText(
@@ -96,12 +115,21 @@ export class MessageService {
     });
   }
 
+  getPinnedMessages(chatId: string) {
+    this.socketService.createPackage({
+      header: 'GetChatMessages',
+      messageCount: -1,
+      chatId,
+      pinnedOnly: true,
+    });
+  }
+
   leaveChat(chatId: string) {
     this.socketService.createPackage({ header: 'LeaveChat', chatId });
   }
 
-  onChatsPackageRecieved = async (chatsPackage: ServerChatsPackage) => {
-    chatsPackage.chats.forEach(async (rawChatContent) => {
+  onChatsPackageRecieved = async (pkg: ServerChatsPackage) => {
+    pkg.chats.forEach(async (rawChatContent) => {
       let chatIndex = this._chats$.value.findIndex(
         (f) => f.id === rawChatContent.id
       );
@@ -126,20 +154,9 @@ export class MessageService {
         chatIndex = this._chats$.value.length - 1;
       }
 
-      const chatMessages: Message[] = await Promise.all(
-        rawChatContent.encryptedMessages.map(async (msg) => {
-          const messageContent = await this.encryptionService.decryptText(
-            this._chats$.value[chatIndex].chatKey,
-            msg.encryptedData
-          );
-
-          return {
-            id: msg.id,
-            user: msg.user,
-            timeStamp: msg.timeStamp,
-            content: messageContent,
-          };
-        })
+      const chatMessages = await this.decryptMessages(
+        rawChatContent.encryptedMessages,
+        this._chats$.value[chatIndex].chatKey
       );
 
       if (
@@ -161,6 +178,27 @@ export class MessageService {
       }
     });
   };
+
+  private async decryptMessages(
+    messages: PublicMessage[],
+    key: CryptoKey
+  ): Promise<Message[]> {
+    const chatMessages: Message[] = await Promise.all(
+      messages.map(async (msg) => {
+        const messageContent = await this.encryptionService.decryptText(
+          key,
+          msg.encryptedData
+        );
+
+        return {
+          ...msg,
+          content: messageContent,
+        };
+      })
+    );
+
+    return chatMessages;
+  }
 
   lastMessageOfChat(chatId: string): Message | null {
     const chat = this._chats$.value.find((c) => c.id === chatId);

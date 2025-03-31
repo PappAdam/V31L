@@ -3,23 +3,26 @@
   <div class="chat-wrapper">
     <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
     <div class="messages-wrapper">
-      @for (message of (this.selectedChat$ | async)?.messages; track $index) {
-
+      @if (this.selectedChat$ | async; as selectedChat) { @for (message of
+      selectedChat.messages; track $index) {
       <app-message
-        msg="{{ message.content }}"
-        first="{{
-          message.user.username == this.previousUser ? 'false' : 'true'
-        }}"
-        sender="{{
-          message.user.username == authService.user?.username
+        [msg]="message.content"
+        [first]="
+          $index === 0 ||
+          selectedChat.messages[$index - 1].user.username !==
+            message.user.username
+        "
+        [sender]="
+          message.user.username === authService.user?.username
             ? ''
             : message.user.username
-        }}"
-        [pinned]="true"
+        "
+        [pinned]="message.pinned"
       ></app-message>
-
-      {{ updatePreviousUser(message.user.username) }}
-
+      } } @else {
+      <div class="no-chat-selected">
+        <h3>No chat selected</h3>
+      </div>
       }
     </div>
     <div class="input-wrapper">
@@ -32,7 +35,7 @@
       <button
         class="message-button"
         matRipple
-        [matRippleColor]="color"
+        matRippleColor="#ffffff30"
         (click)="sendMessage()"
       >
         <mat-icon fontIcon="send"></mat-icon>

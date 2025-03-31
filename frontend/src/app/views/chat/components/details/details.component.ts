@@ -12,6 +12,7 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { MessageComponent } from '../message/message.component';
 
 GroupMemberCardComponent;
 @Component({
@@ -23,6 +24,7 @@ GroupMemberCardComponent;
     MatButtonModule,
     MatDividerModule,
     AsyncPipe,
+    MessageComponent,
   ],
   templateUrl: './details.component.html',
   styleUrl: './details.component.scss',
@@ -36,7 +38,7 @@ export class DetailsComponent {
 
   invitationId: string = 'Creating you invitation...';
 
-  async onAddMemberClick() {
+  async onAddMemberExpand() {
     if (!this.messageService.selectedChat) return;
 
     const createInvitationResponse = await this.inviteService.createInvitation(
@@ -47,6 +49,10 @@ export class DetailsComponent {
     if (createInvitationResponse.result == 'Error') return;
 
     this.invitationId = createInvitationResponse.invId;
+  }
+
+  async onPinnedMessageExpand() {
+    this.messageService.getPinnedMessages(this.messageService.selectedChat.id);
   }
 
   async onLeaveChat() {

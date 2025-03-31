@@ -4,8 +4,8 @@
       @for (chat of chats$ | async; track $index) {
       <app-chat-card
         (click)="messageService.selectedChatIndex = $index"
-        name="{{ chat.name }}"
-        last_msg="{{ chat.messages[0].content }}"
+        [name]="chat.name!"
+        [lastMsg]="chat.messages[0]"
         unread=""
       ></app-chat-card>
       }

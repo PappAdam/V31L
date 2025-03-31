@@ -33,8 +33,7 @@
 
     .message-bubble {
       background-color: $mat-sys-surface-variant;
-      // Just a large number for pill-shape
-      border-radius: 1000px;
+      border-radius: calc($mat-sys-img-profile-medium / 2);
       padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
       max-width: 580px;
       min-height: $mat-sys-img-profile-medium;
@@ -61,6 +60,11 @@
       border-radius: $mat-sys-corner-full;
       background-color: $mat-sys-primary-container;
     }
+  }
+
+  .message-options {
+    display: flex;
+    align-items: center;
   }
 
   .option {

@@ -15,7 +15,7 @@
         fontIcon="add"
         label="Add member"
         type="expand"
-        (expanded)="onAddMemberClick()"
+        (expanded)="onAddMemberExpand()"
       >
         <p>{{ invitationId }}</p>
         <!-- This is weird, if the botton element is a button, it has to have a bottom margin of 4px (or higher), or a scrollbar will appear -->
@@ -26,8 +26,17 @@
       <app-group-option-card
         fontIcon="push_pin"
         label="Pinned messages"
-        type="toggle"
+        type="expand"
+        (expanded)="onPinnedMessageExpand()"
       >
+        @for (message of (messageService.pinnedMessages$ | async); track $index)
+        {
+        <app-message
+          [msg]="message.content"
+          [first]="true"
+          [sender]="message.user.username"
+        ></app-message>
+        }
       </app-group-option-card>
       <app-group-option-card
         fontIcon="logout"

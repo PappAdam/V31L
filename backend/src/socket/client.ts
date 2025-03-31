@@ -102,7 +102,11 @@ export class Client {
 
       case "GetChatMessages":
         const fromMessage = findMessageById(incoming.fromId || "");
-        return this.isAuthorized && !!fromMessage && incoming.messageCount > 0;
+        return (
+          this.isAuthorized &&
+          !!fromMessage &&
+          (incoming.messageCount > 0 || incoming.messageCount == -1)
+        );
 
       case "PinMessage":
         const message = await findMessageById(incoming.messageId);

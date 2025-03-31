@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class MessageComponent {
   @Input() sender: string = '';
-  @Input() first: string = '';
+  @Input() first: boolean = false;
   @Input() pinned: boolean = false;
   @Input({ required: true }) msg: string = '';
 }
