@@ -11,6 +11,7 @@ import { SearchComponent } from './views/home/views/search/search.component';
 import { MessagesComponent } from './views/home/views/messages/messages.component';
 import { AddComponent } from './views/home/views/add/add.component';
 import { NotFoundComponent } from './views/not-found/not-found.component';
+import { ChatComponent } from './views/chat/chat.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -25,6 +26,7 @@ export const routes: Routes = [
       { path: 'settings', component: SettingsComponent, outlet: 'home' },
       { path: 'search', component: SearchComponent, outlet: 'home' },
       { path: 'add', component: AddComponent, outlet: 'home' },
+      { path: 'chat', component: ChatComponent, outlet: 'home' },
     ],
   },
   { path: '**', component: NotFoundComponent },
