@@ -7,8 +7,15 @@ import { DetailsComponent } from './components/details/details.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRipple } from '@angular/material/core';
-import { MessageService } from '@/services/message.service';
-import { combineLatest, firstValueFrom, map, take, tap } from 'rxjs';
+import { Chat, MessageService } from '@/services/message.service';
+import {
+  combineLatest,
+  firstValueFrom,
+  map,
+  Subscription,
+  take,
+  tap,
+} from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { AuthService } from '@/services/auth.service';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -36,6 +43,8 @@ export class ChatComponent {
   protected authService = inject(AuthService);
 
   @Input() chatTitle: string = '';
+  @ViewChild('msgsWrapper') msgsWrapper?: ElementRef;
+  topScrollOffset = 0;
 
   platform: DeviceInfo | null = this.platformService.info;
   detailsState = 'closed';
@@ -43,10 +52,40 @@ export class ChatComponent {
   selectedChat$ = this.messageService.selectedChat$;
 
   messageControl = new FormControl('');
+  private subscription!: Subscription;
+
+  ngOnInit() {
+    this.subscription = this.selectedChat$.subscribe(this.selectedChatChanged);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  onScroll() {
+    const elem = this.msgsWrapper!.nativeElement as HTMLDivElement;
+    this.topScrollOffset = elem.scrollHeight - elem.scrollTop;
+    if (elem.scrollTop < 50) {
+      this.messageService.scrollLoadMessages(
+        this.messageService.selectedChat.id
+      );
+
+      // elem.scrollTo({
+      //   top:
+      // });
+    }
+  }
 
   updateDetailsState(event: string) {
     this.detailsState = event;
   }
+
+  selectedChatChanged = (chat: Chat) => {
+    const elem = this.msgsWrapper?.nativeElement as HTMLDivElement;
+    if (elem) {
+      elem.scrollTop = elem.scrollHeight;
+    }
+  };
 
   async sendMessage() {
     const message = this.messageControl.value?.trim();

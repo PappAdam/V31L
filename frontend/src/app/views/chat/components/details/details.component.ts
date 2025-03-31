@@ -15,6 +15,7 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { MessageComponent } from '../message/message.component';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
 
 GroupMemberCardComponent;
 @Component({
@@ -27,6 +28,9 @@ GroupMemberCardComponent;
     MatDividerModule,
     AsyncPipe,
     MessageComponent,
+    MatTab,
+    MatTabGroup,
+    QRcodeComponent,
   ],
   templateUrl: './details.component.html',
   styleUrl: './details.component.scss',
@@ -40,8 +44,6 @@ export class DetailsComponent {
   snackBar = inject(MatSnackBar);
 
   invitation: string = 'Creating you invitation...';
-
-  selectedOption: 'qrcode' | 'manual' = 'qrcode';
 
   copyToClipboard() {
     if (!this.invitation) return;

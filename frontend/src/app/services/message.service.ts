@@ -134,6 +134,10 @@ export class MessageService {
         (f) => f.id === rawChatContent.id
       );
 
+      if (rawChatContent.encryptedMessages.length == 0) {
+        return;
+      }
+
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
         if (rawChatContent.encryptedChatKey) {
@@ -210,6 +214,7 @@ export class MessageService {
     if (!chat) {
       return;
     }
+
     this.socketService.createPackage({
       header: 'GetChatMessages',
       chatId: chat.id,
