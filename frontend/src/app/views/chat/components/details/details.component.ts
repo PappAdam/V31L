@@ -7,6 +7,7 @@ import { AsyncPipe } from '@angular/common';
 import { InviteService } from '@/services/invite.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { QRcodeComponent } from '../../../../qrcode/qrcode.component';
 import {
   MatDialog,
@@ -38,6 +39,7 @@ export class DetailsComponent {
   messageService = inject(MessageService);
   inviteService = inject(InviteService);
   dialog = inject(MatDialog);
+  snackBar = inject(MatSnackBar);
 
   invitation: string = 'Creating you invitation...';
 
@@ -47,7 +49,16 @@ export class DetailsComponent {
     if (!this.invitation) return;
 
     navigator.clipboard.writeText(this.invitation).catch((err) => {
-      console.error('Failed to copy text:', err);
+      this.snackBar.open('Failed to copy invitation', 'close', {
+        duration: 2000,
+        horizontalPosition: 'right',
+      });
+      return;
+    });
+
+    this.snackBar.open('Invitation copied to clipboard', 'close', {
+      duration: 2000,
+      horizontalPosition: 'right',
     });
   }
 

@@ -54,7 +54,7 @@ export class InviteService {
     );
 
     const key = arrayToString(binKey);
-    const inv = JSON.stringify({ id: invId, key: key });
+    const inv = invId + key;
 
     return inv;
   }

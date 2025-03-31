@@ -42,6 +42,86 @@
         {
           "authorIndex": 0,
           "text": "What are your favorite programming languages for AI?"
+        },
+        {
+          "authorIndex": 1,
+          "text": "Python is definitely the most versatile for AI development."
+        },
+        {
+          "authorIndex": 2,
+          "text": "I've been experimenting with Julia lately - it's fast!"
+        },
+        {
+          "authorIndex": 3,
+          "text": "Anyone attending the AI conference next month?"
+        },
+        {
+          "authorIndex": 4,
+          "text": "I'll be presenting on quantum machine learning there!"
+        },
+        {
+          "authorIndex": 0,
+          "text": "What AI applications are you most excited about?"
+        },
+        {
+          "authorIndex": 1,
+          "text": "Medical diagnostics could save millions of lives."
+        },
+        {
+          "authorIndex": 2,
+          "text": "I'm working on AI for wildlife conservation tracking."
+        },
+        {
+          "authorIndex": 3,
+          "text": "Natural language processing has come so far recently."
+        },
+        {
+          "authorIndex": 4,
+          "text": "Quantum AI could solve problems we can't even imagine yet."
+        },
+        {
+          "authorIndex": 0,
+          "text": "How do you all stay updated on AI advancements?"
+        },
+        {
+          "authorIndex": 1,
+          "text": "ArXiv papers and following key researchers on Twitter."
+        },
+        {
+          "authorIndex": 2,
+          "text": "I'm part of several AI research groups on Slack."
+        },
+        {
+          "authorIndex": 3,
+          "text": "Podcasts and online courses keep me in the loop."
+        },
+        {
+          "authorIndex": 4,
+          "text": "I collaborate with researchers at the quantum lab."
+        },
+        {
+          "authorIndex": 0,
+          "text": "What ethical concerns keep you up at night?"
+        },
+        {
+          "authorIndex": 1,
+          "text": "Deepfakes and misinformation are terrifying."
+        },
+        {
+          "authorIndex": 2,
+          "text": "Algorithmic bias in hiring and lending systems."
+        },
+        {
+          "authorIndex": 3,
+          "text": "The environmental cost of training large models."
+        },
+        {
+          "authorIndex": 4,
+          "text": "Quantum decryption breaking current security standards."
+        },
+        {
+          "authorIndex": 0,
+          "text": "Let's organize a study group for the new AI textbook!"
         }
       ]
     },
@@ -51,12 +131,92 @@
       "messages": [
         { "authorIndex": 5, "text": "Just hit Platinum in Ranked!" },
         { "authorIndex": 6, "text": "GG! Let's squad up later." },
-        { "authorIndex": 2, "text": "What’s the best gaming setup?" },
+        { "authorIndex": 2, "text": "What's the best gaming setup?" },
         { "authorIndex": 0, "text": "Have you tried the new VR game?" },
         { "authorIndex": 4, "text": "Ray tracing makes games look amazing!" },
         {
           "authorIndex": 5,
           "text": "Who wants to join a tournament this weekend?"
+        },
+        {
+          "authorIndex": 6,
+          "text": "I'm down! What time works for everyone?"
+        },
+        {
+          "authorIndex": 2,
+          "text": "Just got a 240Hz monitor - game changer!"
+        },
+        {
+          "authorIndex": 0,
+          "text": "Anyone playing the new fantasy MMO?"
+        },
+        {
+          "authorIndex": 4,
+          "text": "The physics engine in that game is incredible."
+        },
+        {
+          "authorIndex": 5,
+          "text": "Pro tip: customize your controller bindings."
+        },
+        {
+          "authorIndex": 6,
+          "text": "I stream every Wednesday if you want to watch."
+        },
+        {
+          "authorIndex": 2,
+          "text": "What's your favorite esports team?"
+        },
+        {
+          "authorIndex": 0,
+          "text": "The championship finals were insane this year!"
+        },
+        {
+          "authorIndex": 4,
+          "text": "I'm working on a game mod - need testers!"
+        },
+        {
+          "authorIndex": 5,
+          "text": "How do you deal with tilt during ranked?"
+        },
+        {
+          "authorIndex": 6,
+          "text": "Take breaks every 3 games, works for me."
+        },
+        {
+          "authorIndex": 2,
+          "text": "Just built a new PC - 3080 Ti is a beast!"
+        },
+        {
+          "authorIndex": 0,
+          "text": "Console vs PC - what's your preference?"
+        },
+        {
+          "authorIndex": 4,
+          "text": "Cloud gaming is the future, mark my words."
+        },
+        {
+          "authorIndex": 5,
+          "text": "Anyone doing speedrunning? I need tips."
+        },
+        {
+          "authorIndex": 6,
+          "text": "The new battle pass grind is real..."
+        },
+        {
+          "authorIndex": 2,
+          "text": "Favorite gaming snack? I'm team energy drinks."
+        },
+        {
+          "authorIndex": 0,
+          "text": "Retro games night this Friday - who's in?"
+        },
+        {
+          "authorIndex": 4,
+          "text": "Just hit 100% completion on my favorite RPG!"
+        },
+        {
+          "authorIndex": 5,
+          "text": "Let's organize a guild for the new expansion."
         }
       ]
     },
@@ -69,10 +229,90 @@
           "authorIndex": 3,
           "text": "Just implemented a new encryption algorithm."
         },
-        { "authorIndex": 2, "text": "What’s the best VPN to use?" },
+        { "authorIndex": 2, "text": "What's the best VPN to use?" },
         { "authorIndex": 1, "text": "Zero-trust security is the future." },
         { "authorIndex": 4, "text": "Quantum encryption is coming soon!" },
-        { "authorIndex": 7, "text": "Never reuse passwords across sites!" }
+        { "authorIndex": 7, "text": "Never reuse passwords across sites!" },
+        {
+          "authorIndex": 3,
+          "text": "Just patched a critical vulnerability in our system."
+        },
+        {
+          "authorIndex": 2,
+          "text": "How often should we rotate SSH keys?"
+        },
+        {
+          "authorIndex": 1,
+          "text": "The new NIST guidelines are worth reading."
+        },
+        {
+          "authorIndex": 4,
+          "text": "Post-quantum cryptography standards are evolving."
+        },
+        {
+          "authorIndex": 7,
+          "text": "Social engineering is still the biggest threat."
+        },
+        {
+          "authorIndex": 3,
+          "text": "Container security is often overlooked."
+        },
+        {
+          "authorIndex": 2,
+          "text": "Best practices for secure API development?"
+        },
+        {
+          "authorIndex": 1,
+          "text": "Implement rate limiting and proper auth tokens."
+        },
+        {
+          "authorIndex": 4,
+          "text": "Quantum key distribution will change everything."
+        },
+        {
+          "authorIndex": 7,
+          "text": "Just completed a red team exercise - scary results."
+        },
+        {
+          "authorIndex": 3,
+          "text": "Log4j vulnerability taught us important lessons."
+        },
+        {
+          "authorIndex": 2,
+          "text": "How do you handle security in microservices?"
+        },
+        {
+          "authorIndex": 1,
+          "text": "Service meshes with mutual TLS are effective."
+        },
+        {
+          "authorIndex": 4,
+          "text": "We need to prepare for Y2Q - Year to Quantum."
+        },
+        {
+          "authorIndex": 7,
+          "text": "Security awareness training reduces breaches by 70%."
+        },
+        {
+          "authorIndex": 3,
+          "text": "Just open-sourced our threat detection rules."
+        },
+        {
+          "authorIndex": 2,
+          "text": "What SIEM solutions do you recommend?"
+        },
+        {
+          "authorIndex": 1,
+          "text": "Let's organize a CTF competition for the team!"
+        },
+        {
+          "authorIndex": 4,
+          "text": "Working on quantum-resistant blockchain tech."
+        },
+        {
+          "authorIndex": 7,
+          "text": "Remember: security is a process, not a product."
+        }
       ]
     },
     {
@@ -86,7 +326,87 @@
         { "authorIndex": 6, "text": "The new horror movie is terrifying!" },
         {
           "authorIndex": 8,
-          "text": "Who’s excited for the upcoming Oscar season?"
+          "text": "Who's excited for the upcoming Oscar season?"
+        },
+        {
+          "authorIndex": 0,
+          "text": "That indie film at Sundance was incredible."
+        },
+        {
+          "authorIndex": 1,
+          "text": "Foreign films don't get enough recognition."
+        },
+        {
+          "authorIndex": 5,
+          "text": "The superhero genre needs more innovation."
+        },
+        {
+          "authorIndex": 6,
+          "text": "Practical effects > CGI in horror movies."
+        },
+        {
+          "authorIndex": 8,
+          "text": "What's the most underrated movie you've seen?"
+        },
+        {
+          "authorIndex": 0,
+          "text": "'Moon' with Sam Rockwell is a hidden gem."
+        },
+        {
+          "authorIndex": 1,
+          "text": "'The Man from Earth' - brilliant low-budget sci-fi."
+        },
+        {
+          "authorIndex": 5,
+          "text": "The director's cut is always better."
+        },
+        {
+          "authorIndex": 6,
+          "text": "Movie theaters vs streaming - what do you prefer?"
+        },
+        {
+          "authorIndex": 8,
+          "text": "IMAX for blockbusters, home for everything else."
+        },
+        {
+          "authorIndex": 0,
+          "text": "Film scores can make or break a movie."
+        },
+        {
+          "authorIndex": 1,
+          "text": "The French New Wave changed cinema forever."
+        },
+        {
+          "authorIndex": 5,
+          "text": "Who's your favorite working director today?"
+        },
+        {
+          "authorIndex": 6,
+          "text": "That 8-hour art film was... an experience."
+        },
+        {
+          "authorIndex": 8,
+          "text": "Let's do a 90s movie marathon this weekend!"
+        },
+        {
+          "authorIndex": 0,
+          "text": "The cinematography in that last Oscar winner was stunning."
+        },
+        {
+          "authorIndex": 1,
+          "text": "Silent films teach so much about visual storytelling."
+        },
+        {
+          "authorIndex": 5,
+          "text": "The best movie snacks - discuss!"
+        },
+        {
+          "authorIndex": 6,
+          "text": "That plot twist ruined the whole movie for me."
+        },
+        {
+          "authorIndex": 8,
+          "text": "Documentaries can be more gripping than fiction."
         }
       ]
     }
