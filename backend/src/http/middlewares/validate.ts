@@ -65,7 +65,7 @@ export async function extractUserFromTokenMiddleWare(
 
 export function extractUserIdFromToken(token: string): TokenExtractResult {
   try {
-    const decoded = jwt.verify(token, "your_secret_key");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
 
     if (!decoded || typeof decoded !== "object" || !decoded.userId) {
       return { userId: null, expired: false };
