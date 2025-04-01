@@ -32,9 +32,9 @@
         @for (message of (messageService.pinnedMessages$ | async); track $index)
         {
         <app-message
-          [msg]="message.content"
+          [message]="message"
           [first]="true"
-          [sender]="message.user.username"
+          [displayedIn]="'PinnedMessages'"
         ></app-message>
         }
       </app-group-option-card>

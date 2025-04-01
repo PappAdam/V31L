@@ -56,6 +56,7 @@ export type ClientGetMessagesPackage = {
 export type ClientPinMessagePackage = {
   header: "PinMessage";
   messageId: string;
+  pinState: boolean;
 };
 
 export type ClientLeaveChatPackage = {
