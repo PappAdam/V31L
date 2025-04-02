@@ -8,7 +8,7 @@
       <app-message
         msg="{{ message.content }}"
         first="{{
-          message.user.username == this.previousUser ? 'false' : 'true'
+          message.user.username == this.previousUser ? 'false' : 'first'
         }}"
         sender="{{
           message.user.username == authService.user?.username

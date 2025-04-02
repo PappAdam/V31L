@@ -18,8 +18,14 @@ export const routes: Routes = [
   { path: 'login/mfa/verify', component: MfaVerifyComponent },
   {
     path: '',
+    redirectTo: '/(home:messages)', // Redirect to /(home:messages)
+    pathMatch: 'full',
+  },
+  {
+    path: '',
     component: LayoutComponent,
     canActivate: [authGuard, platformGuard],
+
     children: [
       { path: 'messages', component: MessagesComponent, outlet: 'home' },
       { path: 'settings', component: SettingsComponent, outlet: 'home' },

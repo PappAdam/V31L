@@ -4,7 +4,7 @@
   flex-direction: row-reverse;
 }
 
-.message-wrapper[data-first="true"] {
+.message-wrapper[data-first="first"] {
   padding: $mat-sys-spacing-sm $mat-sys-spacing-sm 0 $mat-sys-spacing-sm;
 }
 
@@ -39,13 +39,13 @@
       letter-spacing: $mat-sys-label-large-tracking;
       height: 0;
 
-      &[data-first="true"]:not([data-sender=""]) {
+      &[data-first="first"]:not([data-sender=""]) {
         visibility: visible;
         height: calc($mat-sys-label-medium-size * 1.4);
       }
     }
 
-    .profile-name-wrapper[data-first="true"] {
+    .profile-name-wrapper[data-first="first"] {
       visibility: visible;
       height: fit-content;
     }
@@ -70,6 +70,34 @@
         color: $mat-sys-on-surface-variant;
       }
     }
+
+    .message-bubble[data-first="first"] {
+      border-radius: $mat-sys-corner-large $mat-sys-corner-large
+        $mat-sys-corner-extra-small $mat-sys-corner-large;
+    }
+    .message-bubble[data-first="middle"] {
+      border-radius: $mat-sys-corner-large $mat-sys-corner-extra-small
+        $mat-sys-corner-extra-small $mat-sys-corner-large;
+    }
+    .message-bubble[data-first="end"] {
+      border-radius: $mat-sys-corner-large $mat-sys-corner-extra-small
+        $mat-sys-corner-large $mat-sys-corner-large;
+    }
+
+    .message-bubble:not([data-sender=""])[data-first="first"] {
+      border-radius: $mat-sys-corner-large $mat-sys-corner-large
+        $mat-sys-corner-large $mat-sys-corner-extra-small;
+    }
+
+    .message-bubble:not([data-sender=""])[data-first="middle"] {
+      border-radius: $mat-sys-corner-extra-small $mat-sys-corner-large
+        $mat-sys-corner-large $mat-sys-corner-extra-small;
+    }
+
+    .message-bubble:not([data-sender=""])[data-first="end"] {
+      border-radius: $mat-sys-corner-extra-small $mat-sys-corner-large
+        $mat-sys-corner-large $mat-sys-corner-large;
+    }
   }
 
   .message-profile-wrapper {
@@ -89,14 +117,14 @@
       width: $mat-sys-img-profile-medium;
     }
 
-    .profile-image[data-first="true"] {
+    .profile-image[data-first="first"] {
       visibility: visible;
       width: $mat-sys-img-profile-medium;
       height: $mat-sys-img-profile-medium;
     }
   }
 
-  .message-profile-wrapper[data-sender=""][data-first="true"] {
+  .message-profile-wrapper[data-sender=""][data-first="first"] {
     margin-top: 0px;
   }
 }

@@ -3,7 +3,7 @@
 @forward "./mat-map.scss";
 @use "@angular/material" as mat;
 @use "./mat-map.scss" as *;
-@use "./themes/t1_theme-colors" as *;
+@use "./themes/t4_theme-colors" as *;
 html {
   @include mat.theme(
     (

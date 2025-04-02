@@ -1,0 +1,23 @@
+@use "../../../styles/styles.scss" as *;
+
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $mat-sys-spacing-sm;
+
+  .search-bar {
+    border: none;
+    background-color: $mat-sys-surface-container-high;
+    height: 35px;
+    border-radius: $mat-sys-corner-full;
+    padding: $mat-sys-btn-padding-sm;
+    color: $mat-sys-on-surface;
+    width: 100%;
+
+    &:focus {
+      border: none;
+      outline: none;
+    }
+  }
+}

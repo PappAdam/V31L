@@ -5,9 +5,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { DeviceInfo } from '@capacitor/device';
 import { combineLatest, map } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-header',
-  imports: [MatIconModule, AsyncPipe],
+  imports: [MatIconModule, AsyncPipe, MatButtonModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })

@@ -1,20 +1,7 @@
 import { PlatformService } from '@/services/platform.service';
-import {
-  Component,
-  ComponentRef,
-  inject,
-  ViewChild,
-  ViewContainerRef,
-} from '@angular/core';
+import { Component, inject, ViewChild, ViewContainerRef } from '@angular/core';
 import { DeviceInfo } from '@capacitor/device';
-import {
-  NavbarComponent,
-  ActiveTab,
-} from './components/navbar/navbar.component';
-import { AddComponent } from './views/add/add.component';
-import { SearchComponent } from './views/search/search.component';
-import { MessageComponent } from '../chat/components/message/message.component';
-import { SettingsComponent } from './views/settings/settings.component';
+import { NavbarComponent } from './components/navbar/navbar.component';
 import { MessagesComponent } from './views/messages/messages.component';
 import { NavigationService, Target } from '@/services/navigation.service';
 import { NavigationOutletDirectiveDirective } from '@/directives/navigation-outlet-directive.directive';

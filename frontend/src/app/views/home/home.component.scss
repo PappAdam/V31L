@@ -6,10 +6,10 @@
   width: 100%;
   height: 100%;
   flex-direction: column;
-  gap: $mat-sys-spacing-sm;
-
+  position: relative;
   .tab-outlet {
     height: 100%;
     color: $mat-sys-on-surface;
+    margin-bottom: $mat-sys-component-height-medium;
   }
 }

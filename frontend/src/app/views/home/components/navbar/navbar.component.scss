@@ -1,15 +1,25 @@
 @use "./../../../../../styles/styles.scss" as *;
 
+:host {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  height: $mat-sys-component-height-medium;
+  display: flex;
+  justify-content: center;
+}
 .navbar-wrapper {
   display: flex;
   min-width: 0;
+  width: 100%;
   padding: 8px 8px 10px 8px;
   gap: $mat-sys-spacing-md;
-  background-color: $mat-sys-surface-container;
-  border-radius: $mat-sys-corner-medium;
+  background-color: $mat-sys-surface-container-low;
+  border-radius: 0px 0px $mat-sys-corner-medium $mat-sys-corner-medium;
   justify-content: space-evenly;
   align-items: center;
   cursor: pointer;
+  box-shadow: $mat-sys-seperator-tp-sm;
 
   .option-wrapper {
     display: flex;
@@ -20,7 +30,7 @@
 
     // Default styles
     .option-icon {
-      width: $mat-sys-component-height;
+      width: $mat-sys-component-height-medium;
       padding: 1.5px;
       display: flex;
       min-width: 0;

@@ -13,8 +13,10 @@
     flex-direction: column;
     min-height: 0;
     min-width: 230px;
+    overflow: hidden;
 
     .messages-wrapper {
+      margin-top: $mat-sys-component-height-medium;
       width: 100%;
       height: 100%;
       background-color: $mat-sys-surface-container;
@@ -29,14 +31,22 @@
     }
 
     .input-wrapper {
+      box-shadow: $mat-sys-seperator-tp-sm;
       display: flex;
       min-width: 0;
-      height: 45px;
+      height: $mat-sys-component-height-medium;
       align-items: center;
       flex-shrink: 0;
       gap: $mat-sys-spacing-sm;
-      background-color: $mat-sys-surface-container;
+      background-color: $mat-sys-surface-container-low;
       border-radius: 0px 0px $mat-sys-corner-medium $mat-sys-corner-medium;
+      padding: $mat-sys-spacing-sm;
+
+      button {
+        width: 35px;
+        height: 35px;
+      }
+
       .text-input-box {
         width: 100%;
         display: flex;
@@ -48,9 +58,9 @@
         scrollbar-width: none; // Firefox
         -ms-overflow-style: none; // IE and Edge
         max-height: 200px;
-        min-height: 40px;
-        padding: $mat-sys-spacing-sm;
-        border-radius: $mat-sys-corner-medium;
+        min-height: 35px;
+        padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
+        border-radius: $mat-sys-corner-full;
 
         &::-webkit-scrollbar {
           display: none; // Chrome, Safari, Opera

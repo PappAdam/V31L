@@ -1,10 +1,19 @@
+// Optional: Add dark theme-specific shadows
+$mat-sys-seperator-btm-sm: 0 4px 10px -6px rgba(0, 0, 0, 0.8);
+$mat-sys-seperator-tp-sm: 0 -4px 10px -6px rgba(0, 0, 0, 0.8);
+
 // user defined stuff
-$mat-sys-component-height: 64px;
+$mat-sys-component-height-medium: 56px;
+$mat-sys-component-height-large: 64px;
+
 $mat-sys-img-profile-medium: 36px;
-$mat-sys-img-profile-large: 48px;
-$mat-sys-img-profile-extra-large: 80px;
+$mat-sys-img-profile-large: 44px;
+$mat-sys-img-profile-extra-large: 56px;
 
 $mat-sys-side-width: 350px;
+
+$mat-sys-seperator-btm-sm: 0 4px 10px -6px rgba(0, 0, 0, 0.6);
+$mat-sys-seperator-tp-sm: 0 -4px 10px -6px rgba(0, 0, 0, 0.6);
 
 /// Spacing Variables (for gaps, margins, paddings)
 $mat-sys-spacing-base: 4px;

@@ -12,7 +12,11 @@
       {{ sender }}
       <div class="profile-name"></div>
     </div>
-    <div class="message-bubble" [attr.data-first]="first">
+    <div
+      class="message-bubble"
+      [attr.data-first]="first"
+      [attr.data-sender]="sender"
+    >
       <p class="message">
         {{ msg }}
       </p>

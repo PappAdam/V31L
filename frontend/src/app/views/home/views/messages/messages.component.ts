@@ -7,11 +7,13 @@ import { MessageService } from '@/services/message.service';
 import { BehaviorSubject, combineLatest, first, map, tap } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
+import { SearchBarComponent } from '@/components/search-bar/search-bar.component';
 @Component({
   selector: 'app-messages',
   imports: [
     ChatCardComponent,
     DirectsComponent,
+    SearchBarComponent,
     GroupsComponent,
     MatTabsModule,
     AsyncPipe,
