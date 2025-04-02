@@ -1,0 +1,45 @@
+@use "../../../../../styles/styles.scss" as *;
+
+.add-member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    input,
+    button {
+      width: 50%;
+    }
+
+    button {
+      padding: $mat-sys-spacing-sm;
+      margin: $mat-sys-spacing-sm;
+    }
+
+    input {
+      background-color: $mat-sys-surface-variant;
+      border: none;
+      border-radius: $mat-sys-corner-large;
+      padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
+      min-height: $mat-sys-img-profile-medium;
+      font: $mat-sys-body-medium-font;
+      font-size: $mat-sys-body-medium-size;
+      line-height: $mat-sys-body-medium-line-height;
+      letter-spacing: $mat-sys-body-medium-tracking;
+      height: fit-content;
+      flex-shrink: 1;
+      word-wrap: break-word;
+      margin: $mat-sys-spacing-sm;
+      margin-top: calc($mat-sys-spacing-sm * 2);
+      word-wrap: wrap;
+      color: $mat-sys-on-surface-variant;
+      text-align: center;
+    }
+  }
+}

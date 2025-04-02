@@ -26,11 +26,10 @@ export class QRcodeComponent implements OnChanges {
     const darkColor = getComputedStyle(
       document.documentElement
     ).getPropertyValue('--mat-sys-primary');
-    const lightColor = getComputedStyle(
-      document.documentElement
-    ).getPropertyValue('--mat-sys-background');
+    const lightColor = '#00000000';
 
     this.url = await QRCode.toDataURL(this.from, {
+      errorCorrectionLevel: 'H',
       color: {
         dark: darkColor,
         light: lightColor,

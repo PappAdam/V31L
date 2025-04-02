@@ -17,31 +17,23 @@
         type="expand"
         (expanded)="onAddMemberExpand()"
       >
-        <mat-tab-group>
-          <mat-tab label="QR code">
-            <div class="inv-body">
-              <app-qrcode class="inv-qr-code" [from]="this.invitation" />
-            </div>
-          </mat-tab>
-          <mat-tab label="Manual">
-            <div class="inv-body">
-              <div class="inv-string-container">
-                <p>
-                  {{ invitation.slice(0, 15) }} ...
-                  {{
-                    invitation.slice(
-                      invitation.length - 15 - 1,
-                      invitation.length - 1
-                    )
-                  }}
-                </p>
-              </div>
-              <button mat-flat-button (click)="copyToClipboard()">
-                Copy to clipboard
-              </button>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
+        <div class="inv-body">
+          <app-qrcode class="inv-qr-code" [from]="this.invitation" />
+          <mat-divider></mat-divider>
+          <div class="inv-string-container">
+            <p>
+              {{ invitation.slice(0, 15) }}...{{
+                invitation.slice(
+                  invitation.length - 15 - 1,
+                  invitation.length - 1
+                )
+              }}
+            </p>
+          </div>
+          <button mat-flat-button (click)="copyToClipboard()">
+            Copy to clipboard
+          </button>
+        </div>
       </app-group-option-card>
       <app-group-option-card
         fontIcon="push_pin"
