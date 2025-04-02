@@ -13,3 +13,12 @@
     margin-bottom: $mat-sys-component-height-medium;
   }
 }
+
+.home-mobile-wrapper {
+  height: 100%;
+
+  .tab-outlet {
+    height: 100%;
+    color: $mat-sys-on-surface;
+  }
+}
