@@ -1,5 +1,5 @@
 import { PlatformService } from '@/services/platform.service';
-import { Component, inject, Input } from '@angular/core';
+import { Component, ElementRef, inject, Input, ViewChild } from '@angular/core';
 import { DeviceInfo } from '@capacitor/device';
 import { HeaderComponent } from './components/header/header.component';
 import { MessageComponent } from './components/message/message.component';
@@ -11,7 +11,6 @@ import { MessageService } from '@/services/message.service';
 import { combineLatest, firstValueFrom, map, take, tap } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { AuthService } from '@/services/auth.service';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 @Component({
   selector: 'app-chat',
@@ -23,9 +22,7 @@ import { MatInputModule } from '@angular/material/input';
     MatIconModule,
     MatRipple,
     AsyncPipe,
-    FormsModule,
     MatInputModule,
-    ReactiveFormsModule,
   ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
@@ -37,19 +34,17 @@ export class ChatComponent {
   color = '#ffffff30';
   detailsState = 'closed';
   protected messageService = inject(MessageService);
-
   protected authService = inject(AuthService);
   chats$ = this.messageService.chats$;
   selectedChatIndex$ = this.messageService.selectedChatIndex$;
   selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
     map(([messages, index]) => messages[index])
   );
-  messageControl = new FormControl('');
 
   message = '';
 
   previousUser = '';
-
+  @ViewChild('textInput') textInputDiv!: ElementRef<HTMLElement>;
   constructor() {
     this.platform = this.platformService.info;
 
@@ -72,12 +67,17 @@ export class ChatComponent {
     this.previousUser = username;
   }
 
+  sendOnEnter(event: Event) {
+    event.preventDefault();
+    this.sendMessage();
+  }
+
   async sendMessage() {
-    const message = this.messageControl.value?.trim();
+    let message = this.textInputDiv.nativeElement.innerText;
     if (!message || this.messageService.currentSelectedChatIndex() == -1)
       return;
     const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
     this.messageService.sendMessage(selectedChat.id, message);
-    this.messageControl.reset();
+    this.textInputDiv.nativeElement.innerText = '';
   }
 }

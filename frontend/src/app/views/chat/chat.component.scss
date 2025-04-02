@@ -11,7 +11,6 @@
     display: flex;
     min-width: 0;
     flex-direction: column;
-    gap: $mat-sys-spacing-sm;
     min-height: 0;
     min-width: 230px;
 
@@ -19,7 +18,6 @@
       width: 100%;
       height: 100%;
       background-color: $mat-sys-surface-container;
-      border-radius: $mat-sys-corner-medium;
       overflow-y: scroll;
       scroll-behavior: smooth;
       padding-bottom: $mat-sys-spacing-sm;
@@ -31,50 +29,44 @@
     }
 
     .input-wrapper {
-      height: $mat-sys-component-height;
       display: flex;
       min-width: 0;
+      height: 45px;
       align-items: center;
       flex-shrink: 0;
       gap: $mat-sys-spacing-sm;
-
-      min-width: 0;
-      .text-input {
-        min-width: 0;
-        border-radius: $mat-sys-corner-medium;
-        resize: none;
+      background-color: $mat-sys-surface-container;
+      border-radius: 0px 0px $mat-sys-corner-medium $mat-sys-corner-medium;
+      .text-input-box {
         width: 100%;
-        height: 100%;
-        outline: transparent;
-        font-family: "Roboto";
+        display: flex;
+        align-items: center;
+        justify-content: center;
         background-color: $mat-sys-surface-container;
-        border: none;
-        color: $mat-sys-on-surface;
-        padding: $mat-sys-spacing-sm;
-        font-size: $mat-sys-body-medium;
+        overflow-y: scroll;
+        overflow-x: hidden;
         scrollbar-width: none; // Firefox
         -ms-overflow-style: none; // IE and Edge
+        max-height: 200px;
+        min-height: 40px;
+        padding: $mat-sys-spacing-sm;
+        border-radius: $mat-sys-corner-medium;
 
         &::-webkit-scrollbar {
           display: none; // Chrome, Safari, Opera
         }
+        .text-input {
+          resize: none;
+          color: $mat-sys-on-surface;
+          width: 100%;
+          outline: transparent;
+          font-size: $mat-sys-body-medium;
+        }
       }
-
       button {
-        border: none;
-        background-color: $mat-sys-primary;
-        color: $mat-sys-on-primary;
-        border-radius: $mat-sys-corner-medium;
-        width: $mat-sys-component-height;
-        height: $mat-sys-component-height;
-        flex-shrink: 0;
-
-        cursor: pointer;
-      }
-
-      button:disabled {
-        opacity: 0.2;
-        cursor: default;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
   }
