@@ -155,7 +155,7 @@ async function processBasedOnHeader(
     case "PinMessage":
       const message = await updateMessageById({
         id: incoming.messageId,
-        pinned: true,
+        pinned: incoming.pinState,
       });
 
       return !!message;

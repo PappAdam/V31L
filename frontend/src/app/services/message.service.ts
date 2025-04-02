@@ -115,6 +115,17 @@ export class MessageService {
     });
   }
 
+  pinMessage(messageId: string, pinState: boolean) {
+    const chatId = this.selectedChat.id;
+    this.socketService.createPackage(
+      { header: 'PinMessage', messageId, pinState },
+      () => {
+        // Selected chat could change before acknowledgement, chatId must be determined outside the callback.
+        this.getPinnedMessages(chatId);
+      }
+    );
+  }
+
   getPinnedMessages(chatId: string) {
     this.socketService.createPackage({
       header: 'GetChatMessages',

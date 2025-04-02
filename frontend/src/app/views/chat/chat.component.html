@@ -6,18 +6,12 @@
       @if (this.selectedChat$ | async; as selectedChat) { @for (message of
       selectedChat.messages; track $index) {
       <app-message
-        [msg]="message.content"
         [first]="
           $index === 0 ||
           selectedChat.messages[$index - 1].user.username !==
             message.user.username
         "
-        [sender]="
-          message.user.username === authService.user?.username
-            ? ''
-            : message.user.username
-        "
-        [pinned]="message.pinned"
+        [message]="message"
       ></app-message>
       } } @else {
       <div class="no-chat-selected">
