@@ -4,7 +4,14 @@ import { DirectsComponent } from './components/directs/directs.component';
 import { GroupsComponent } from './components/groups/groups.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MessageService } from '@/services/message.service';
-import { BehaviorSubject, combineLatest, first, map, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  first,
+  map,
+  tap,
+} from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { SearchBarComponent } from '@/components/search-bar/search-bar.component';
@@ -36,11 +43,16 @@ export class MessagesComponent {
   );
 
   messageControl = new FormControl('');
-
-  constructor(private router: Router) {}
+  searchControl = new FormControl('');
+  constructor(private router: Router) {
+    this.searchControl.valueChanges
+      .pipe(distinctUntilChanged())
+      .subscribe((searchTerm) => {
+        console.log('term', searchTerm);
+      });
+  }
 
   navToChat(index: number) {
-    console.log('asdads');
     this.messageService.selectedChatIndex = index;
     this.router.navigate(['/chat']);
   }

@@ -12,6 +12,8 @@ import { combineLatest, firstValueFrom, map, take, tap } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { AuthService } from '@/services/auth.service';
 import { MatInputModule } from '@angular/material/input';
+import { FormControl } from '@angular/forms';
+
 @Component({
   selector: 'app-chat',
   imports: [
@@ -40,9 +42,7 @@ export class ChatComponent {
   selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
     map(([messages, index]) => messages[index])
   );
-
   message = '';
-
   previousUser = '';
   @ViewChild('textInput') textInputDiv!: ElementRef<HTMLElement>;
   constructor() {
