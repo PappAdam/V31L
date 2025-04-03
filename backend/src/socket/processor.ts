@@ -4,7 +4,7 @@ import {
   PublicMessage,
   ServerChatsPackage,
 } from "@common";
-import { findChatMembersByChat } from "../db/chatMember";
+import { deleteChatMember, findChatMembersByChat } from "../db/chatMember";
 import {
   createMessage,
   findChatMessages,
@@ -79,6 +79,7 @@ async function processBasedOnHeader(
                 user: client.user,
                 encryptedData: incoming.messageContent,
                 timeStamp: createdMessage.timeStamp,
+                pinned: createdMessage.pinned,
               },
             ],
             users: [],
@@ -131,26 +132,46 @@ async function processBasedOnHeader(
         )
       ).map(toPublicMessage);
 
-      var responsePayload: PublicChat = {
+      var publicChat: PublicChat = {
         id: incoming.chatId,
         encryptedMessages: messages,
         users: [],
       };
 
-      ServerPackageSender.send([client.ws], {
-        header: "Chats",
-        chats: [responsePayload],
-      });
+      if (incoming.pinnedOnly) {
+        ServerPackageSender.send([client.ws], {
+          header: "PinnedMessages",
+          messages,
+        });
+      } else {
+        ServerPackageSender.send([client.ws], {
+          header: "Chats",
+          chats: [publicChat],
+        });
+      }
 
       return true;
 
     case "PinMessage":
       const message = await updateMessageById({
         id: incoming.messageId,
-        pinned: true,
+        pinned: incoming.pinState,
       });
 
       return !!message;
+
+    case "LeaveChat":
+      const deletedChatMember = await deleteChatMember(
+        client.user.id,
+        incoming.chatId
+      );
+
+      ServerPackageSender.send([client.ws], {
+        header: "LeaveChat",
+        chatId: incoming.chatId,
+      });
+
+      return !!deletedChatMember;
 
     default:
       console.error(

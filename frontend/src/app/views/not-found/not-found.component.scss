@@ -1,6 +1,5 @@
-// not-found.component.scss
 @use "@angular/material" as mat;
-
+@use "../../../styles/mat-map.scss" as *;
 .container {
   display: flex;
   align-items: center;

@@ -7,6 +7,7 @@ export type PublicMessage = {
   id: string;
   user: PublicUser;
   timeStamp: Date;
+  pinned: boolean;
   encryptedData: EncryptedMessage;
 };
 

@@ -1,16 +1,11 @@
 @use "../../../../../styles/styles.scss" as *;
 
-.message-wrapper:not([data-sender=""]) {
-  flex-direction: row-reverse;
-}
-
 .message-wrapper[data-first="true"] {
   padding: $mat-sys-spacing-sm $mat-sys-spacing-sm 0 $mat-sys-spacing-sm;
 }
 
 .message-wrapper {
   width: 100%;
-  height: fit-content;
   display: flex;
   justify-content: flex-end;
   gap: calc(#{$mat-sys-spacing-sm} / 2);
@@ -18,41 +13,28 @@
     $mat-sys-spacing-sm;
   color: $mat-sys-on-surface;
 
-  .message-bubble-wrapper:not([data-sender=""]) {
-    display: flex;
-    flex-direction: column;
+  .has-text-above {
+    margin-top: $mat-sys-body-medium-line-height;
   }
 
   .message-bubble-wrapper {
     display: flex;
-    flex-direction: column-reverse;
-    min-width: 0;
+    flex-direction: column;
     justify-content: flex-start;
 
-    .profile-name-wrapper {
+    .profile-name {
       padding-left: $mat-sys-spacing-md;
-      visibility: hidden;
       font: $mat-sys-label-large-font;
       font-size: $mat-sys-label-medium-size;
       font-weight: $mat-sys-label-large-weight;
       line-height: $mat-sys-label-large-line-height;
+      height: $mat-sys-label-large-line-height;
       letter-spacing: $mat-sys-label-large-tracking;
-      height: 0;
-
-      &[data-first="true"]:not([data-sender=""]) {
-        visibility: visible;
-        height: calc($mat-sys-label-medium-size * 1.4);
-      }
-    }
-
-    .profile-name-wrapper[data-first="true"] {
-      visibility: visible;
-      height: fit-content;
     }
 
     .message-bubble {
       background-color: $mat-sys-surface-variant;
-      border-radius: $mat-sys-corner-large;
+      border-radius: calc($mat-sys-img-profile-medium / 2);
       padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
       max-width: 580px;
       min-height: $mat-sys-img-profile-medium;
@@ -60,43 +42,55 @@
       font-size: $mat-sys-body-medium-size;
       line-height: $mat-sys-body-medium-line-height;
       letter-spacing: $mat-sys-body-medium-tracking;
-      height: fit-content;
       flex-shrink: 1;
       word-wrap: break-word;
-      min-width: none;
-
-      .message {
-        word-wrap: wrap;
-        color: $mat-sys-on-surface-variant;
-      }
+      word-wrap: wrap;
+      color: $mat-sys-on-surface-variant;
     }
   }
 
   .message-profile-wrapper {
-    flex-shrink: 0;
-    margin-top: calc(#{$mat-sys-label-large-size} + 2px);
-    align-self: flex-start;
     display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: start;
+    flex-shrink: 0;
+    width: $mat-sys-img-profile-medium;
 
     .profile-image {
-      visibility: hidden;
+      width: 100%;
+      aspect-ratio: 1 / 1;
       border-radius: $mat-sys-corner-full;
       background-color: $mat-sys-primary-container;
-      height: 0;
-      width: $mat-sys-img-profile-medium;
-    }
-
-    .profile-image[data-first="true"] {
-      visibility: visible;
-      width: $mat-sys-img-profile-medium;
-      height: $mat-sys-img-profile-medium;
     }
   }
 
-  .message-profile-wrapper[data-sender=""][data-first="true"] {
-    margin-top: 0px;
+  .message-options {
+    display: flex;
+    align-items: center;
+  }
+
+  .option {
+    margin: 0 $mat-sys-spacing-sm;
+    height: calc($mat-sys-body-medium-line-height + $mat-sys-spacing-sm * 2);
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.05s ease;
+    color: $mat-sys-on-background;
+
+    &:hover {
+      background-color: $mat-sys-surface-container-high;
+    }
+
+    &.active {
+      opacity: 1;
+      color: $mat-sys-primary;
+    }
+  }
+
+  &:hover .option {
+    opacity: 1;
   }
 }

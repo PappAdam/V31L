@@ -28,6 +28,14 @@
       &::-webkit-scrollbar {
         display: none; // Chrome, Safari, Opera
       }
+
+      .no-chat-selected {
+        color: $mat-sys-surface-container-lowest;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
     }
 
     .input-wrapper {

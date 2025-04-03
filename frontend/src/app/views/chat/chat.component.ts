@@ -31,45 +31,21 @@ import { MatInputModule } from '@angular/material/input';
   styleUrl: './chat.component.scss',
 })
 export class ChatComponent {
-  @Input() chatTitle: string = '';
-  platform: DeviceInfo | null = null;
-  platformService: PlatformService = inject(PlatformService);
-  color = '#ffffff30';
-  detailsState = 'closed';
+  protected platformService: PlatformService = inject(PlatformService);
   protected messageService = inject(MessageService);
-
   protected authService = inject(AuthService);
-  chats$ = this.messageService.chats$;
-  selectedChatIndex$ = this.messageService.selectedChatIndex$;
-  selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
-    map(([messages, index]) => messages[index])
-  );
+
+  @Input() chatTitle: string = '';
+
+  platform: DeviceInfo | null = this.platformService.info;
+  detailsState = 'closed';
+
+  selectedChat$ = this.messageService.selectedChat$;
+
   messageControl = new FormControl('');
 
-  message = '';
-
-  previousUser = '';
-
-  constructor() {
-    this.platform = this.platformService.info;
-
-    this.selectedChatIndex$
-      .pipe(
-        tap((index) => {
-          this.onSelectedIndexChanged(index);
-        })
-      )
-      .subscribe();
-  }
-  onSelectedIndexChanged(index: number) {
-    console.log(index);
-  }
   updateDetailsState(event: string) {
     this.detailsState = event;
-  }
-
-  updatePreviousUser(username: string) {
-    this.previousUser = username;
   }
 
   async sendMessage() {

@@ -5,7 +5,6 @@ import { platformGuard } from './guards/platform.guard';
 import { LayoutComponent } from './layout/layout.component';
 import { MfaVerifyComponent } from './login/mfa/verify/verify.component';
 import { MfaSetupComponent } from './login/mfa/setup/setup.component';
-import { HomeComponent } from './home/home.component';
 import { SettingsComponent } from './views/home/views/settings/settings.component';
 import { SearchComponent } from './views/home/views/search/search.component';
 import { MessagesComponent } from './views/home/views/messages/messages.component';
