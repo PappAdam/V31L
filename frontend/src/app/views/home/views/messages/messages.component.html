@@ -1,11 +1,13 @@
 <div class="messages-wrapper">
   <app-search-bar></app-search-bar>
-  @for (chat of chats$ | async; track $index) {
-  <app-chat-card
-    (click)="messageService.selectedChatIndex = $index"
-    name="{{ chat.name }}"
-    last_msg="{{ chat.messages[0].content }}"
-    unread=""
-  ></app-chat-card>
-  }
+  <div class="cards">
+    @for (chat of chats$ | async; track $index) {
+    <app-chat-card
+      (click)="messageService.selectedChatIndex = $index"
+      name="{{ chat.name }}"
+      last_msg="{{ chat.messages[0].content }}"
+      unread=""
+    ></app-chat-card>
+    }
+  </div>
 </div>

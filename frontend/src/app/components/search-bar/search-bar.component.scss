@@ -5,6 +5,9 @@
   align-items: center;
   justify-content: center;
   padding: $mat-sys-spacing-sm;
+  height: $mat-sys-component-height-medium;
+  position: absolute;
+  width: 100%;
 
   .search-bar {
     border: none;

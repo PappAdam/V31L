@@ -1,0 +1,24 @@
+@use "../../../../../styles/styles.scss" as *;
+
+.header {
+  height: $mat-sys-component-height-medium;
+  width: 100%;
+  box-shadow: $mat-sys-seperator-btm-sm;
+  background-color: $mat-sys-surface-container-low;
+  border-radius: $mat-sys-corner-medium $mat-sys-corner-medium 0 0;
+  margin-bottom: $mat-sys-spacing-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $mat-sys-spacing-sm;
+  mat-icon {
+    // transform: $mat-sys-icon-scale-medium;
+  }
+
+  .title {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

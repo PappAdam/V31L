@@ -45,6 +45,10 @@
       button {
         width: 35px;
         height: 35px;
+
+        mat-icon {
+          transform: $mat-sys-icon-scale-medium;
+        }
       }
 
       .text-input-box {

@@ -16,6 +16,13 @@
       container-height: $mat-sys-component-height-medium,
     )
   );
+  .cards {
+    margin-top: $mat-sys-component-height-medium;
+    overflow-y: scroll;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }
 
 .mat-mdc-tab-nav-bar {
