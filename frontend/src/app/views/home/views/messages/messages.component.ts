@@ -8,6 +8,9 @@ import { BehaviorSubject, combineLatest, first, map, tap } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { SearchBarComponent } from '@/components/search-bar/search-bar.component';
+import { PlatformService } from '@/services/platform.service';
+import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-messages',
   imports: [
@@ -23,6 +26,7 @@ import { SearchBarComponent } from '@/components/search-bar/search-bar.component
 })
 export class MessagesComponent {
   protected messageService = inject(MessageService);
+  protected platformService = inject(PlatformService);
 
   chats$ = this.messageService.chats$;
   selectedChatIndex$ = this.messageService.selectedChatIndex$;
@@ -33,5 +37,11 @@ export class MessagesComponent {
 
   messageControl = new FormControl('');
 
-  constructor() {}
+  constructor(private router: Router) {}
+
+  navToChat(index: number) {
+    console.log('asdads');
+    this.messageService.selectedChatIndex = index;
+    this.router.navigate(['/chat']);
+  }
 }

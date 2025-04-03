@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
 import { authGuard } from './guards/auth.guard';
-import { platformGuard } from './guards/platform.guard';
+import { platformGuard, androidGuard } from './guards/platform.guard';
 import { LayoutComponent } from './layout/layout.component';
 import { MfaVerifyComponent } from './login/mfa/verify/verify.component';
 import { MfaSetupComponent } from './login/mfa/setup/setup.component';
@@ -16,8 +16,9 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'login/mfa/setup', component: MfaSetupComponent },
   { path: 'login/mfa/verify', component: MfaVerifyComponent },
+  { path: 'chat', component: ChatComponent, canActivate: [androidGuard] },
   {
-    path: '',
+    path: 'side',
     component: LayoutComponent,
     canActivate: [authGuard, platformGuard],
 
@@ -26,7 +27,6 @@ export const routes: Routes = [
       { path: 'settings', component: SettingsComponent, outlet: 'home' },
       { path: 'search', component: SearchComponent, outlet: 'home' },
       { path: 'add', component: AddComponent, outlet: 'home' },
-      { path: 'chat', component: ChatComponent, outlet: 'home' },
     ],
   },
   { path: '**', component: NotFoundComponent },

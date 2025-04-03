@@ -14,6 +14,6 @@ export class TabHeaderComponent {
   constructor(private router: Router) {}
 
   Back(): void {
-    this.router.navigate(['/', { outlets: { home: 'messages' } }]);
+    this.router.navigate(['/side', { outlets: { home: 'messages' } }]);
   }
 }

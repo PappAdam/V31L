@@ -6,6 +6,7 @@ import { DeviceInfo } from '@capacitor/device';
 import { combineLatest, map } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-header',
   imports: [MatIconModule, AsyncPipe, MatButtonModule],
@@ -13,7 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  constructor() {
+  constructor(private router: Router) {
     this.platform = this.platformService.info;
   }
 
@@ -43,5 +44,9 @@ export class HeaderComponent {
     }
 
     this.detailsStateEvent.emit(this.state);
+  }
+
+  goBack() {
+    this.router.navigate(['/side', { outlets: { home: 'messages' } }]);
   }
 }

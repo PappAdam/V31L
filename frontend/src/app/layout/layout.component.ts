@@ -18,6 +18,6 @@ export class LayoutComponent {
     this.platform = this.platformService.info;
   }
   ngOnInit() {
-    this.router.navigate(['/', { outlets: { home: 'messages' } }]);
+    this.router.navigate(['/side', { outlets: { home: 'messages' } }]);
   }
 }
