@@ -7,6 +7,7 @@ import { findChatMember } from "../db/chatMember";
 import processPackage from "./processor";
 import { findMessageById } from "@/db/message";
 import { findChatById } from "@/db/chat";
+import { User } from "@prisma/client";
 
 export const clients: Client[] = [];
 
@@ -34,6 +35,11 @@ export class Client {
     this.ws.onclose = this.onClose;
 
     clients.push(this);
+  }
+
+  static withUser(userid: string): Client | undefined {
+    const client = clients.find((c) => c.user.id == userid);
+    return client;
   }
 
   get isAuthorized() {

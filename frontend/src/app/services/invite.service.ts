@@ -6,16 +6,13 @@ import {
   arrayToString,
   CreateSuccess,
   InviteError,
-  InviteResponse,
+  ChatResponse,
   InviteSuccess,
   JoinSuccess,
+  stringToCharCodeArray,
 } from '@common';
 import { lastValueFrom } from 'rxjs';
-
-export type InvIdKeyPair = {
-  id: string;
-  key: CryptoKey;
-};
+import { MessageService } from './message.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,44 +21,45 @@ export class InviteService {
   baseUrl: string = 'http://localhost:3000/inv/';
   http = inject(HttpClient);
   enc = inject(EncryptionService);
-  key!: CryptoKey;
-  user: StoredUser;
+  msg = inject(MessageService);
 
   sensitiveDataWarning = true;
 
-  constructor() {
-    const rawUser = localStorage.getItem('user');
-    this.user = JSON.parse(rawUser!);
-    const encodedUserName = this.enc.encoder.encode(this.user.username);
-    // TODO use real keys, randomly generated
-    crypto.subtle
-      .digest('SHA-256', encodedUserName)
-      .then(
-        async (key) =>
-          (this.key = await crypto.subtle.importKey(
-            'raw',
-            key,
-            { name: 'AES-KW' },
-            true,
-            ['wrapKey', 'unwrapKey']
-          ))
-      );
-  }
+  constructor() {}
 
   async wrapInvitation(invId: string): Promise<string> {
-    const binKey = new Uint8Array(
-      await crypto.subtle.exportKey('raw', this.key)
-    );
+    const raw = Uint16Array.from(
+      new Uint8Array(
+        await crypto.subtle.exportKey('raw', this.msg.selectedChat.chatKey)
+      )
+    ).map((b) => b + 1);
 
-    const key = arrayToString(binKey);
+    const key = String.fromCharCode(...raw);
     const inv = invId + key;
 
     return inv;
   }
 
+  async unwrapInvitation(
+    wrapped: string
+  ): Promise<{ id: string; key: string }> {
+    const id = wrapped.slice(0, 36);
+    const key = String.fromCharCode(
+      ...stringToCharCodeArray(
+        wrapped.slice(36, wrapped.length),
+        Uint16Array
+      ).map((b) => b - 1)
+    );
+
+    return {
+      id,
+      key,
+    };
+  }
+
   /**
    * Creates a invitation for a given chat
-   * {@link InviteResponse}
+   * {@link ChatResponse}
    */
   async createInvitation(chatId: string): Promise<string | null> {
     const body = { chatId };
@@ -72,7 +70,7 @@ export class InviteService {
           this.baseUrl + 'create',
           body,
           {
-            headers: { Authorization: this.user.token },
+            headers: { Authorization: this.enc.user.token },
           }
         )
       );
@@ -93,26 +91,36 @@ export class InviteService {
    * @param key AES-GCM key for decrypting and encrypting messages in chat
    */
   async sendJoinRequest(
-    invId: string,
-    key: CryptoKey
+    connectionString: string
   ): Promise<JoinSuccess | InviteError> {
     try {
-      const rawKey = await crypto.subtle.wrapKey('raw', key, this.key, {
-        name: 'AES-KW',
-      });
+      const invIdKeyPair = await this.unwrapInvitation(connectionString);
+      const key = await crypto.subtle.importKey(
+        'raw',
+        stringToCharCodeArray(invIdKeyPair.key, Uint8Array),
+        { name: 'AES-GCM' },
+        true,
+        ['encrypt', 'decrypt']
+      );
 
-      const wrappedKey = String.fromCharCode(...new Uint8Array(rawKey));
+      const wrapped = await this.enc.wrapKey(key, this.enc.privateKey);
 
-      const body = { key: wrappedKey, invId };
+      const body = {
+        key: String.fromCharCode(...wrapped),
+        invId: invIdKeyPair.id,
+      };
 
       const response = await lastValueFrom(
         this.http.post<JoinSuccess | InviteError>(this.baseUrl + 'join', body, {
-          headers: { Authorization: this.user.token },
+          headers: { Authorization: this.enc.user.token },
         })
       );
+
       return response;
     } catch (error: any) {
       return error.error;
     }
   }
+
+  async createChatRequest(chatName: string) {}
 }

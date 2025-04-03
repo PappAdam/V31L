@@ -42,5 +42,5 @@ export const invitationJoinSuccessResponse = (
 
 export const invitationInvalidResponse: InviteError = {
   result: "Error",
-  message: "Non-existent User-Chat pair",
+  message: "Invalid Invitation",
 };

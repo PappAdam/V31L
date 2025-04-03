@@ -28,7 +28,6 @@ export type Chat = Omit<
 export class MessageService {
   socketService = inject(SocketService);
   encryptionService = inject(EncryptionService);
-  invitationService = inject(InviteService);
 
   private _chats$ = new BehaviorSubject<Chat[]>([]);
   get chats$(): Observable<Chat[]> {
@@ -152,9 +151,10 @@ export class MessageService {
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
         if (rawChatContent.encryptedChatKey) {
+          console.log(rawChatContent.encryptedChatKey);
           const chatKey = await this.encryptionService.unwrapKey(
             rawChatContent.encryptedChatKey,
-            this.invitationService.key
+            this.encryptionService.privateKey
           );
           const chat = {
             ...rawChatContent,

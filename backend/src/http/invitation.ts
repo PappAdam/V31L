@@ -4,7 +4,7 @@ import {
   invitationInvalidResponse,
   invitationJoinSuccessResponse,
   serverErrorResponse,
-  stringToUint8Array,
+  stringToCharCodeArray,
 } from "@common";
 import { Invitation, validateChatJoinRequest } from "@/invitation";
 import { createChatMember, findChatMember } from "@/db/chatMember";
@@ -90,7 +90,7 @@ async function joinChat(req: Request, res: Response) {
       return;
     }
 
-    const unwrappedKey = stringToUint8Array(key);
+    const unwrappedKey = stringToCharCodeArray(key, Uint8Array);
 
     if (!unwrappedKey) {
       res.status(400).json("Bad key");

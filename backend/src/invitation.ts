@@ -21,8 +21,6 @@ export class Invitation {
     if (index) {
       Invitations.splice(index, 1);
     }
-
-    console.log("Invitation removed on index: ", index);
   };
 }
 
@@ -31,6 +29,7 @@ export function validateChatJoinRequest(incomingID: string): Invitation | null {
     return incomingID == inv.id;
   });
 
+  console.log(i);
   if (i == -1) return null;
 
   const timeSinceCreation = Date.now() - Invitations[i].createdAt;

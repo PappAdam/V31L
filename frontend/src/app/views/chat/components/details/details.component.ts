@@ -45,16 +45,10 @@ export class DetailsComponent {
 
   invitation: string = 'Creating you invitation...';
 
-  copyToClipboard() {
+  async copyToClipboard() {
     if (!this.invitation) return;
 
-    navigator.clipboard.writeText(this.invitation).catch((err) => {
-      this.snackBar.open('Failed to copy invitation', 'close', {
-        duration: 2000,
-        horizontalPosition: 'right',
-      });
-      return;
-    });
+    await navigator.clipboard.writeText(this.invitation);
 
     this.snackBar.open('Invitation copied to clipboard', 'close', {
       duration: 2000,

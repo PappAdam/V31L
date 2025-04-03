@@ -1,11 +1,39 @@
 <div class="add-member">
-  <!-- <form>
-    <input type="text" [formControl]="chatName" />
+  <input
+    #imageSelector
+    type="file"
+    (change)="onImageUpload($event)"
+    accept="image/*"
+    hidden
+  />
+  @if (imgUploaded) {
+  <div class="image-container">
+    <img [src]="img" alt="" />
+    <mat-icon
+      class="remove-btn"
+      fontIcon="close"
+      (click)="removeImage()"
+    ></mat-icon>
+  </div>
+  } @else {
+  <mat-icon
+    fontIcon="add_photo_alternate"
+    (click)="imageSelector.click()"
+  ></mat-icon>
+  }
+  <form (ngSubmit)="onCreate()">
+    <label for="chatName">Chat Name: </label>
+    <input name="chatName" type="text" [formControl]="chatName" />
     <button type="submit" mat-flat-button>Create</button>
-  </form> -->
+  </form>
   <mat-divider></mat-divider>
-  <!-- <form>
-    <input type="text" [formControl]="connectionString" />
+  <form (ngSubmit)="onJoin($event)">
+    <label for="connectionString">Connection String: </label>
+    <input
+      name="connectionString"
+      type="text"
+      [formControl]="connectionString"
+    />
     <button type="submit" mat-flat-button>Join</button>
-  </form> -->
+  </form>
 </div>

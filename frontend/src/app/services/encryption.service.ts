@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { EncryptedMessage, PublicMessage } from '@common';
+import { StoredUser } from './auth.service';
 
 export type Message = Omit<PublicMessage, 'encryptedData'> & {
   content: string;
@@ -12,6 +13,9 @@ export class EncryptionService {
   encoder = new TextEncoder();
   decoder = new TextDecoder();
   globalKey!: CryptoKey;
+  privateKey!: CryptoKey;
+  user: StoredUser;
+
   constructor() {
     // TODO GLOBAL KEY SHOULD NOT BE USED
     crypto.subtle
@@ -28,6 +32,23 @@ export class EncryptionService {
           new Uint8Array(raw, 0, 32).toString()
         );
       });
+
+    const rawUser = localStorage.getItem('user');
+    this.user = JSON.parse(rawUser!);
+    const encodedUserName = this.encoder.encode(this.user.username);
+
+    crypto.subtle
+      .digest('SHA-256', encodedUserName)
+      .then(
+        async (key) =>
+          (this.privateKey = await crypto.subtle.importKey(
+            'raw',
+            key,
+            { name: 'AES-KW' },
+            true,
+            ['wrapKey', 'unwrapKey']
+          ))
+      );
   }
 
   async encryptText(key: CryptoKey, text: string): Promise<EncryptedMessage> {
@@ -79,7 +100,7 @@ export class EncryptionService {
     wrappedKey: Uint8Array,
     masterKey: CryptoKey
   ): Promise<CryptoKey> {
-    return crypto.subtle.unwrapKey(
+    const unwrapped = await crypto.subtle.unwrapKey(
       'raw',
       wrappedKey,
       masterKey,
@@ -88,5 +109,7 @@ export class EncryptionService {
       true,
       ['encrypt', 'decrypt']
     );
+
+    return unwrapped;
   }
 }
