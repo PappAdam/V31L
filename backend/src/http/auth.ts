@@ -164,5 +164,5 @@ async function refreshToken(req: Request, res: Response) {
  * @returns The generated JWT token
  */
 export const generateToken = (userId: string): string => {
-  return jwt.sign({ userId }, "your_secret_key", { expiresIn: "1h" });
+  return jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: "1h" });
 };

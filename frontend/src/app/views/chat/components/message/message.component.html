@@ -5,7 +5,10 @@
   "
 >
   @if (displayedIn == "Chat") {
-  <div class="message-options" [class.has-text-above]="message.user.username">
+  <div
+    class="message-options"
+    [class.has-text-above]="first && message.user.username"
+  >
     <div
       class="option pin"
       [class.active]="message.pinned"
