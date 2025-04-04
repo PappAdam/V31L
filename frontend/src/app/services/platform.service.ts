@@ -16,7 +16,7 @@ export class PlatformService {
 
   async loadDeviceInfo() {
     this.deviceInfo = await Device.getInfo();
-    this.deviceInfo.platform = 'web';
+    this.deviceInfo.platform = 'android';
     return this.deviceInfo;
   }
 

@@ -4,6 +4,14 @@
   height: 100%;
   display: flex;
   flex-direction: row;
+  position: relative;
+
+  .detail-mobile-wrapper {
+    position: absolute;
+    right: 0;
+    height: 100%;
+    z-index: 23;
+  }
 
   .chat-wrapper {
     height: 100%;
@@ -34,7 +42,7 @@
       box-shadow: $mat-sys-seperator-tp-sm;
       display: flex;
       min-width: 0;
-      height: $mat-sys-component-height-medium;
+      min-height: $mat-sys-component-height-medium;
       align-items: center;
       flex-shrink: 0;
       gap: $mat-sys-spacing-sm;
@@ -64,7 +72,7 @@
         max-height: 200px;
         min-height: 35px;
         padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
-        border-radius: $mat-sys-corner-full;
+        border-radius: $mat-sys-corner-medium;
 
         &::-webkit-scrollbar {
           display: none; // Chrome, Safari, Opera

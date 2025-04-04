@@ -52,6 +52,6 @@ export class HeaderComponent {
   }
 
   goBack() {
-    this.router.navigate(['/side', { outlets: { home: 'messages' } }]);
+    this.router.navigate(['/app', { outlets: { home: 'messages' } }]);
   }
 }

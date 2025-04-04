@@ -17,10 +17,9 @@ export const routes: Routes = [
   { path: 'login/mfa/setup', component: MfaSetupComponent },
   { path: 'login/mfa/verify', component: MfaVerifyComponent },
   { path: 'chat', component: ChatComponent, canActivate: [androidGuard] },
-  { path: '', redirectTo: 'side', pathMatch: 'full' },
-
+  { path: '', redirectTo: 'app', pathMatch: 'full' },
   {
-    path: 'side',
+    path: 'app',
     component: LayoutComponent,
     canActivate: [authGuard, platformGuard],
 

@@ -12,8 +12,4 @@ export class ChatCardComponent {
   @Input({ required: true }) last_msg: string = '';
   @Input() status: string = '';
   @Input() selected: boolean = false;
-
-  asd() {
-    console.log(this.selected);
-  }
 }

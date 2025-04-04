@@ -9,15 +9,15 @@
   background-color: $mat-sys-surface-container-highest;
 }
 
-.card-wrapper:hover {
+.card-wrapper:hover:not([data-selected="true"]) {
   cursor: pointer;
 
   background-color: $mat-sys-surface-container-high;
-  transition: all 0.25s ease-in-out;
+  transition: all 0.15s ease-in-out;
 }
 
 .card-wrapper {
-  transition: all 0.25s ease-in-out; //
+  transition: all 0.15s ease-in-out; //
   border-radius: $mat-sys-corner-medium;
   color: $mat-sys-on-surface;
   width: 100%;
