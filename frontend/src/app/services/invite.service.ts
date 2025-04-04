@@ -122,5 +122,29 @@ export class InviteService {
     }
   }
 
-  async createChatRequest(chatName: string) {}
+  async createChatRequest(chatName: string): Promise<ChatResponse> {
+    const rawKey = crypto.getRandomValues(new Uint8Array(32));
+    const key = await crypto.subtle.importKey(
+      'raw',
+      rawKey,
+      { name: 'AES-GCM' },
+      true,
+      ['encrypt', 'decrypt']
+    );
+
+    const wrappedKey = await this.enc.wrapKey(key, this.enc.privateKey);
+
+    const body = {
+      name: chatName,
+      key: String.fromCharCode(...wrappedKey),
+    };
+
+    const response = lastValueFrom(
+      this.http.post<ChatResponse>('http://localhost:3000/chat/create', body, {
+        headers: { Authorization: this.enc.user.token },
+      })
+    );
+
+    return response;
+  }
 }

@@ -12,27 +12,10 @@ export type Message = Omit<PublicMessage, 'encryptedData'> & {
 export class EncryptionService {
   encoder = new TextEncoder();
   decoder = new TextDecoder();
-  globalKey!: CryptoKey;
   privateKey!: CryptoKey;
   user: StoredUser;
 
   constructor() {
-    // TODO GLOBAL KEY SHOULD NOT BE USED
-    crypto.subtle
-      .importKey('raw', new Uint8Array(32), { name: 'AES-GCM' }, true, [
-        'encrypt',
-        'decrypt',
-      ])
-      .then(async (key) => {
-        this.globalKey = key;
-        let raw = await crypto.subtle.exportKey('raw', key);
-
-        console.warn(
-          'GLOBAL KEY IS BEING USED FOR DEVELOPMENT!\nDEV KEY: ',
-          new Uint8Array(raw, 0, 32).toString()
-        );
-      });
-
     const rawUser = localStorage.getItem('user');
     this.user = JSON.parse(rawUser!);
     const encodedUserName = this.encoder.encode(this.user.username);

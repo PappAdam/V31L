@@ -69,7 +69,7 @@ export class AddComponent {
       return;
     }
 
-    const res = await this.inviteService.sendJoinRequest(v);
+    const res = await this.inviteService.createChatRequest(v);
     console.log(res);
   }
 }

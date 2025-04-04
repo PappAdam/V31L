@@ -103,7 +103,7 @@ export class MessageService {
 
   async sendMessage(chatId: string, message: string) {
     const encrypted = await this.encryptionService.encryptText(
-      this.encryptionService.globalKey,
+      this.selectedChat.chatKey,
       message
     );
 
@@ -144,10 +144,6 @@ export class MessageService {
         (f) => f.id === rawChatContent.id
       );
 
-      if (rawChatContent.encryptedMessages.length == 0) {
-        return;
-      }
-
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
         if (rawChatContent.encryptedChatKey) {
@@ -167,6 +163,10 @@ export class MessageService {
         }
 
         chatIndex = this._chats$.value.length - 1;
+      }
+
+      if (rawChatContent.encryptedMessages.length == 0) {
+        return;
       }
 
       const chatMessages = await this.decryptMessages(

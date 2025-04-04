@@ -7,6 +7,9 @@ import {
 import { createChatMember } from "@/db/chatMember";
 import { validateRequiredFields } from "./middlewares/validate";
 import { createChat } from "@/db/chat";
+import { Client } from "@/socket/client";
+import ServerPackageSender from "@/socket/server";
+import { toPublicChat } from "@/db/public";
 
 const chatRouter = Router();
 chatRouter.post(
@@ -37,7 +40,23 @@ async function createNewChat(req: Request, res: Response) {
       throw Error("Failed to create chat member");
     }
 
-    res.status(200).json(chatCreationSuccessResponse);
+    const client = Client.withUser(user.id);
+    if (!client) {
+      return;
+    }
+
+    const publicChat = await toPublicChat(chat.id, rawKey);
+    if (!publicChat) {
+      throw Error("chat is not convertable");
+    }
+
+    ServerPackageSender.send([client?.ws], {
+      header: "Chats",
+      chats: [publicChat],
+    });
+
+    res.status(200).json(chatCreationSuccessResponse());
+    return;
   } catch (error) {
     console.error("Error during creating invitation: \n", error);
     res.status(500).json(serverErrorResponse);
