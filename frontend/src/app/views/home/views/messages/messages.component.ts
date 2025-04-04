@@ -8,8 +8,10 @@ import {
   BehaviorSubject,
   combineLatest,
   distinctUntilChanged,
+  filter,
   first,
   map,
+  startWith,
   tap,
 } from 'rxjs';
 import { FormControl } from '@angular/forms';
@@ -17,7 +19,7 @@ import { AsyncPipe } from '@angular/common';
 import { SearchBarComponent } from '@/components/search-bar/search-bar.component';
 import { PlatformService } from '@/services/platform.service';
 import { Router } from '@angular/router';
-
+import { Chat } from '@/services/message.service';
 @Component({
   selector: 'app-messages',
   imports: [
@@ -37,20 +39,25 @@ export class MessagesComponent {
 
   chats$ = this.messageService.chats$;
   selectedChatIndex$ = this.messageService.selectedChatIndex$;
+  messageControl = new FormControl('');
+  searchControl$ = new FormControl('');
 
-  selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
-    map(([messages, index]) => messages[index])
+  filteredChats$ = combineLatest([
+    this.chats$,
+    this.searchControl$.valueChanges.pipe(startWith('')), // Handle initial value
+  ]).pipe(
+    map(([chats, keyword]) =>
+      chats.filter((chat) =>
+        chat.name!.toLowerCase().includes(keyword!.toLowerCase())
+      )
+    )
   );
 
-  messageControl = new FormControl('');
-  searchControl = new FormControl('');
-  constructor(private router: Router) {
-    this.searchControl.valueChanges
-      .pipe(distinctUntilChanged())
-      .subscribe((searchTerm) => {
-        console.log('term', searchTerm);
-      });
-  }
+  selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
+    map(([chats, index]) => chats[index])
+  );
+
+  constructor(private router: Router) {}
 
   navToChat(index: number) {
     this.messageService.selectedChatIndex = index;

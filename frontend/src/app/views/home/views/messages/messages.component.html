@@ -1,15 +1,15 @@
 <div class="messages-wrapper">
-  <app-search-bar [control]="searchControl"></app-search-bar>
+  <app-search-bar [control]="searchControl$"></app-search-bar>
   <div class="cards">
-    @if (this.platformService.info?.platform == "web") { @for (chat of chats$ |
-    async; track $index) {
+    @if (this.platformService.info?.platform == "web") { @for (chat of
+    filteredChats$ | async; track $index) {
     <app-chat-card
       (click)="messageService.selectedChatIndex = $index"
       name="{{ chat.name }}"
       last_msg="{{ chat.messages?.[0]?.content || 'No messages yet' }}"
       unread=""
     ></app-chat-card>
-    } } @else { @for (chat of chats$ | async; track $index) {
+    } } @else { @for (chat of filteredChats$ | async; track $index) {
 
     <app-chat-card
       (click)="navToChat($index)"
