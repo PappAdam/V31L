@@ -6,7 +6,9 @@
   <div class="image-wrapper"><img src="" alt="" /></div>
   <div class="text-wrapper">
     <div class="title-wrapper">
-      <p class="group_title" [attr.data-unread]="unread">{{ name }}</p>
+      <p class="group_title" [attr.data-unread]="unread" (click)="asd()">
+        {{ name }}
+      </p>
     </div>
     <div class="last-msg-wrapper">
       <p class="last-msg" [attr.data-unread]="unread">{{ last_msg }}</p>

@@ -49,18 +49,8 @@ export class ChatComponent {
   @ViewChild('textInput') textInputDiv!: ElementRef<HTMLElement>;
   constructor() {
     this.platform = this.platformService.info;
+  }
 
-    this.selectedChatId$
-      .pipe(
-        tap((id) => {
-          this.onSelectedIdChanged(id);
-        })
-      )
-      .subscribe();
-  }
-  onSelectedIdChanged(id: string) {
-    console.log(id);
-  }
   updateDetailsState(event: string) {
     this.detailsState = event;
   }

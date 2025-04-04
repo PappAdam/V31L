@@ -8,6 +8,9 @@
       name="{{ chat.name }}"
       last_msg="{{ chat.messages?.[0]?.content || 'No messages yet' }}"
       unread=""
+      [selected]="
+        this.messageService.currentSelectedChatId() == chat.id ? true : false
+      "
     ></app-chat-card>
     } } @else { @for (chat of filteredChats$ | async; track $index) {
 
