@@ -1,9 +1,9 @@
-import { MessageService } from '@/services/message.service';
+import { Chat, MessageService } from '@/services/message.service';
 import { PlatformService } from '@/services/platform.service';
 import { Component, Output, EventEmitter, inject, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DeviceInfo } from '@capacitor/device';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
@@ -26,10 +26,15 @@ export class HeaderComponent {
   protected messageService = inject(MessageService);
 
   chats$ = this.messageService.chats$;
-  selectedChatIndex$ = this.messageService.selectedChatIndex$;
+  selectedChatId$ = this.messageService.selectedChatId$;
 
-  selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
-    map(([messages, index]) => messages[index])
+  selectedChat$: Observable<Chat | undefined> = combineLatest([
+    this.chats$,
+    this.selectedChatId$,
+  ]).pipe(
+    map(
+      ([chats, id]) => chats.find((chat) => chat.id === id) // ✅ Implicit return
+    )
   );
 
   ctor() {

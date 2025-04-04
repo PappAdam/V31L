@@ -27,7 +27,7 @@
     <div class="image"></div>
     <div class="title">
       @if (this.selectedChat$ | async; as selectedChat) {
-      {{ selectedChat.name }}
+      {{ selectedChat?.name }}
       }
     </div>
   </div>

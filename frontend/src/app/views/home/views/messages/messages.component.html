@@ -4,7 +4,7 @@
     @if (this.platformService.info?.platform == "web") { @for (chat of
     filteredChats$ | async; track $index) {
     <app-chat-card
-      (click)="messageService.selectedChatIndex = $index"
+      (click)="messageService.selectedChatId = chat.id"
       name="{{ chat.name }}"
       last_msg="{{ chat.messages?.[0]?.content || 'No messages yet' }}"
       unread=""
@@ -12,7 +12,7 @@
     } } @else { @for (chat of filteredChats$ | async; track $index) {
 
     <app-chat-card
-      (click)="navToChat($index)"
+      (click)="navToChat(chat.id)"
       name="{{ chat.name }}"
       last_msg="{{ chat.messages?.[0]?.content || 'No messages yet' }}"
       unread=""

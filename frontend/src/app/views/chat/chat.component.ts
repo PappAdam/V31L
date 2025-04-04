@@ -38,9 +38,11 @@ export class ChatComponent {
   protected messageService = inject(MessageService);
   protected authService = inject(AuthService);
   chats$ = this.messageService.chats$;
-  selectedChatIndex$ = this.messageService.selectedChatIndex$;
-  selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
-    map(([messages, index]) => messages[index])
+  selectedChatId$ = this.messageService.selectedChatId$;
+  selectedChat$ = combineLatest([this.chats$, this.selectedChatId$]).pipe(
+    map(
+      ([chats, id]) => chats.find((chat) => chat.id === id) // Ensure type consistency
+    )
   );
   message = '';
   previousUser = '';
@@ -48,16 +50,16 @@ export class ChatComponent {
   constructor() {
     this.platform = this.platformService.info;
 
-    this.selectedChatIndex$
+    this.selectedChatId$
       .pipe(
-        tap((index) => {
-          this.onSelectedIndexChanged(index);
+        tap((id) => {
+          this.onSelectedIdChanged(id);
         })
       )
       .subscribe();
   }
-  onSelectedIndexChanged(index: number) {
-    console.log(index);
+  onSelectedIdChanged(id: string) {
+    console.log(id);
   }
   updateDetailsState(event: string) {
     this.detailsState = event;
@@ -74,10 +76,9 @@ export class ChatComponent {
 
   async sendMessage() {
     let message = this.textInputDiv.nativeElement.innerText;
-    if (!message || this.messageService.currentSelectedChatIndex() == -1)
-      return;
+    if (!message || this.messageService.currentSelectedChatId() == '') return;
     const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
-    this.messageService.sendMessage(selectedChat.id, message);
+    this.messageService.sendMessage(selectedChat!.id, message);
     this.textInputDiv.nativeElement.innerText = '';
   }
 }

@@ -38,7 +38,7 @@ export class MessagesComponent {
   protected platformService = inject(PlatformService);
 
   chats$ = this.messageService.chats$;
-  selectedChatIndex$ = this.messageService.selectedChatIndex$;
+  selectedChatId$ = this.messageService.selectedChatId$;
   messageControl = new FormControl('');
   searchControl$ = new FormControl('');
 
@@ -53,14 +53,18 @@ export class MessagesComponent {
     )
   );
 
-  selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
-    map(([chats, index]) => chats[index])
+  selectedChat$ = combineLatest([this.chats$, this.selectedChatId$]).pipe(
+    map(([chats, id]) => {
+      chats.find((chat) => {
+        chat.id === id;
+      });
+    })
   );
 
   constructor(private router: Router) {}
 
-  navToChat(index: number) {
-    this.messageService.selectedChatIndex = index;
+  navToChat(id: string) {
+    this.messageService.selectedChatId = id;
     this.router.navigate(['/chat']);
   }
 }

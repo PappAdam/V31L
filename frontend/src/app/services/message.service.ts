@@ -26,17 +26,17 @@ export class MessageService {
     return this._chats$.asObservable();
   }
 
-  private _selectedChatIndex$ = new BehaviorSubject<number>(-1);
-  get selectedChatIndex$(): Observable<number> {
-    return this._selectedChatIndex$.asObservable();
+  private _selectedChatId$ = new BehaviorSubject<string>('');
+  get selectedChatId$(): Observable<string> {
+    return this._selectedChatId$.asObservable();
   }
 
-  currentSelectedChatIndex(): number {
-    return this._selectedChatIndex$.value;
+  currentSelectedChatId(): string {
+    return this._selectedChatId$.getValue();
   }
 
-  set selectedChatIndex(index: number) {
-    this._selectedChatIndex$.next(index);
+  set selectedChatId(index: string) {
+    this._selectedChatId$.next(index);
   }
 
   constructor() {
