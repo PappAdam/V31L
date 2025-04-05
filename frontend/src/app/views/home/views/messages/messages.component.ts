@@ -44,7 +44,7 @@ export class MessagesComponent {
 
   filteredChats$ = combineLatest([
     this.chats$,
-    this.searchControl$.valueChanges.pipe(startWith('')), // Handle initial value
+    this.searchControl$.valueChanges.pipe(startWith('')),
   ]).pipe(
     map(([chats, keyword]) =>
       chats.filter((chat) =>
@@ -54,11 +54,7 @@ export class MessagesComponent {
   );
 
   selectedChat$ = combineLatest([this.chats$, this.selectedChatId$]).pipe(
-    map(([chats, id]) => {
-      chats.find((chat) => {
-        chat.id === id;
-      });
-    })
+    map(([chats, id]) => chats.find((chat) => chat.id === id))
   );
 
   constructor(private router: Router) {}

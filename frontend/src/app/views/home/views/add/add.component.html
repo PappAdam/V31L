@@ -1,1 +1,8 @@
-<p>add works!</p>
+@if(this.platform?.platform == "web") {
+<div class="add">
+  <app-tab-header Title="Add"></app-tab-header>
+  <div class="single-option-container">
+    <div class="single-option"></div>
+  </div>
+</div>
+} @else { }

@@ -107,6 +107,8 @@ export class MessageService {
 
       const chatMessages: Message[] = await Promise.all(
         rawChatContent.encryptedMessages.map(async (msg) => {
+          console.log('chatMessage branch ran');
+
           const messageContent = await this.encryptionService.decryptText(
             this._chats$.value[chatIndex].chatKey,
             msg.encryptedData
@@ -126,6 +128,7 @@ export class MessageService {
         rawChatContent.encryptedMessages[0].timeStamp >
           this.lastMessage(rawChatContent.id)!.timeStamp
       ) {
+        console.log('Thethingthat i tryied rlat time ran');
         // Pushing new messages to the end of the array
         this._chats$.value[chatIndex].messages = [
           ...this._chats$.value[chatIndex].messages,

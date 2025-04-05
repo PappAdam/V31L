@@ -64,7 +64,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: $mat-sys-surface-container;
+        background-color: $mat-sys-surface-container-high;
         overflow-y: scroll;
         overflow-x: hidden;
         scrollbar-width: none; // Firefox
@@ -73,6 +73,16 @@
         min-height: 35px;
         padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
         border-radius: $mat-sys-corner-medium;
+
+        &::before {
+          content: "type a message...";
+          width: 100%;
+          font-size: $mat-sys-label-medium-size;
+          color: grey;
+          font-weight: 400;
+          letter-spacing: 0.5px;
+          cursor: text;
+        }
 
         &::-webkit-scrollbar {
           display: none; // Chrome, Safari, Opera
