@@ -109,23 +109,17 @@ async function joinChat(req: Request, res: Response) {
       throw Error("Failed to add user to chat");
     }
 
+    res.status(201).json(invitationJoinSuccessResponse(chatMember.chatId));
+
     const user = req.user!;
-    let client = Client.withUser(user.id);
-    if (!client) {
-      throw Error("Client now available, possible disconnect.");
-    }
+    let clients = Client.withUser(user.id).map((c) => c.ws);
 
-    const publicChat = await toPublicChat(chatMember.chatId, rawKey);
-    if (!publicChat) {
-      throw Error("chat is not convertable");
-    }
+    const publicChat = (await toPublicChat(chatMember.chatId, rawKey))!;
 
-    ServerPackageSender.send([client?.ws], {
+    ServerPackageSender.send(clients, {
       header: "Chats",
       chats: [publicChat],
     });
-
-    res.status(201).json(invitationJoinSuccessResponse(chatMember.chatId));
   } catch (error) {
     console.error("Error during joining invitation: \n", error);
     res.status(500).json(serverErrorResponse);

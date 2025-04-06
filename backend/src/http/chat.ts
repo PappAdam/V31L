@@ -40,8 +40,8 @@ async function createNewChat(req: Request, res: Response) {
       throw Error("Failed to create chat member");
     }
 
-    const client = Client.withUser(user.id);
-    if (!client) {
+    const clients = Client.withUser(user.id).map((c) => c.ws);
+    if (!clients) {
       return;
     }
 
@@ -50,7 +50,7 @@ async function createNewChat(req: Request, res: Response) {
       throw Error("chat is not convertable");
     }
 
-    ServerPackageSender.send([client?.ws], {
+    ServerPackageSender.send(clients, {
       header: "Chats",
       chats: [publicChat],
     });

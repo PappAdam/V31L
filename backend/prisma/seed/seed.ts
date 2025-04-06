@@ -6,7 +6,6 @@ import { EncryptedMessage } from "@common";
 import testData from "./testData.json";
 import prisma from "@/db/_db";
 import { Chat, ChatMember, Message, User } from "@prisma/client";
-import { time } from "console";
 import { readFile } from "fs/promises";
 import { createImage } from "@/db/image";
 
@@ -65,6 +64,7 @@ async function seedDatabase(): Promise<{
   await prisma.user.deleteMany();
   await prisma.message.deleteMany();
   await prisma.chat.deleteMany();
+  await prisma.image.deleteMany();
 
   const pfpImgData = await readImg("./prisma/seed/img/pfp.png");
   const dbpfpImage = await createImage(pfpImgData, "pfpImg");

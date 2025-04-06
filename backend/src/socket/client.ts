@@ -37,8 +37,8 @@ export class Client {
     clients.push(this);
   }
 
-  static withUser(userid: string): Client | undefined {
-    const client = clients.find((c) => c.user.id == userid);
+  static withUser(userid: string): Client[] {
+    const client = clients.filter((c) => c.user.id == userid);
     return client;
   }
 
