@@ -4,6 +4,7 @@ import { EncryptionService } from './encryption.service';
 import { StoredUser } from './auth.service';
 import { InviteResponse, InviteSuccess } from '@common';
 import { lastValueFrom } from 'rxjs';
+import { FalseEncryptionService } from './false-encryption.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,7 @@ import { lastValueFrom } from 'rxjs';
 export class InviteService {
   baseUrl: string = 'http://localhost:3000/inv/';
   http = inject(HttpClient);
-  enc = inject(EncryptionService);
+  enc = inject(FalseEncryptionService);
   key!: CryptoKey;
   user: StoredUser;
 

@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { PublicChat, PublicMessage, ServerChatsPackage } from '@common';
 import { EncryptionService, Message } from './encryption.service';
 import { InviteService } from './invite.service';
+import { FalseEncryptionService } from './false-encryption.service';
 
 export type Chat = Omit<
   PublicChat,
@@ -18,7 +19,7 @@ export type Chat = Omit<
 })
 export class MessageService {
   socketService = inject(SocketService);
-  encryptionService = inject(EncryptionService);
+  encryptionService = inject(FalseEncryptionService);
   invitationService = inject(InviteService);
 
   private _chats$ = new BehaviorSubject<Chat[]>([]);
@@ -63,7 +64,7 @@ export class MessageService {
 
   async sendMessage(chatId: string, message: string) {
     const encrypted = await this.encryptionService.encryptText(
-      this.encryptionService.globalKey,
+      this._chats$.value.find((c) => c.id == this.selectedChatId)?.chatKey,
       message
     );
 
