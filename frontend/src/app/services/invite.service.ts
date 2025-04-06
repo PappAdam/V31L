@@ -13,26 +13,11 @@ export class InviteService {
   baseUrl: string = 'http://192.168.50.15:3000/inv/';
   http = inject(HttpClient);
   enc = inject(FalseEncryptionService);
-  key!: CryptoKey;
   user: StoredUser;
 
   constructor() {
     const rawUser = localStorage.getItem('user');
     this.user = JSON.parse(rawUser!);
-    const encodedUserName = this.enc.encoder.encode(this.user.username);
-    // TODO use real keys, randomly generated
-    crypto.subtle
-      .digest('SHA-256', encodedUserName)
-      .then(
-        async (key) =>
-          (this.key = await crypto.subtle.importKey(
-            'raw',
-            key,
-            { name: 'AES-KW' },
-            true,
-            ['wrapKey', 'unwrapKey']
-          ))
-      );
   }
 
   /**
@@ -64,11 +49,11 @@ export class InviteService {
     key: CryptoKey
   ): Promise<InviteResponse> {
     try {
-      const rawKey = await crypto.subtle.wrapKey('raw', key, this.key, {
-        name: 'AES-KW',
-      });
+      // const rawKey = await crypto.subtle.wrapKey('raw', key, this.key, {
+      //   name: 'AES-KW',
+      // });
 
-      const wrappedKey = String.fromCharCode(...new Uint8Array(rawKey));
+      const wrappedKey = this.enc.privateKey;
 
       const body = { key: wrappedKey, invId };
 

@@ -91,7 +91,7 @@ export class MessageService {
         if (rawChatContent.encryptedChatKey) {
           const chatKey = await this.encryptionService.unwrapKey(
             rawChatContent.encryptedChatKey,
-            this.invitationService.key
+            this.encryptionService.privateKey
           );
           const chat = {
             ...chatContext,
@@ -130,13 +130,11 @@ export class MessageService {
           this.lastMessage(rawChatContent.id)!.timeStamp
       ) {
         console.log('Thethingthat i tryied rlat time ran');
-        // Pushing new messages to the end of the array
         this._chats$.value[chatIndex].messages = [
           ...this._chats$.value[chatIndex].messages,
           ...chatMessages,
         ];
       } else {
-        // Pushing new messages to the beginning of the array
         this._chats$.value[chatIndex].messages = [
           ...chatMessages,
           ...this._chats$.value[chatIndex].messages,
