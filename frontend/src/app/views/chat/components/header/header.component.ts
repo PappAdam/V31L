@@ -1,11 +1,19 @@
 import { MessageService } from '@/services/message.service';
 import { PlatformService } from '@/services/platform.service';
-import { Component, Output, EventEmitter, inject, Input } from '@angular/core';
+import {
+  Component,
+  Output,
+  EventEmitter,
+  inject,
+  Input,
+  ViewChild,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DeviceInfo } from '@capacitor/device';
 import { combineLatest, lastValueFrom, map } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { ImgService } from '@/services/img.service';
+import { InviteService } from '@/services/invite.service';
 @Component({
   selector: 'app-header',
   imports: [MatIconModule, AsyncPipe],

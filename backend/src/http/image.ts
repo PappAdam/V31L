@@ -1,10 +1,5 @@
 import { findImageById } from "@/db/image";
-import {
-  ImageResponse,
-  imgError,
-  imgSuccess,
-  serverErrorResponse,
-} from "@common";
+import { ImageResponse, serverErrorResponse } from "@common";
 import { Request, Response, Router } from "express";
 
 const imgRouter = Router();
@@ -25,11 +20,17 @@ export async function getImage(
     const img = await findImageById(id);
 
     if (!img) {
-      res.status(404).json(imgError);
+      res.status(404).json(undefined);
       return;
     }
 
-    res.status(200).json(imgSuccess(Buffer.from(img.data).toString("base64")));
+    res
+      .status(200)
+      .json(
+        `data:image/${img.type};base64,${Buffer.from(img.data).toString(
+          "base64"
+        )}`
+      );
   } catch (error) {
     console.error("Error during getting and image: ", error);
     res.status(500).json(serverErrorResponse);

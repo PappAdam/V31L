@@ -114,6 +114,7 @@ export class MessageService {
       header: 'NewMessage',
       chatId,
       messageContent: encrypted,
+      type: 'Text',
     });
   }
 

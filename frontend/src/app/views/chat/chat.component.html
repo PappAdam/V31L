@@ -34,7 +34,14 @@
       >
         <mat-icon fontIcon="send"></mat-icon>
       </button>
-      <button class="message-button" disabled>
+      <input
+        #imageSelector
+        type="file"
+        (change)="onImageUpload($event)"
+        accept="image/*"
+        hidden
+      />
+      <button class="message-button" (click)="imageSelector.click()">
         <mat-icon fontIcon="image"></mat-icon>
       </button>
       <button class="message-button" disabled>

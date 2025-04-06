@@ -67,13 +67,14 @@ async function seedDatabase(): Promise<{
   await prisma.image.deleteMany();
 
   const pfpImgData = await readImg("./prisma/seed/img/pfp.png");
-  const dbpfpImage = await createImage(pfpImgData, "pfpImg");
+  const dbpfpImage = await createImage(pfpImgData, "png", "pfpImg");
   if (!dbpfpImage) {
     throw Error("Failed to create image");
   }
 
   const groupImgData = await readImg("./prisma/seed/img/group.png");
-  const dbgroupImage = await createImage(groupImgData, "groupImg");
+  const dbgroupImage = await createImage(groupImgData, "png", "groupImg");
+
   if (!dbgroupImage) {
     throw Error("Failed to create image");
   }

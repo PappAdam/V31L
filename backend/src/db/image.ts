@@ -1,8 +1,10 @@
 import { Image } from "@prisma/client";
 import prisma from "./_db";
+import { stringToCharCodeArray } from "@common";
 
 export async function createImage(
-  imageData: Buffer,
+  imageData: Uint8Array,
+  type: string,
   id?: string
 ): Promise<Image | null> {
   try {
@@ -10,6 +12,7 @@ export async function createImage(
       data: {
         id,
         data: imageData,
+        type,
       },
     });
 

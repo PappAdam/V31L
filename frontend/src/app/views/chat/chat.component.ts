@@ -44,6 +44,15 @@ export class ChatComponent {
 
   @Input() chatTitle: string = '';
   @ViewChild('msgsWrapper') msgsWrapper?: ElementRef;
+
+  @ViewChild('imageSelector') imageSelector?: HTMLInputElement;
+  img = '';
+  selectedFile: File | null = null;
+
+  public get imgUploaded(): boolean {
+    return !!this.img;
+  }
+
   topScrollOffset = 0;
 
   platform: DeviceInfo | null = this.platformService.info;
@@ -60,6 +69,26 @@ export class ChatComponent {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  onImageUpload(event: any) {
+    const file = event.target.files[0] as File | null;
+    this.uploadFile(file);
+  }
+
+  uploadFile(file: File | null): void {
+    if (file && file.type.startsWith('image/')) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.img = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeImage() {
+    this.img = '';
   }
 
   onScroll() {

@@ -12,7 +12,7 @@ export class ImgService {
   http = inject(HttpClient);
   baseURL = 'http://localhost:3000/img/';
 
-  async getUrl(id: string) {
+  async getUrl(id: string): Promise<string | undefined> {
     if (!this.authService.user) {
       return;
     }
@@ -23,10 +23,6 @@ export class ImgService {
       })
     );
 
-    if (response.result == 'Error') {
-      return;
-    }
-
-    return `data:image/png;base64,${response.data}`;
+    return response;
   }
 }
