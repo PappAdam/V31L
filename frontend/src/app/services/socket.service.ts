@@ -18,7 +18,7 @@ import {
   Subscription,
 } from 'rxjs';
 
-const URL: string = 'ws://localhost:8080';
+const URL: string = 'ws://192.168.50.15:8080';
 
 /**
  * Represents an item in the package queue, which tracks the state and dependencies of a package to be sent to the server.
