@@ -155,7 +155,10 @@ export class MessageService {
             rawChatContent.encryptedChatKey,
             this.encryptionService.privateKey
           );
-          const img = (await this.img.getUrl(rawChatContent.imgID)) || '';
+          let img = '';
+          if (rawChatContent.imgID) {
+            img = (await this.img.getUrl(rawChatContent.imgID)) || '';
+          }
 
           const chat = {
             ...rawChatContent,
