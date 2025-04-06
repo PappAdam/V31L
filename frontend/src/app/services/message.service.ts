@@ -13,13 +13,15 @@ import {
 import { PublicChat, PublicMessage, ServerChatsPackage } from '@common';
 import { EncryptionService, Message } from './encryption.service';
 import { InviteService } from './invite.service';
+import { ImgService } from './img.service';
 
 export type Chat = Omit<
   PublicChat,
-  'encryptedMessages' | 'encryptedChatKey'
+  'encryptedMessages' | 'encryptedChatKey' | 'imgID'
 > & {
   messages: Message[];
   chatKey: CryptoKey;
+  img: string;
 };
 
 @Injectable({
@@ -28,6 +30,7 @@ export type Chat = Omit<
 export class MessageService {
   socketService = inject(SocketService);
   encryptionService = inject(EncryptionService);
+  img = inject(ImgService);
 
   private _chats$ = new BehaviorSubject<Chat[]>([]);
   get chats$(): Observable<Chat[]> {
@@ -152,10 +155,13 @@ export class MessageService {
             rawChatContent.encryptedChatKey,
             this.encryptionService.privateKey
           );
+          const img = (await this.img.getUrl(rawChatContent.imgID)) || '';
+
           const chat = {
             ...rawChatContent,
             chatKey,
             messages: [],
+            img,
           };
           this._chats$.next([...this._chats$.value, chat]);
         } else {

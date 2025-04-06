@@ -34,7 +34,11 @@ export async function getPublicChatsWithMessages(
           toPublicMessage
         );
         let users = (await findChatMembersByChat(chat.id)).map((m) => {
-          return { username: m.user.username, id: m.user.id };
+          return {
+            username: m.user.username,
+            id: m.user.id,
+            pfpImgId: m.user.profilePictureId,
+          };
         });
 
         return {
@@ -42,6 +46,7 @@ export async function getPublicChatsWithMessages(
           name: chat.name,
           encryptedMessages: messages,
           encryptedChatKey: chat.key,
+          imgID: chat.chatImgId,
           users,
         };
       })
@@ -88,6 +93,7 @@ export async function toPublicChat(
       name: chat.name,
       encryptedMessages: messages,
       encryptedChatKey: key,
+      imgID: chat.chatImgId,
       users,
     };
   } catch (error) {

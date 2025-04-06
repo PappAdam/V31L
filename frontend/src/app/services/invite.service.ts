@@ -137,6 +137,7 @@ export class InviteService {
     const body = {
       name: chatName,
       key: String.fromCharCode(...wrappedKey),
+      chatImgId: 'groupImg',
     };
 
     const response = lastValueFrom(

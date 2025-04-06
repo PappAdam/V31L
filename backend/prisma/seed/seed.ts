@@ -7,6 +7,12 @@ import testData from "./testData.json";
 import prisma from "@/db/_db";
 import { Chat, ChatMember, Message, User } from "@prisma/client";
 import { time } from "console";
+import { readFile } from "fs/promises";
+import { createImage } from "@/db/image";
+
+async function readImg(path: string) {
+  return await readFile(path);
+}
 
 async function encryptText(
   key: CryptoKey,
@@ -60,6 +66,18 @@ async function seedDatabase(): Promise<{
   await prisma.message.deleteMany();
   await prisma.chat.deleteMany();
 
+  const pfpImgData = await readImg("./prisma/seed/img/pfp.png");
+  const dbpfpImage = await createImage(pfpImgData, "pfpImg");
+  if (!dbpfpImage) {
+    throw Error("Failed to create image");
+  }
+
+  const groupImgData = await readImg("./prisma/seed/img/group.png");
+  const dbgroupImage = await createImage(groupImgData, "groupImg");
+  if (!dbgroupImage) {
+    throw Error("Failed to create image");
+  }
+
   const key = await crypto.subtle.importKey(
     "raw",
     new Uint8Array(32),
@@ -71,14 +89,21 @@ async function seedDatabase(): Promise<{
   const users = await Promise.all(
     testData.users.map(async (u) => {
       return {
-        ...(await createUser(u.username, u.password, u.mfaEnabled || false))!,
+        ...(await createUser(
+          u.username,
+          u.password,
+          u.mfaEnabled || false,
+          dbpfpImage.id
+        ))!,
         passwordNotHashed: u.password,
       };
     })
   );
 
   const chats = await Promise.all(
-    testData.chats.map(async (chat) => (await createChat(chat.name))!)
+    testData.chats.map(
+      async (chat) => (await createChat(chat.name, dbgroupImage.id))!
+    )
   );
 
   // For each chat, create new chatMembers, and push them into the `chatMembers` list.

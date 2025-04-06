@@ -3,8 +3,9 @@ import { PlatformService } from '@/services/platform.service';
 import { Component, Output, EventEmitter, inject, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DeviceInfo } from '@capacitor/device';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, lastValueFrom, map } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
+import { ImgService } from '@/services/img.service';
 @Component({
   selector: 'app-header',
   imports: [MatIconModule, AsyncPipe],
@@ -34,7 +35,7 @@ export class HeaderComponent {
     this.platform = this.platformService.info;
   }
 
-  openDetails() {
+  async openDetails() {
     if (this.state == 'closed') {
       this.state = 'open';
     } else {

@@ -14,17 +14,17 @@ import { toPublicChat } from "@/db/public";
 const chatRouter = Router();
 chatRouter.post(
   "/create",
-  validateRequiredFields(["name", "key"]),
+  validateRequiredFields(["name", "key", "chatImgId"]),
   createNewChat
 );
 
 export default chatRouter;
 
 async function createNewChat(req: Request, res: Response) {
-  const { name, key } = req.body;
+  const { name, key, chatImgId } = req.body;
 
   try {
-    const chat = await createChat(name);
+    const chat = await createChat(name, chatImgId);
 
     if (!name) {
       res.status(400).json("No chat name was provided");
