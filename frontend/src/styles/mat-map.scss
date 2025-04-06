@@ -157,7 +157,6 @@ $mat-sys-corner-extra-large: var(--mat-sys-corner-extra-large);
 $mat-sys-corner-extra-large-top: var(--mat-sys-corner-extra-large-top);
 $mat-sys-corner-extra-small: var(--mat-sys-corner-extra-small);
 $mat-sys-corner-extra-small-top: var(--mat-sys-corner-extra-small-top);
-$mat-sys-corner-full: var(--mat-sys-corner-full);
 $mat-sys-corner-large: var(--mat-sys-corner-large);
 $mat-sys-corner-large-end: var(--mat-sys-corner-large-end);
 $mat-sys-corner-large-start: var(--mat-sys-corner-large-start);
@@ -166,6 +165,7 @@ $mat-sys-corner-medium: var(--mat-sys-corner-medium);
 $mat-sys-corner-none: var(--mat-sys-corner-none);
 $mat-sys-corner-small: var(--mat-sys-corner-small);
 
+$mat-sys-corner-full: $mat-sys-corner-medium;
 //------
 
 $mat-sys-background: var(--mat-sys-background);
