@@ -9,6 +9,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { DeviceInfo } from '@capacitor/device';
+import { TabHeaderComponent } from '../../components/tab-header/tab-header.component';
 
 @Component({
   selector: 'app-add',
@@ -18,6 +19,7 @@ import { DeviceInfo } from '@capacitor/device';
     MatDividerModule,
     MatButtonModule,
     MatIcon,
+    TabHeaderComponent,
     FormsModule,
   ],
   templateUrl: './add.component.html',
@@ -68,7 +70,6 @@ export class AddComponent {
     }
 
     const res = await this.inviteService.sendJoinRequest(v);
-    console.log(res);
   }
 
   async onCreate() {
@@ -78,6 +79,5 @@ export class AddComponent {
     }
 
     const res = await this.inviteService.createChatRequest(v);
-    console.log(res);
   }
 }

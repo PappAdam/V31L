@@ -26,16 +26,7 @@ export class HeaderComponent {
   protected messageService = inject(MessageService);
 
   chats$ = this.messageService.chats$;
-  selectedChatId$ = this.messageService.selectedChatId$;
-
-  selectedChat$: Observable<Chat | undefined> = combineLatest([
-    this.chats$,
-    this.selectedChatId$,
-  ]).pipe(
-    map(
-      ([chats, id]) => chats.find((chat) => chat.id === id) // ✅ Implicit return
-    )
-  );
+  selectedChat$ = this.messageService.selectedChat$;
 
   ctor() {
     this.platform = this.platformService.info;

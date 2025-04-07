@@ -19,7 +19,7 @@ import { MessageService } from './message.service';
   providedIn: 'root',
 })
 export class InviteService {
-  baseUrl: string = 'http://192.168.50.15:3000/inv/';
+  baseUrl: string = 'http://localhost:3000/inv/';
   http = inject(HttpClient);
   enc = inject(EncryptionService);
   msg = inject(MessageService);

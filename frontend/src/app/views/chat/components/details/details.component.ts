@@ -30,8 +30,6 @@ GroupMemberCardComponent;
     MatDividerModule,
     AsyncPipe,
     MessageComponent,
-    MatTab,
-    MatTabGroup,
     QRcodeComponent,
   ],
   templateUrl: './details.component.html',

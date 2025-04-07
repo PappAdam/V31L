@@ -50,7 +50,7 @@ async function createNewChat(req: Request, res: Response) {
       throw Error("chat is not convertable");
     }
 
-    ServerPackageSender.send([client?.ws], {
+    ServerPackageSender.send([client.ws], {
       header: "Chats",
       chats: [publicChat],
     });

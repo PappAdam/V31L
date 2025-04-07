@@ -29,8 +29,7 @@ export type Chat = Omit<
 })
 export class MessageService {
   socketService = inject(SocketService);
-  encryptionService = inject(FalseEncryptionService);
-  invitationService = inject(InviteService);
+  encryptionService = inject(EncryptionService);
 
   private _chats$ = new BehaviorSubject<Chat[]>([]);
   get chats$(): Observable<Chat[]> {
@@ -77,7 +76,6 @@ export class MessageService {
   }
 
   selectedChat$ = combineLatest([this.chats$, this.selectedChatId$]).pipe(
-    filter(([chats, id]) => chats.length > 0),
     map(([chats, id]) => chats.find((chat) => chat.id === id)!)
   );
 
@@ -96,7 +94,9 @@ export class MessageService {
       })
     ),
     this.selectedChat$.pipe(
-      tap((chat) => this.getPinnedMessages(chat.id)),
+      tap((chat) => {
+        if (chat) this.getPinnedMessages(chat.id);
+      }),
       map(() => [])
     )
   );
@@ -135,7 +135,9 @@ export class MessageService {
   }
 
   leaveChat(chatId: string) {
-    this.socketService.createPackage({ header: 'LeaveChat', chatId });
+    this.socketService.createPackage({ header: 'LeaveChat', chatId }, () => {
+      this._selectedChatId$.next('');
+    });
   }
 
   onChatsPackageRecieved = async (pkg: ServerChatsPackage) => {
@@ -147,7 +149,6 @@ export class MessageService {
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
         if (rawChatContent.encryptedChatKey) {
-          console.log(rawChatContent.encryptedChatKey);
           const chatKey = await this.encryptionService.unwrapKey(
             rawChatContent.encryptedChatKey,
             this.encryptionService.privateKey

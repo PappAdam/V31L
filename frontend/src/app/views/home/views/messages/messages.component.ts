@@ -22,14 +22,7 @@ import { Router } from '@angular/router';
 import { Chat } from '@/services/message.service';
 @Component({
   selector: 'app-messages',
-  imports: [
-    ChatCardComponent,
-    DirectsComponent,
-    SearchBarComponent,
-    GroupsComponent,
-    MatTabsModule,
-    AsyncPipe,
-  ],
+  imports: [ChatCardComponent, SearchBarComponent, MatTabsModule, AsyncPipe],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })

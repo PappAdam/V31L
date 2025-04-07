@@ -13,7 +13,7 @@ import {
   providedIn: 'root',
 })
 export class AuthService {
-  baseUrl: string = 'http://192.168.50.15:3000/auth/';
+  baseUrl: string = 'http://localhost:3000/auth/';
 
   private _user$: BehaviorSubject<StoredUser | null> =
     new BehaviorSubject<StoredUser | null>(null);
