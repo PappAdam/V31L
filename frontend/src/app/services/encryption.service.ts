@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { EncryptedMessage, PublicMessage } from '@common';
+import { StoredUser } from './auth.service';
 
 export type Message = Omit<PublicMessage, 'encryptedData'> & {
   content: string;
@@ -11,23 +12,26 @@ export type Message = Omit<PublicMessage, 'encryptedData'> & {
 export class EncryptionService {
   encoder = new TextEncoder();
   decoder = new TextDecoder();
-  globalKey!: CryptoKey;
-  constructor() {
-    // TODO GLOBAL KEY SHOULD NOT BE USED
-    crypto.subtle
-      .importKey('raw', new Uint8Array(32), { name: 'AES-GCM' }, true, [
-        'encrypt',
-        'decrypt',
-      ])
-      .then(async (key) => {
-        this.globalKey = key;
-        let raw = await crypto.subtle.exportKey('raw', key);
+  privateKey!: CryptoKey;
+  user: StoredUser;
 
-        console.warn(
-          'GLOBAL KEY IS BEING USED FOR DEVELOPMENT!\nDEV KEY: ',
-          new Uint8Array(raw, 0, 32).toString()
-        );
-      });
+  constructor() {
+    const rawUser = localStorage.getItem('user');
+    this.user = JSON.parse(rawUser!);
+    const encodedUserName = this.encoder.encode(this.user.username);
+
+    crypto.subtle
+      .digest('SHA-256', encodedUserName)
+      .then(
+        async (key) =>
+          (this.privateKey = await crypto.subtle.importKey(
+            'raw',
+            key,
+            { name: 'AES-KW' },
+            true,
+            ['wrapKey', 'unwrapKey']
+          ))
+      );
   }
 
   async encryptText(key: CryptoKey, text: string): Promise<EncryptedMessage> {
@@ -79,7 +83,7 @@ export class EncryptionService {
     wrappedKey: Uint8Array,
     masterKey: CryptoKey
   ): Promise<CryptoKey> {
-    return crypto.subtle.unwrapKey(
+    const unwrapped = await crypto.subtle.unwrapKey(
       'raw',
       wrappedKey,
       masterKey,
@@ -88,5 +92,7 @@ export class EncryptionService {
       true,
       ['encrypt', 'decrypt']
     );
+
+    return unwrapped;
   }
 }

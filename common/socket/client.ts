@@ -5,7 +5,9 @@ export type ClientPackageDescription =
   | ClientNewMessagePackage
   | ClientBodyLessPackage
   | ClientGetChatsPackage
-  | ClientGetMessagesPackage;
+  | ClientGetMessagesPackage
+  | ClientPinMessagePackage
+  | ClientLeaveChatPackage;
 
 export type ClientPackage = ClientPackageDescription & { id: string };
 
@@ -44,8 +46,20 @@ export type ClientGetMessagesPackage = {
   header: "GetChatMessages";
   messageCount: number;
   chatId: string;
+  pinnedOnly?: boolean;
   /**
    * MessageId used as cursor if paging is needed
    */
   fromId?: string;
+};
+
+export type ClientPinMessagePackage = {
+  header: "PinMessage";
+  messageId: string;
+  pinState: boolean;
+};
+
+export type ClientLeaveChatPackage = {
+  header: "LeaveChat";
+  chatId: string;
 };

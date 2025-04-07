@@ -4,8 +4,12 @@ import {
   PublicMessage,
   ServerChatsPackage,
 } from "@common";
-import { findChatMembersByChat } from "../db/chatMember";
-import { createMessage, findChatMessages } from "../db/message";
+import { deleteChatMember, findChatMembersByChat } from "../db/chatMember";
+import {
+  createMessage,
+  findChatMessages,
+  updateMessageById,
+} from "../db/message";
 import { extractUserIdFromToken } from "@/http/middlewares/validate";
 import { Client } from "./client";
 import ServerPackageSender from "./server";
@@ -75,8 +79,10 @@ async function processBasedOnHeader(
                 user: client.user,
                 encryptedData: incoming.messageContent,
                 timeStamp: createdMessage.timeStamp,
+                pinned: createdMessage.pinned,
               },
             ],
+            users: [],
           },
         ],
       };
@@ -96,7 +102,7 @@ async function processBasedOnHeader(
       return true;
 
     case "GetChats":
-      const chats = await getPublicChatsWithMessages(
+      const chats: PublicChat[] = await getPublicChatsWithMessages(
         client.user.id,
         incoming.chatCount,
         incoming.messageCount
@@ -112,7 +118,7 @@ async function processBasedOnHeader(
 
       ServerPackageSender.send([client.ws], {
         header: "Chats",
-        chats: chats,
+        chats,
       });
       return true;
 
@@ -121,21 +127,51 @@ async function processBasedOnHeader(
         await findChatMessages(
           incoming.chatId,
           incoming.messageCount,
+          incoming.pinnedOnly,
           incoming.fromId
         )
       ).map(toPublicMessage);
 
-      var responsePayload: PublicChat = {
+      var publicChat: PublicChat = {
         id: incoming.chatId,
         encryptedMessages: messages,
+        users: [],
       };
 
-      ServerPackageSender.send([client.ws], {
-        header: "Chats",
-        chats: [responsePayload],
-      });
+      if (incoming.pinnedOnly) {
+        ServerPackageSender.send([client.ws], {
+          header: "PinnedMessages",
+          messages,
+        });
+      } else {
+        ServerPackageSender.send([client.ws], {
+          header: "Chats",
+          chats: [publicChat],
+        });
+      }
 
       return true;
+
+    case "PinMessage":
+      const message = await updateMessageById({
+        id: incoming.messageId,
+        pinned: incoming.pinState,
+      });
+
+      return !!message;
+
+    case "LeaveChat":
+      const deletedChatMember = await deleteChatMember(
+        client.user.id,
+        incoming.chatId
+      );
+
+      ServerPackageSender.send([client.ws], {
+        header: "LeaveChat",
+        chatId: incoming.chatId,
+      });
+
+      return !!deletedChatMember;
 
     default:
       console.error(

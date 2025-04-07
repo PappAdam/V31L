@@ -1,3 +1,4 @@
+import { Message } from '@/services/encryption.service';
 import { Component, Input } from '@angular/core';
 
 @Component({
@@ -8,8 +9,8 @@ import { Component, Input } from '@angular/core';
 })
 export class ChatCardComponent {
   @Input() unread: string = '0';
-  @Input({ required: true }) name: string = '';
-  @Input({ required: true }) last_msg: string = '';
+  @Input() name: string = '';
+  @Input() lastMsg?: Message;
   @Input() status: string = '';
   @Input() selected: boolean = false;
 }

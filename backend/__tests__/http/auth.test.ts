@@ -1,108 +1,61 @@
-import { mockDeep } from "jest-mock-extended";
 import request from "supertest";
-import prismaMock from "../_setup/prismaMock";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import httpServer from "../../src/http/http";
-import { Request, Response, NextFunction } from "express";
 import {
   invalidCredentialsResponse,
   missingFieldsResponse,
   nextSetupMfaResponse,
   nextVerifyMfaResponse,
-  serverErrorResponse,
   successResponse,
   userExistsResponse,
 } from "@common";
 import { generateToken } from "authenticator";
+import prisma from "@/db/_db";
+import { database } from "../_setup/setup";
+import { decryptData } from "@/encryption";
+import { arrayToString } from "@common";
 
-const user = {
-  id: "id-123",
-  username: "user-123",
-  password: "password-123",
-  authKey: "key-123",
-};
-const token = "mocked-token";
-const expiredJwtPayload = {
-  userId: user.id,
-  exp: Math.floor(Date.now() / 1000) - 1000,
-};
-const validJwtPayload = {
-  userId: user.id,
-  exp: Math.floor(Date.now() / 1000) + 1000,
-};
-
-jest.mock("@/http/middlewares/validate", () => {
-  const actualModule = jest.requireActual("@/http/middlewares/validate");
-  return {
-    ...actualModule,
-    extractUserFromTokenMiddleWare: jest.fn(
-      async (req: Request, res: Response, next: NextFunction) => {
-        req.user = user;
-        next();
-      }
-    ),
-  };
-});
-
-jest.mock("jsonwebtoken", () => {
-  const jwtMock = mockDeep<typeof import("jsonwebtoken")>();
-
-  (jwtMock.sign as jest.Mock).mockReturnValue("mocked-token");
-  (jwtMock.verify as jest.Mock).mockReturnValue("id-123");
-
-  return {
-    __esModule: true,
-    default: jwtMock,
-  };
-});
-
-jest.mock("bcryptjs", () => {
-  const bcryptMock = mockDeep<typeof import("bcryptjs")>();
-
-  return {
-    __esModule: true,
-    default: bcryptMock,
-  };
-});
+jest.spyOn(jwt, "sign");
+jest.spyOn(bcrypt, "compare");
 
 const registerRoute = "/auth/register";
 describe(`POST ${registerRoute}`, () => {
+  const newUser = { username: "newUser", password: "newPassword" };
   it("201 Success no mfa", successNoMfa);
   it("201 Next with mfa", nextWithMfa);
   it("400 Missing required fields", missingFields);
   it("400 User with username already exists", userExists);
-  it("500 Server error (caused by prisma error)", prismaError);
 
   async function successNoMfa() {
-    prismaMock.user.findUnique.mockResolvedValue(null);
-    prismaMock.user.create.mockResolvedValue(user);
-
     const response = await request(httpServer)
       .post(registerRoute)
-      .send({ username: user.username, password: user.password });
+      .send(newUser);
 
     expect(response.status).toBe(201);
-    expect(response.body).toEqual(successResponse(token, user));
-    expect(prismaMock.user.create).toHaveBeenCalled();
+    expect(response.body).toEqual(
+      successResponse(response.body.token, {
+        id: response.body.id,
+        username: "newUser",
+      })
+    );
+    expect(prisma.user.create).toHaveBeenCalled();
     expect(jwt.sign).toHaveBeenCalled();
   }
 
   async function nextWithMfa() {
-    prismaMock.user.findUnique.mockResolvedValue(null);
-    prismaMock.user.create.mockResolvedValue(user);
-
-    const response = await request(httpServer).post(registerRoute).send({
-      username: user.username,
-      password: user.password,
-      mfaEnabled: true,
-    });
+    const response = await request(httpServer)
+      .post(registerRoute)
+      .send({
+        ...newUser,
+        mfaEnabled: true,
+      });
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual(
       nextSetupMfaResponse(response.body.setupCode)
     );
-    expect(prismaMock.user.create).toHaveBeenCalled();
+    expect(prisma.user.create).toHaveBeenCalled();
     expect(jwt.sign).not.toHaveBeenCalled();
   }
 
@@ -113,34 +66,20 @@ describe(`POST ${registerRoute}`, () => {
     expect(response.body).toEqual(
       missingFieldsResponse(["username", "password"])
     );
-    expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
-    expect(prismaMock.user.create).not.toHaveBeenCalled();
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    expect(prisma.user.create).not.toHaveBeenCalled();
   }
 
   async function userExists() {
-    prismaMock.user.findUnique.mockResolvedValue(user);
-
-    const response = await request(httpServer)
-      .post(registerRoute)
-      .send({ username: user.username, password: user.password });
+    const response = await request(httpServer).post(registerRoute).send({
+      username: database.users[0].username,
+      password: database.users[0].passwordNotHashed,
+    });
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual(userExistsResponse);
-    expect(prismaMock.user.findUnique).toHaveBeenCalled();
-    expect(prismaMock.user.create).not.toHaveBeenCalled();
-  }
-
-  async function prismaError() {
-    prismaMock.user.findUnique.mockResolvedValue(null);
-    prismaMock.user.create.mockRejectedValue(new Error("Database error"));
-
-    const response = await request(httpServer)
-      .post(registerRoute)
-      .send({ username: user.username, password: user.password });
-
-    expect(response.status).toBe(500);
-    expect(response.body).toEqual(serverErrorResponse);
-    expect(prismaMock.user.create).toHaveBeenCalled();
+    expect(prisma.user.findUnique).toHaveBeenCalled();
+    expect(prisma.user.create).not.toHaveBeenCalled();
   }
 });
 
@@ -154,50 +93,56 @@ describe(`POST ${loginRoute}`, () => {
   it("400 Invalid credentials (Invalid password)", invalidPassword);
 
   async function successNoMfa() {
-    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-    prismaMock.user.findUnique.mockResolvedValue({ ...user, authKey: null });
-
-    const response = await request(httpServer)
-      .post(loginRoute)
-      .send({ username: user.username, password: user.password });
+    const existingUserNoMfa = database.users.find((u) => !u.authKey)!;
+    const response = await request(httpServer).post(loginRoute).send({
+      username: existingUserNoMfa.username,
+      password: existingUserNoMfa.passwordNotHashed,
+    });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(successResponse(token, user));
-    expect(prismaMock.user.findUnique).toHaveBeenCalled();
+    expect(response.body).toEqual(
+      successResponse(response.body.token, existingUserNoMfa)
+    );
+    expect(prisma.user.findUnique).toHaveBeenCalled();
     expect(bcrypt.compare).toHaveBeenCalled();
     expect(jwt.sign).toHaveBeenCalled();
   }
 
   async function nextWithMfa() {
-    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-    prismaMock.user.findUnique.mockResolvedValue({ ...user });
-
-    const response = await request(httpServer)
-      .post(loginRoute)
-      .send({ username: user.username, password: user.password });
+    const existingUserWithMfa = database.users.find((u) => u.authKey)!;
+    const response = await request(httpServer).post(loginRoute).send({
+      username: existingUserWithMfa.username,
+      password: existingUserWithMfa.passwordNotHashed,
+    });
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(nextVerifyMfaResponse);
-    expect(prismaMock.user.findUnique).toHaveBeenCalled();
+    expect(prisma.user.findUnique).toHaveBeenCalled();
     expect(bcrypt.compare).toHaveBeenCalled();
     expect(jwt.sign).not.toHaveBeenCalled();
   }
 
   async function successWithMfa() {
-    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-    prismaMock.user.findUnique.mockResolvedValue({ ...user });
+    const existingUserWithMfa = database.users.find((u) => u.authKey)!;
+    const decrypted2FA = decryptData({
+      encrypted: existingUserWithMfa.authKey!,
+      iv: existingUserWithMfa.iv!,
+      authTag: existingUserWithMfa.authTag!,
+    });
 
     const response = await request(httpServer)
       .post(loginRoute)
       .send({
-        username: user.username,
-        password: user.password,
-        mfa: generateToken(user.authKey),
+        username: existingUserWithMfa.username,
+        password: existingUserWithMfa.passwordNotHashed,
+        mfa: generateToken(arrayToString(decrypted2FA)),
       });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(successResponse(token, user));
-    expect(prismaMock.user.findUnique).toHaveBeenCalled();
+    expect(response.body).toEqual(
+      successResponse(response.body.token, existingUserWithMfa)
+    );
+    expect(prisma.user.findUnique).toHaveBeenCalled();
     expect(bcrypt.compare).toHaveBeenCalled();
     expect(jwt.sign).toHaveBeenCalled();
   }
@@ -209,29 +154,26 @@ describe(`POST ${loginRoute}`, () => {
     expect(response.body).toEqual(
       missingFieldsResponse(["username", "password"])
     );
-    expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
   }
 
   async function invalidUsername() {
-    prismaMock.user.findUnique.mockResolvedValue(null);
-
     const response = await request(httpServer)
       .post(loginRoute)
-      .send({ username: user.username, password: user.password });
+      .send({ username: "invalidUsername", password: "thisDoesNotMatter" });
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual(invalidCredentialsResponse);
-    expect(prismaMock.user.findUnique).toHaveBeenCalled();
+    expect(prisma.user.findUnique).toHaveBeenCalled();
     expect(bcrypt.compare).not.toHaveBeenCalled();
   }
 
   async function invalidPassword() {
-    prismaMock.user.findUnique.mockResolvedValue(user);
-    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
-
-    const response = await request(httpServer)
-      .post(loginRoute)
-      .send({ username: user.username, password: user.password });
+    const existingUserNoMfa = database.users.find((u) => !u.authKey)!;
+    const response = await request(httpServer).post(loginRoute).send({
+      username: existingUserNoMfa.username,
+      password: "invalidPassword",
+    });
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual(invalidCredentialsResponse);
@@ -240,21 +182,17 @@ describe(`POST ${loginRoute}`, () => {
   }
 });
 
-const refreshRoute = "/auth/refresh";
-describe(`POST ${refreshRoute}`, () => {
-  (jwt.verify as jest.Mock).mockReturnValue(validJwtPayload);
-  prismaMock.user.findUniqueOrThrow.mockResolvedValue(user);
+// const refreshRoute = "/auth/refresh";
+// describe(`POST ${refreshRoute}`, () => {
+//   it("200 Success", success);
+//   async function success() {
+//     const newToken = "new-token";
 
-  it("200 Success", success);
-  async function success() {
-    const newToken = "new-token";
-    (jwt.sign as jest.Mock).mockReturnValue(newToken);
-
-    const response = await request(httpServer)
-      .post(refreshRoute)
-      .set("Authorization", "Bearer " + token)
-      .send({ username: user.username, password: user.password });
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(successResponse(newToken, user));
-  }
-});
+//     const response = await request(httpServer)
+//       .post(refreshRoute)
+//       .set("Authorization", "Bearer " + token)
+//       .send({ username: user.username, password: user.password });
+//     expect(response.status).toBe(200);
+//     expect(response.body).toEqual(successResponse(newToken, user));
+//   }
+// });

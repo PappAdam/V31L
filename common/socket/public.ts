@@ -7,12 +7,14 @@ export type PublicMessage = {
   id: string;
   user: PublicUser;
   timeStamp: Date;
+  pinned: boolean;
   encryptedData: EncryptedMessage;
 };
 
 export type PublicChat = {
   id: string;
   name?: string;
+  users: PublicUser[];
   encryptedMessages: PublicMessage[];
   encryptedChatKey?: Uint8Array;
 };

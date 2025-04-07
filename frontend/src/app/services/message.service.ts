@@ -1,6 +1,16 @@
 import { inject, Injectable } from '@angular/core';
 import { SocketService } from './socket.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  filter,
+  find,
+  map,
+  merge,
+  Observable,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { PublicChat, PublicMessage, ServerChatsPackage } from '@common';
 import { EncryptionService, Message } from './encryption.service';
 import { InviteService } from './invite.service';
@@ -32,39 +42,68 @@ export class MessageService {
     return this._selectedChatId$.asObservable();
   }
 
-  currentSelectedChatId(): string {
+  get selectedChatId(): string {
     return this._selectedChatId$.getValue();
   }
-
-  set selectedChatId(index: string) {
-    this._selectedChatId$.next(index);
-  }
-
-  constructor() {
-    this.socketService
-      .addPackageListener('Chats')
-      .subscribe(this.onChatsPackageRecieved);
-
-    this.socketService.authorized$.subscribe((authorized) => {
+  //#region Subscriptions - These subscriptions modify the _chats$ BehaviorSubject, they just show up as unused varibles, don't remove them.
+  private loadOnAuthozition = this.socketService.authorized$.subscribe(
+    (authorized) => {
+      this._chats$.next([]);
       if (authorized) {
-        this._chats$.next([]);
         this.socketService.createPackage({
           header: 'GetChats',
           chatCount: 10,
           messageCount: 20,
         });
       }
-    });
+    }
+  );
+
+  private chatsPackageSubscription = this.socketService
+    .addPackageListener('Chats')
+    .subscribe((p) => this.onChatsPackageRecieved(p));
+
+  private removeChatSubscription = this.socketService
+    .addPackageListener('LeaveChat')
+    .subscribe((p) =>
+      this._chats$.next(
+        this._chats$.value.filter((chat) => chat.id != p.chatId)
+      )
+    );
+  //#endregion
+
+  set selectedChatId(index: string) {
+    this._selectedChatId$.next(index);
   }
 
-  lastMessage(chatId: string): Message | null {
-    const chat = this._chats$.value.find((c) => c.id === chatId);
-    return chat?.messages[chat.messages.length - 1] || null;
+  selectedChat$ = combineLatest([this.chats$, this.selectedChatId$]).pipe(
+    filter(([chats, id]) => chats.length > 0),
+    map(([chats, id]) => chats.find((chat) => chat.id === id)!)
+  );
+
+  get selectedChat() {
+    return this._chats$.value.find((chat) => chat.id === this.selectedChatId)!;
   }
+
+  pinnedMessages$: Observable<Message[]> = merge(
+    this.socketService.addPackageListener('PinnedMessages').pipe(
+      switchMap((pkg) => {
+        const messages = this.decryptMessages(
+          pkg.messages,
+          this.selectedChat.chatKey
+        );
+        return messages;
+      })
+    ),
+    this.selectedChat$.pipe(
+      tap((chat) => this.getPinnedMessages(chat.id)),
+      map(() => [])
+    )
+  );
 
   async sendMessage(chatId: string, message: string) {
     const encrypted = await this.encryptionService.encryptText(
-      this._chats$.value.find((c) => c.id == this.selectedChatId)?.chatKey,
+      this.selectedChat.chatKey,
       message
     );
 
@@ -75,26 +114,46 @@ export class MessageService {
     });
   }
 
-  onChatsPackageRecieved = async (chatsPackage: ServerChatsPackage) => {
-    chatsPackage.chats.forEach(async (rawChatContent) => {
+  pinMessage(messageId: string, pinState: boolean) {
+    const chatId = this.selectedChat.id;
+    this.socketService.createPackage(
+      { header: 'PinMessage', messageId, pinState },
+      () => {
+        // Selected chat could change before acknowledgement, chatId must be determined outside the callback.
+        this.getPinnedMessages(chatId);
+      }
+    );
+  }
+
+  getPinnedMessages(chatId: string) {
+    this.socketService.createPackage({
+      header: 'GetChatMessages',
+      messageCount: -1,
+      chatId,
+      pinnedOnly: true,
+    });
+  }
+
+  leaveChat(chatId: string) {
+    this.socketService.createPackage({ header: 'LeaveChat', chatId });
+  }
+
+  onChatsPackageRecieved = async (pkg: ServerChatsPackage) => {
+    pkg.chats.forEach(async (rawChatContent) => {
       let chatIndex = this._chats$.value.findIndex(
         (f) => f.id === rawChatContent.id
       );
 
-      const chatContext: Omit<Chat, 'chatKey' | 'messages'> = {
-        id: rawChatContent.id,
-        name: rawChatContent.name,
-      };
-
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
         if (rawChatContent.encryptedChatKey) {
+          console.log(rawChatContent.encryptedChatKey);
           const chatKey = await this.encryptionService.unwrapKey(
             rawChatContent.encryptedChatKey,
             this.encryptionService.privateKey
           );
           const chat = {
-            ...chatContext,
+            ...rawChatContent,
             chatKey,
             messages: [],
           };
@@ -106,25 +165,18 @@ export class MessageService {
         chatIndex = this._chats$.value.length - 1;
       }
 
-      const chatMessages: Message[] = await Promise.all(
-        rawChatContent.encryptedMessages.map(async (msg) => {
-          const messageContent = await this.encryptionService.decryptText(
-            this._chats$.value[chatIndex].chatKey,
-            msg.encryptedData
-          );
+      if (rawChatContent.encryptedMessages.length == 0) {
+        return;
+      }
 
-          return {
-            id: msg.id,
-            user: msg.user,
-            timeStamp: msg.timeStamp,
-            content: messageContent,
-          };
-        })
+      const chatMessages = await this.decryptMessages(
+        rawChatContent.encryptedMessages,
+        this._chats$.value[chatIndex].chatKey
       );
       if (
-        this.lastMessage(rawChatContent.id) &&
+        this.lastMessageOfChat(rawChatContent.id) &&
         rawChatContent.encryptedMessages[0].timeStamp >
-          this.lastMessage(rawChatContent.id)!.timeStamp
+          this.lastMessageOfChat(rawChatContent.id)!.timeStamp
       ) {
         this._chats$.value[chatIndex].messages = [
           ...this._chats$.value[chatIndex].messages,
@@ -138,4 +190,44 @@ export class MessageService {
       }
     });
   };
+
+  private async decryptMessages(
+    messages: PublicMessage[],
+    key: CryptoKey
+  ): Promise<Message[]> {
+    const chatMessages: Message[] = await Promise.all(
+      messages.map(async (msg) => {
+        const messageContent = await this.encryptionService.decryptText(
+          key,
+          msg.encryptedData
+        );
+
+        return {
+          ...msg,
+          content: messageContent,
+        };
+      })
+    );
+
+    return chatMessages;
+  }
+
+  lastMessageOfChat(chatId: string): Message | null {
+    const chat = this._chats$.value.find((c) => c.id === chatId);
+    return chat?.messages[chat.messages.length - 1] || null;
+  }
+
+  scrollLoadMessages(chatId: string) {
+    const chat = this._chats$.value.find((c) => c.id === chatId);
+    if (!chat) {
+      return;
+    }
+
+    this.socketService.createPackage({
+      header: 'GetChatMessages',
+      chatId: chat.id,
+      messageCount: 10,
+      fromId: chat.messages[0].id,
+    });
+  }
 }

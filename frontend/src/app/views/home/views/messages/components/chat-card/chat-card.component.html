@@ -11,7 +11,9 @@
       </p>
     </div>
     <div class="last-msg-wrapper">
-      <p class="last-msg" [attr.data-unread]="unread">{{ last_msg }}</p>
+      <p class="last-msg" [attr.data-unread]="unread">
+        {{ lastMsg?.content }}
+      </p>
     </div>
   </div>
   <div class="info-wrapper">

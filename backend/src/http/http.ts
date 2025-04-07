@@ -8,6 +8,7 @@ import authRouter from "@/http/auth";
 import logRouter from "@/http/log";
 import invRouter from "@/http/invitation";
 import { extractUserFromTokenMiddleWare } from "@/http/middlewares/validate";
+import chatRouter from "./chat";
 
 const httpServer = express();
 httpServer.use(cors());
@@ -33,5 +34,6 @@ const protectedRoutes = httpServer.use(extractUserFromTokenMiddleWare);
 
 protectedRoutes.use("/log", logRouter);
 protectedRoutes.use("/inv", invRouter);
+protectedRoutes.use("/chat", chatRouter);
 
 export default httpServer;

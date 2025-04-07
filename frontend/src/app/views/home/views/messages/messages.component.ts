@@ -53,10 +53,6 @@ export class MessagesComponent {
     )
   );
 
-  selectedChat$ = combineLatest([this.chats$, this.selectedChatId$]).pipe(
-    map(([chats, id]) => chats.find((chat) => chat.id === id))
-  );
-
   constructor(private router: Router) {}
 
   navToChat(id: string) {

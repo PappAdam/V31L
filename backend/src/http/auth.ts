@@ -19,11 +19,8 @@ import {
 } from "@common";
 import { User } from "@prisma/client";
 import { generateTotpUri, verifyToken } from "authenticator";
-import { decryptData } from "@/utils/encryption";
-import {
-  arrayToString,
-  arrayToString as charCodeArrayToString,
-} from "@/utils/buffers";
+import { decryptData } from "@/encryption";
+import { arrayToString } from "@common";
 
 const authRouter = Router();
 authRouter.post(
@@ -82,8 +79,6 @@ async function registerUser(req: Request, res: Response) {
         30
       );
 
-      console.log(setupCode);
-
       res.status(201).json(nextSetupMfaResponse(setupCode));
       return;
     }
@@ -126,15 +121,15 @@ async function loginUser(req: Request, res: Response) {
     }
 
     if (user.authKey) {
+      if (!mfa) {
+        res.json(nextVerifyMfaResponse);
+        return;
+      }
       const decrypted2FA = decryptData({
         encrypted: user.authKey!,
         iv: user.iv!,
         authTag: user.authTag!,
       });
-      if (!mfa) {
-        res.json(nextVerifyMfaResponse);
-        return;
-      }
       const verifyResult = verifyToken(arrayToString(decrypted2FA), mfa);
       if (!verifyResult) {
         res.status(400).json(invalidCredentialsResponse);
@@ -169,5 +164,5 @@ async function refreshToken(req: Request, res: Response) {
  * @returns The generated JWT token
  */
 export const generateToken = (userId: string): string => {
-  return jwt.sign({ userId }, "your_secret_key", { expiresIn: "1h" });
+  return jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: "1h" });
 };

@@ -2,8 +2,8 @@ import bcrypt from "bcryptjs";
 import { User } from "@prisma/client";
 import prisma from "./_db";
 import authenticator from "authenticator";
-import { decryptData, encryptData } from "@/utils/encryption";
-import { arrayToString } from "@/utils/buffers";
+import { decryptData, encryptData } from "@/encryption";
+import { arrayToString } from "@common";
 
 /**
  * Creates a new user.

@@ -4,12 +4,14 @@ export type InviteSuccess = (CreateSuccess | JoinSuccess) & {
   result: "Success";
 };
 
-type CreateSuccess = {
+export type CreateSuccess = {
+  result: "Success";
   type: "Create";
   invId: string;
 };
 
-type JoinSuccess = {
+export type JoinSuccess = {
+  result: "Success";
   type: "Join";
   chatId: string;
 };
@@ -40,5 +42,5 @@ export const invitationJoinSuccessResponse = (
 
 export const invitationInvalidResponse: InviteError = {
   result: "Error",
-  message: "Non-existent User-Chat pair",
+  message: "Invalid Invitation",
 };

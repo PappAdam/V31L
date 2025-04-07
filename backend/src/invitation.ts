@@ -1,5 +1,3 @@
-import { randomUUID, createHmac } from "crypto";
-
 const Invitations: Invitation[] = [];
 
 export class Invitation {
@@ -13,9 +11,17 @@ export class Invitation {
     this.createdAt = Date.now();
     this.expireTime = expireTime;
     this.chatId = chatId;
+    setTimeout(this.remove, 10);
 
     Invitations.push(this);
   }
+
+  remove = () => {
+    const index = Invitations.findIndex((inv) => inv.id == this.id);
+    if (index) {
+      Invitations.splice(index, 1);
+    }
+  };
 }
 
 export function validateChatJoinRequest(incomingID: string): Invitation | null {

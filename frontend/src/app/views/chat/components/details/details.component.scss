@@ -31,33 +31,54 @@
     flex-direction: column;
     flex-shrink: 0;
 
-    .group-header-wrapper {
-      width: 100%;
-      display: flex;
-      align-items: flex-end;
-      justify-content: flex-start;
-      flex-direction: column;
-
-      .image-wrapper {
-        width: 100%;
-        height: calc(2.5 * $mat-sys-img-profile-extra-large);
-        background-color: $mat-sys-primary-container;
-        border-radius: $mat-sys-corner-small $mat-sys-corner-small 0 0;
-      }
-      .title-wrapper {
-        color: $mat-sys-on-surface;
-        height: fit-content;
-        width: 100%;
-        background-color: $mat-sys-surface-container-high;
-        padding: $mat-sys-spacing-sm;
-        border-radius: 0 0 $mat-sys-corner-small $mat-sys-corner-small;
-      }
-    }
-
     .group-action-wrapper {
       width: 100%;
       border-radius: $mat-sys-corner-small;
       background-color: $mat-sys-surface-container-high;
+
+      .inv-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        * {
+          width: 100%;
+        }
+
+        .inv-qr-code {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .inv-string-container {
+          background-color: $mat-sys-surface-variant;
+          border-radius: $mat-sys-corner-large;
+          padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
+          min-height: $mat-sys-img-profile-medium;
+          font: $mat-sys-body-medium-font;
+          font-size: $mat-sys-body-medium-size;
+          line-height: $mat-sys-body-medium-line-height;
+          letter-spacing: $mat-sys-body-medium-tracking;
+          height: fit-content;
+          flex-shrink: 1;
+          word-wrap: break-word;
+          margin: $mat-sys-spacing-sm;
+          margin-top: calc($mat-sys-spacing-sm * 2);
+
+          p {
+            word-wrap: wrap;
+            color: $mat-sys-on-surface-variant;
+            text-align: center;
+          }
+        }
+        button {
+          padding: $mat-sys-spacing-sm;
+          margin: $mat-sys-spacing-sm;
+        }
+      }
     }
 
     .group-members-wrapper {
@@ -68,7 +89,6 @@
       gap: $mat-sys-spacing-sm;
       flex-direction: column;
       padding: $mat-sys-spacing-sm;
-      height: 100%;
       overflow: scroll;
 
       &::-webkit-scrollbar {

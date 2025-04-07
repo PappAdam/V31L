@@ -1,22 +1,16 @@
 @if (this.platform?.platform == "web") {
 <div class="header-wrapper">
+  @if (this.selectedChat$ | async; as selectedChat) {
   <div class="title-wrapper">
     <div class="image"></div>
     <div class="title">
-      @if (this.selectedChat$ | async; as selectedChat) {
       {{ selectedChat.name }}
-      }
     </div>
   </div>
-
-  <button
-    class="details"
-    (click)="openDetails()"
-    mat-icon-button
-    aria-label="Example icon button with a vertical three dot icon"
-  >
-    <mat-icon>more_vert</mat-icon>
-  </button>
+  <div class="details" (click)="openDetails()">
+    <mat-icon fontIcon="more_vert"></mat-icon>
+  </div>
+  }
 </div>
 } @else {
 <div class="header-wrapper">

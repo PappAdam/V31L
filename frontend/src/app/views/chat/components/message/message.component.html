@@ -1,32 +1,43 @@
 <div
   class="message-wrapper"
-  [attr.data-sender]="sender"
-  [attr.data-first]="first"
+  [style.flexDirection]="
+    ownMessage && displayedIn == 'Chat' ? 'row' : 'row-reverse'
+  "
 >
-  <div class="message-bubble-wrapper" [attr.data-sender]="sender">
+  @if (displayedIn == "Chat") {
+  <div
+    class="message-options"
+    [class.has-text-above]="first && message.user.username"
+  >
     <div
-      class="profile-name-wrapper"
-      [attr.data-first]="first"
-      [attr.data-sender]="sender"
+      class="option pin"
+      [class.active]="message.pinned"
+      (click)="togglePinMessage()"
     >
-      {{ sender }}
-      <div class="profile-name"></div>
-    </div>
-    <div
-      class="message-bubble"
-      [attr.data-first]="first"
-      [attr.data-sender]="sender"
-    >
-      <p class="message">
-        {{ msg }}
-      </p>
+      <mat-icon fontIcon="push_pin"></mat-icon>
     </div>
   </div>
-  <div
-    class="message-profile-wrapper"
-    [attr.data-first]="first"
-    [attr.data-sender]="sender"
-  >
-    <div class="profile-image" [attr.data-first]="first"></div>
+  }
+  <div class="message-bubble-wrapper">
+    @if (first) {
+    <div class="profile-name">
+      {{
+        !ownMessage || displayedIn == "PinnedMessages"
+          ? message.user.username
+          : ""
+      }}
+    </div>
+    }
+    <div class="message-bubble">
+      {{ message.content }}
+    </div>
+  </div>
+  <div class="message-profile-wrapper">
+    @if (first) {
+    <div
+      class="profile-image"
+      [class.has-text-above]="message.user.username"
+    ></div>
+    }
   </div>
 </div>

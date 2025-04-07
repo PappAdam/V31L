@@ -6,18 +6,16 @@
     <app-chat-card
       (click)="messageService.selectedChatId = chat.id"
       name="{{ chat.name }}"
-      last_msg="{{ chat.messages?.[0]?.content || 'No messages yet' }}"
+      [lastMsg]="chat.messages[0]"
       unread=""
-      [selected]="
-        this.messageService.currentSelectedChatId() == chat.id ? true : false
-      "
+      [selected]="this.messageService.selectedChatId == chat.id ? true : false"
     ></app-chat-card>
     } } @else { @for (chat of filteredChats$ | async; track $index) {
 
     <app-chat-card
       (click)="navToChat(chat.id)"
       name="{{ chat.name }}"
-      last_msg="{{ chat.messages?.[0]?.content || 'No messages yet' }}"
+      [lastMsg]="chat.messages[0]"
       unread=""
     ></app-chat-card>
     } }

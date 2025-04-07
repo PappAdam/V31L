@@ -4,11 +4,14 @@ import {
   invitationInvalidResponse,
   invitationJoinSuccessResponse,
   serverErrorResponse,
+  stringToCharCodeArray,
 } from "@common";
 import { Invitation, validateChatJoinRequest } from "@/invitation";
-import { addUserToChat, findChatMember } from "@/db/chatMember";
+import { createChatMember, findChatMember } from "@/db/chatMember";
 import { validateRequiredFields } from "./middlewares/validate";
-import { stringToUint8Array } from "@/utils/buffers";
+import { toPublicChat } from "@/db/public";
+import ServerPackageSender from "@/socket/server";
+import { Client } from "@/socket/client";
 
 const invRouter = Router();
 invRouter.post("/create", validateRequiredFields(["chatId"]), createInvitation);
@@ -90,20 +93,37 @@ async function joinChat(req: Request, res: Response) {
       return;
     }
 
-    const unwrappedKey = stringToUint8Array(key);
+    const rawKey = stringToCharCodeArray(key, Uint8Array);
 
-    if (!unwrappedKey) {
+    if (!rawKey) {
       res.status(400).json("Bad key");
     }
 
-    const chatMember = await addUserToChat(
+    const chatMember = await createChatMember(
       req.user!.id,
       invitation.chatId,
-      unwrappedKey
+      rawKey
     );
+
     if (!chatMember) {
       throw Error("Failed to add user to chat");
     }
+
+    const user = req.user!;
+    let client = Client.withUser(user.id);
+    if (!client) {
+      throw Error("Client now available, possible disconnect.");
+    }
+
+    const publicChat = await toPublicChat(chatMember.chatId, rawKey);
+    if (!publicChat) {
+      throw Error("chat is not convertable");
+    }
+
+    ServerPackageSender.send([client?.ws], {
+      header: "Chats",
+      chats: [publicChat],
+    });
 
     res.status(201).json(invitationJoinSuccessResponse(chatMember.chatId));
   } catch (error) {
