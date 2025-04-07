@@ -94,6 +94,20 @@ export async function findUserById(userId: string): Promise<User | null> {
   }
 }
 
+export async function deleteUser(userId: string): Promise<User | null> {
+  try {
+    const deletedUser = await prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+    return deletedUser;
+  } catch (error) {
+    console.error("Error deleting user:\n", error);
+    return null;
+  }
+}
+
 export async function updateUser(
   user: Partial<User> & { id: string }
 ): Promise<User | null> {

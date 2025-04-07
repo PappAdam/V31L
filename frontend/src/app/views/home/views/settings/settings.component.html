@@ -12,18 +12,38 @@
   <mat-divider></mat-divider>
   <div class="options">
     <app-group-option-card type="expand" label="Edit Profile" fontIcon="edit">
-      <app-group-option-card label="Change Password"></app-group-option-card>
-      <app-group-option-card
-        label="Update Profile picture"
-      ></app-group-option-card>
+      <div class="edit-profile">
+        <app-group-option-card
+          label="Change Password"
+          fontIcon="password"
+        ></app-group-option-card>
+        <app-group-option-card
+          label="Update Profile picture"
+          fontIcon="account_circle"
+        ></app-group-option-card>
+      </div>
     </app-group-option-card>
     <app-group-option-card
       type="toggle"
       label="Two-factor authentication"
       fontIcon="lock"
+      (activated)="onToggleTwoFactor($event)"
+      [(isActivated)]="mfaToggleEnabled"
     >
     </app-group-option-card>
     <app-group-option-card label="Reset profile" fontIcon="change_circle">
+    </app-group-option-card>
+    <app-group-option-card
+      label="Delete profile"
+      fontIcon="delete"
+      (click)="onDeleteProfile()"
+    >
+    </app-group-option-card>
+    <app-group-option-card
+      label="Log out"
+      fontIcon="logout"
+      (click)="onLogout()"
+    >
     </app-group-option-card>
   </div>
 </div>

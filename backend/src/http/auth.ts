@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import {
   createUser,
+  deleteUser,
   findUserByName,
   updateUser,
   updateUserMfa,
@@ -21,6 +22,7 @@ import {
   AuthSuccessResponse,
   nextSetupMfaResponse,
   nextVerifyMfaResponse,
+  missingFieldsResponse,
 } from "@common";
 import { User } from "@prisma/client";
 import { generateTotpUri, verifyToken } from "authenticator";
@@ -52,6 +54,8 @@ authRouter.post(
   extractUserFromTokenMiddleWare,
   disableMfa
 );
+
+authRouter.delete("/", extractUserFromTokenMiddleWare, deleteProfile);
 export default authRouter;
 
 /**
@@ -265,5 +269,42 @@ async function disableMfa(req: Request, res: Response) {
   } catch (error) {
     res.status(500).json(serverErrorResponse);
     console.error("Error during mfa disable: \n", error);
+  }
+}
+
+async function deleteProfile(req: Request, res: Response) {
+  try {
+    const { mfa } = req.body;
+    const user = req.user as User;
+
+    if (!user.authKey) {
+      const deleted = await deleteUser(user.id);
+      if (!deleted) throw new Error("Error deleting user");
+      res.json({});
+      return;
+    }
+
+    if (!mfa) {
+      res.json(missingFieldsResponse(["mfa"]));
+      return;
+    }
+
+    const decrypted2FA = decryptData({
+      encrypted: user.authKey!,
+      iv: user.iv!,
+      authTag: user.authTag!,
+    });
+    const verifyResult = verifyToken(arrayToString(decrypted2FA), mfa);
+    if (!verifyResult) {
+      res.status(400).json(invalidCredentialsResponse);
+      return;
+    }
+
+    const deleted = await deleteUser(user.id);
+    if (!deleted) throw new Error("Error deleting user");
+    res.json({});
+  } catch (error) {
+    res.status(500).json(serverErrorResponse);
+    console.error("Error during account deletion: \n", error);
   }
 }

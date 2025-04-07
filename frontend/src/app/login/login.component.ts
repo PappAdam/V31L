@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, Inject, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -10,6 +10,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import {
+  MatDialogModule,
+  MatDialogRef,
+  MatDialog,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { QRcodeComponent } from '../qrcode/qrcode.component';
 
 @Component({
   selector: 'app-login',
@@ -27,6 +35,10 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
+
   protected loginForm = new FormGroup({
     username: new FormControl('', [
       Validators.required,
@@ -47,10 +59,17 @@ export class LoginComponent {
   protected showPassord = false;
   protected signIn = true;
 
-  constructor(private authService: AuthService, private router: Router) {}
-
   get promptText() {
     return this.signIn ? 'Sign In' : 'Sign Up';
+  }
+
+  constructor() {
+    const setupCode =
+      this.router.getCurrentNavigation()?.extras.state?.['setupCode'];
+
+    if (setupCode) {
+      this.openSetupDialog(setupCode);
+    }
   }
 
   async onSubmit(): Promise<void> {
@@ -80,12 +99,10 @@ export class LoginComponent {
       case 'Next':
         switch (response.to) {
           case 'Setup':
-            this.router.navigate([`/login/mfa/setup`], {
-              state: { setupCode: response.setupCode },
-            });
+            this.openSetupDialog(response.setupCode, username, password);
             return;
           case 'Verify':
-            this.router.navigate([`/login/mfa/verify`]);
+            this.openVerifyDialog(username, password);
             return;
         }
       case 'Error':
@@ -95,6 +112,43 @@ export class LoginComponent {
         );
         break;
     }
+  }
+
+  private openVerifyDialog(username: string, password: string): void {
+    this.dialog
+      .open(VerifyDialog, {
+        data: {
+          title: 'Two-Factor Authentication',
+          content: 'Please enter the code from your authenticator app',
+          username,
+          password,
+        },
+      })
+      .afterClosed()
+      .subscribe((success) => {
+        if (success) {
+          this.router.navigate(['/']);
+        }
+      });
+  }
+
+  private openSetupDialog(
+    setupCode: string,
+    username?: string,
+    password?: string
+  ): void {
+    this.dialog
+      .open(SetupDialog, {
+        data: { setupCode },
+      })
+      .afterClosed()
+      .subscribe((success) => {
+        if (success && username && password) {
+          this.openVerifyDialog(username, password);
+        } else if (!username || !password) {
+          this.router.navigate(['/']);
+        }
+      });
   }
 
   toggleShowPassword(event: MouseEvent) {
@@ -134,4 +188,134 @@ function passwordValidator(): ValidatorFn {
     // If all conditions are satisfied, return null (no error)
     return null;
   };
+}
+
+@Component({
+  selector: 'verify-dialog',
+  imports: [
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+  ],
+  template: `
+    <h3 mat-dialog-title>Verify 2FA Code</h3>
+    <mat-dialog-content>
+      <mat-form-field appearance="outline" [style.margin-top.px]="10">
+        <mat-label>Verification Code</mat-label>
+        <input
+          matInput
+          [formControl]="code"
+          placeholder="6-digit code"
+          maxlength="6"
+          type="tel"
+          inputmode="numeric"
+        />
+        @if (code.hasError('pattern')) {
+        <mat-error> Must be 6 digits </mat-error>
+        } @if (code.hasError('incorrect')) {
+        <mat-error> Invalid verification code </mat-error>
+        }
+      </mat-form-field>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+      <button mat-button [mat-dialog-close]="false">Cancel</button>
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="code.invalid"
+        (click)="submitCode()"
+      >
+        Verify
+      </button>
+    </mat-dialog-actions>
+  `,
+})
+class VerifyDialog {
+  private authService = inject(AuthService);
+  private dialogRef = inject(MatDialogRef<VerifyDialog>);
+  private data = inject(MAT_DIALOG_DATA);
+
+  code = new FormControl('', [
+    Validators.required,
+    Validators.pattern(/^\d{6}$/),
+  ]);
+
+  constructor() {
+    this.code.valueChanges.subscribe((value) =>
+      this.sanitizeInput(value || '')
+    );
+  }
+
+  private sanitizeInput(value: string): void {
+    const sanitized = value.replace(/\D/g, '').slice(0, 6);
+    if (sanitized !== value) {
+      this.code.setValue(sanitized, { emitEvent: false });
+    }
+
+    if (sanitized.length === 6) {
+      this.submitCode();
+    }
+  }
+
+  async submitCode() {
+    if (this.code.invalid) return;
+
+    try {
+      const response = await this.authService.authorize2FA(
+        this.data.username,
+        this.data.password,
+        this.code.value!
+      );
+
+      if (response.result === 'Success') {
+        this.dialogRef.close(true);
+      } else {
+        this.handleError();
+      }
+    } catch (error) {
+      this.handleError();
+    }
+  }
+
+  private handleError() {
+    this.code.reset('');
+    this.code.setErrors({ incorrect: true });
+    this.code.markAsTouched();
+  }
+}
+
+@Component({
+  selector: 'setup-dialog',
+  standalone: true,
+  imports: [MatDialogModule, MatButtonModule, QRcodeComponent],
+  template: `
+    <h3 mat-dialog-title>Setup 2FA</h3>
+    <mat-dialog-content>
+      <p class="instructions">Scan the QR code with your authenticator app:</p>
+      <app-qrcode [from]="setupCode" />
+    </mat-dialog-content>
+    <mat-dialog-actions>
+      <button mat-flat-button color="primary" (click)="onNextClick()">
+        I have scanned the QR code
+      </button>
+    </mat-dialog-actions>
+  `,
+})
+class SetupDialog {
+  setupCode: string;
+  private data = inject(MAT_DIALOG_DATA);
+
+  constructor(private dialogRef: MatDialogRef<SetupDialog>) {
+    if (!this.data?.setupCode) {
+      throw new Error('No setup code provided!');
+    }
+
+    this.setupCode = this.data.setupCode;
+  }
+
+  onNextClick() {
+    this.dialogRef.close(true);
+  }
 }
