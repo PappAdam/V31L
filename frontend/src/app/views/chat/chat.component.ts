@@ -8,18 +8,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRipple } from '@angular/material/core';
 import { Chat, MessageService } from '@/services/message.service';
-import {
-  combineLatest,
-  firstValueFrom,
-  map,
-  Subscription,
-  take,
-  tap,
-} from 'rxjs';
+import { firstValueFrom, Subscription, take } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { AuthService } from '@/services/auth.service';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import { ImgService } from '@/services/img.service';
 @Component({
   selector: 'app-chat',
   imports: [
@@ -41,16 +35,17 @@ export class ChatComponent {
   protected platformService: PlatformService = inject(PlatformService);
   protected messageService = inject(MessageService);
   protected authService = inject(AuthService);
+  protected imgService = inject(ImgService);
 
   @Input() chatTitle: string = '';
   @ViewChild('msgsWrapper') msgsWrapper?: ElementRef;
 
   @ViewChild('imageSelector') imageSelector?: HTMLInputElement;
-  img = '';
+  imgs: string[] = [];
   selectedFile: File | null = null;
 
   public get imgUploaded(): boolean {
-    return !!this.img;
+    return this.imgs.length != 0;
   }
 
   topScrollOffset = 0;
@@ -81,14 +76,14 @@ export class ChatComponent {
       this.selectedFile = file;
       const reader = new FileReader();
       reader.onload = (e) => {
-        this.img = e.target?.result as string;
+        this.imgs.push(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   }
 
-  removeImage() {
-    this.img = '';
+  removeImage(index: number) {
+    this.imgs.splice(index, 1);
   }
 
   onScroll() {
@@ -117,9 +112,13 @@ export class ChatComponent {
   };
 
   async sendMessage() {
+    const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
+    this.imgs.forEach((img) => {
+      this.messageService.sendImage(selectedChat.id, img);
+    });
+
     const message = this.messageControl.value?.trim();
     if (!message || this.messageService.selectedChatIndex == -1) return;
-    const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
     this.messageService.sendMessage(selectedChat.id, message);
     this.messageControl.reset();
   }

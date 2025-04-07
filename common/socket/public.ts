@@ -1,3 +1,5 @@
+import { MessageType } from "./client";
+
 export type PublicUser = {
   id: string;
   username: string;
@@ -9,6 +11,7 @@ export type PublicMessage = {
   timeStamp: Date;
   pinned: boolean;
   encryptedData: EncryptedMessage;
+  type: "TEXT" | "IMAGE";
 };
 
 export type PublicChat = {
@@ -22,5 +25,5 @@ export type PublicChat = {
 
 export type EncryptedMessage = {
   data: Uint8Array;
-  iv: Uint8Array;
+  iv?: Uint8Array;
 };

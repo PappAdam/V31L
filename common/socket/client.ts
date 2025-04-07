@@ -13,7 +13,7 @@ export type ClientPackage = ClientPackageDescription & { id: string };
 
 export type MessageType =
   | { type: "Text" }
-  | { type: "Image"; encodign: string };
+  | { type: "Image"; encoding: string };
 
 export type ClientNewMessagePackage = {
   header: "NewMessage";

@@ -5,13 +5,22 @@ CREATE TABLE "User" (
     "password" TEXT NOT NULL,
     "authKey" BLOB,
     "iv" BLOB,
-    "authTag" BLOB
+    "authTag" BLOB,
+    "profilePictureId" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "Image" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "data" BLOB NOT NULL,
+    "type" TEXT NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE "Chat" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
+    "chatImgId" TEXT NOT NULL,
     "lastMessageId" TEXT,
     CONSTRAINT "Chat_lastMessageId_fkey" FOREIGN KEY ("lastMessageId") REFERENCES "Message" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );

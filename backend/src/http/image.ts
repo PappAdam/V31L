@@ -24,13 +24,7 @@ export async function getImage(
       return;
     }
 
-    res
-      .status(200)
-      .json(
-        `data:image/${img.type};base64,${Buffer.from(img.data).toString(
-          "base64"
-        )}`
-      );
+    res.status(200).json(img);
   } catch (error) {
     console.error("Error during getting and image: ", error);
     res.status(500).json(serverErrorResponse);

@@ -65,15 +65,22 @@ async function seedDatabase(): Promise<{
   await prisma.message.deleteMany();
   await prisma.chat.deleteMany();
   await prisma.image.deleteMany();
-
   const pfpImgData = await readImg("./prisma/seed/img/pfp.png");
-  const dbpfpImage = await createImage(pfpImgData, "png", "pfpImg");
+  const dbpfpImage = await createImage(
+    pfpImgData,
+    "data:image/png;base64",
+    "pfpImg"
+  );
   if (!dbpfpImage) {
     throw Error("Failed to create image");
   }
 
   const groupImgData = await readImg("./prisma/seed/img/group.png");
-  const dbgroupImage = await createImage(groupImgData, "png", "groupImg");
+  const dbgroupImage = await createImage(
+    groupImgData,
+    "data:image/png;base64",
+    "groupImg"
+  );
 
   if (!dbgroupImage) {
     throw Error("Failed to create image");
@@ -136,7 +143,12 @@ async function seedDatabase(): Promise<{
         const senderId = users[message.authorIndex]!.id as string;
         const encryptedMessage = await encryptText(key, message.text);
 
-        return (await createMessage(chatId, senderId, encryptedMessage))!;
+        return (await createMessage(
+          chatId,
+          senderId,
+          encryptedMessage,
+          "TEXT"
+        ))!;
       })
     );
     messages = [...messages, ...newMessages];

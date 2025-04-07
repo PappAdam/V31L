@@ -10,9 +10,14 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { PublicChat, PublicMessage, ServerChatsPackage } from '@common';
+import {
+  arrayToString,
+  PublicChat,
+  PublicMessage,
+  ServerChatsPackage,
+  stringToCharCodeArray,
+} from '@common';
 import { EncryptionService, Message } from './encryption.service';
-import { InviteService } from './invite.service';
 import { ImgService } from './img.service';
 
 export type Chat = Omit<
@@ -91,7 +96,7 @@ export class MessageService {
   pinnedMessages$: Observable<Message[]> = merge(
     this.socketService.addPackageListener('PinnedMessages').pipe(
       switchMap((pkg) => {
-        const messages = this.decryptMessages(
+        const messages = this.decryptAndParseMessages(
           pkg.messages,
           this.selectedChat.chatKey
         );
@@ -115,6 +120,28 @@ export class MessageService {
       chatId,
       messageContent: encrypted,
       type: 'Text',
+    });
+  }
+
+  async sendImage(chatId: string, img: string) {
+    const [imgtype, imgdata] = img.split(',');
+    if (!imgdata) {
+      console.error('Failed to send img. Sending its plain text data instead.');
+      this.sendMessage(chatId, imgtype);
+      return;
+    }
+
+    const encrypted = await this.encryptionService.encryptText(
+      this.selectedChat.chatKey,
+      imgdata
+    );
+
+    this.socketService.createPackage({
+      header: 'NewMessage',
+      chatId,
+      messageContent: encrypted,
+      type: 'Image',
+      encoding: imgtype,
     });
   }
 
@@ -151,14 +178,13 @@ export class MessageService {
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
         if (rawChatContent.encryptedChatKey) {
-          console.log(rawChatContent.encryptedChatKey);
           const chatKey = await this.encryptionService.unwrapKey(
             rawChatContent.encryptedChatKey,
             this.encryptionService.privateKey
           );
           let img = '';
           if (rawChatContent.imgID) {
-            img = (await this.img.getUrl(rawChatContent.imgID)) || '';
+            img = (await this.img.getUrl(rawChatContent.imgID, chatKey)) || '';
           }
 
           const chat = {
@@ -179,7 +205,7 @@ export class MessageService {
         return;
       }
 
-      const chatMessages = await this.decryptMessages(
+      const chatMessages = await this.decryptAndParseMessages(
         rawChatContent.encryptedMessages,
         this._chats$.value[chatIndex].chatKey
       );
@@ -189,13 +215,11 @@ export class MessageService {
         rawChatContent.encryptedMessages[0].timeStamp >
           this.lastMessageOfChat(rawChatContent.id)!.timeStamp
       ) {
-        // Pushing new messages to the end of the array
         this._chats$.value[chatIndex].messages = [
           ...this._chats$.value[chatIndex].messages,
           ...chatMessages,
         ];
       } else {
-        // Pushing new messages to the beginning of the array
         this._chats$.value[chatIndex].messages = [
           ...chatMessages,
           ...this._chats$.value[chatIndex].messages,
@@ -204,20 +228,40 @@ export class MessageService {
     });
   };
 
-  private async decryptMessages(
+  private async decryptAndParseMessages(
     messages: PublicMessage[],
     key: CryptoKey
   ): Promise<Message[]> {
     const chatMessages: Message[] = await Promise.all(
       messages.map(async (msg) => {
-        const messageContent = await this.encryptionService.decryptText(
-          key,
-          msg.encryptedData
-        );
+        let messageContent: string;
+        if (msg.encryptedData.iv) {
+          messageContent = await this.encryptionService.decryptText(
+            key,
+            msg.encryptedData
+          );
+        } else {
+          messageContent = arrayToString(msg.encryptedData.data);
+        }
+
+        let type = msg.type;
+
+        let img: string | undefined;
+        if (msg.type == 'IMAGE') {
+          img = await this.img.getUrl(messageContent, key);
+        }
+
+        if (!img && msg.type == 'IMAGE') {
+          type = 'TEXT';
+          messageContent = 'Failed to load img';
+        } else if (img) {
+          messageContent = img;
+        }
 
         return {
           ...msg,
           content: messageContent,
+          type,
         };
       })
     );

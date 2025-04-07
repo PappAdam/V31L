@@ -1,4 +1,4 @@
-import { Message } from "@prisma/client";
+import { Message, MessageType } from "@prisma/client";
 import prisma from "./_db";
 import { EncryptedMessage, PublicUser } from "@common";
 import { encryptData } from "@/encryption";
@@ -62,7 +62,8 @@ export async function findChatMessages(
 export async function createMessage(
   chatId: string,
   userId: string,
-  content: EncryptedMessage
+  content: EncryptedMessage,
+  type: MessageType
 ): Promise<Message | null> {
   if (!chatId || !userId || !content) {
     return null;
@@ -78,6 +79,7 @@ export async function createMessage(
         inIv: content.iv,
         outIv: encryptedContent.iv,
         authTag: encryptedContent.authTag,
+        type,
       },
     });
 

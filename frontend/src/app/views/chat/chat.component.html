@@ -4,7 +4,9 @@
     <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
     <div class="messages-wrapper" #msgsWrapper (scroll)="onScroll()">
       @if (this.selectedChat$ | async; as selectedChat) { @for (message of
-      selectedChat.messages; track $index) {
+      selectedChat.messages; track $index) { @if (message.type == "IMAGE") {
+      <img [src]="message.content" alt="" />
+      } @else {
       <app-message
         [first]="
           $index === 0 ||
@@ -13,12 +15,26 @@
         "
         [message]="message"
       ></app-message>
-      } } @else {
+      } } } @else {
       <div class="no-chat-selected">
         <h3>No chat selected</h3>
       </div>
       }
     </div>
+    @if (imgUploaded) {
+    <div class="images-wrapper">
+      @for (img of imgs; track $index) {
+      <div class="image-preview">
+        <img [src]="img" alt="" />
+        <mat-icon
+          class="remove-btn"
+          fontIcon="close"
+          (click)="removeImage($index)"
+        ></mat-icon>
+      </div>
+      }
+    </div>
+    }
     <div class="input-wrapper">
       <textarea
         matInput
@@ -51,5 +67,4 @@
   </div>
   <app-details [state]="detailsState"></app-details>
 </div>
-
 } @else { "this is the mobile type stuff" }
