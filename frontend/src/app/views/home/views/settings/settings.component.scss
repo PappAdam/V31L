@@ -1,0 +1,33 @@
+@use "../../../../../styles/styles.scss" as *;
+
+.settings {
+  height: 100%;
+  background-color: $mat-sys-surface-container;
+  border-radius: $mat-sys-corner-medium;
+  padding: $mat-sys-spacing-md;
+
+  .profile {
+    display: flex;
+    margin-bottom: $mat-sys-spacing-md;
+
+    img {
+      width: $mat-sys-img-profile-large;
+      height: $mat-sys-img-profile-large;
+    }
+
+    .profile-info {
+      margin-left: $mat-sys-spacing-md;
+      display: flex;
+      height: $mat-sys-img-profile-large;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+  }
+
+  .options {
+    margin-top: $mat-sys-spacing-md;
+    display: flex;
+    flex-direction: column;
+    gap: $mat-sys-spacing-md;
+  }
+}

@@ -1,7 +1,12 @@
 import { Request, Response, Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { createUser, findUserByName } from "@/db/user";
+import {
+  createUser,
+  findUserByName,
+  updateUser,
+  updateUserMfa,
+} from "@/db/user";
 import {
   extractUserFromTokenMiddleWare,
   validateRequiredFields,
@@ -33,7 +38,20 @@ authRouter.post(
   validateRequiredFields(["username", "password"]),
   loginUser
 );
+authRouter.post(
+  "/changepassword",
+  validateRequiredFields(["oldPassword", "newPassword"]),
+  extractUserFromTokenMiddleWare,
+  changePassword
+);
 authRouter.post("/refresh", extractUserFromTokenMiddleWare, refreshToken);
+authRouter.post("/enablemfa", extractUserFromTokenMiddleWare, enableMfa);
+authRouter.post(
+  "/disablemfa",
+  validateRequiredFields(["mfa"]),
+  extractUserFromTokenMiddleWare,
+  disableMfa
+);
 export default authRouter;
 
 /**
@@ -145,6 +163,33 @@ async function loginUser(req: Request, res: Response) {
   }
 }
 
+async function changePassword(req: Request, res: Response) {
+  try {
+    const user = req.user as User;
+    const { oldPassword, newPassword } = req.body;
+
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordMatch) {
+      res.status(400).json(invalidCredentialsResponse);
+      return;
+    }
+
+    const updatedUser = await updateUser({
+      id: user.id,
+      password: newPassword,
+    });
+    if (!updatedUser) {
+      throw new Error("Error updating user");
+    }
+
+    const token = generateToken(user.id);
+    res.json(successResponse(token, updatedUser));
+  } catch (error) {
+    res.status(500).json(serverErrorResponse);
+    console.error("Error during password change: \n", error);
+  }
+}
+
 /**
  * Refresh request handler
  *
@@ -166,3 +211,59 @@ async function refreshToken(req: Request, res: Response) {
 export const generateToken = (userId: string): string => {
   return jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: "1h" });
 };
+
+async function enableMfa(req: Request, res: Response) {
+  try {
+    const user = req.user as User;
+
+    const updatedUser = await updateUserMfa(user.id, "enable");
+    if (!updatedUser) throw new Error("Error updating user");
+
+    const authKey = decryptData({
+      encrypted: updatedUser.authKey!,
+      iv: updatedUser.iv!,
+      authTag: updatedUser.authTag!,
+    });
+
+    const setupCode = generateTotpUri(
+      arrayToString(authKey),
+      user.username,
+      "Veil",
+      "SHA1",
+      6,
+      30
+    );
+
+    res.status(201).json(nextSetupMfaResponse(setupCode));
+  } catch (error) {
+    res.status(500).json(serverErrorResponse);
+    console.error("Error during mfa enable: \n", error);
+  }
+}
+
+async function disableMfa(req: Request, res: Response) {
+  try {
+    const { mfa } = req.body;
+    const user = req.user as User;
+
+    const decrypted2FA = decryptData({
+      encrypted: user.authKey!,
+      iv: user.iv!,
+      authTag: user.authTag!,
+    });
+    const verifyResult = verifyToken(arrayToString(decrypted2FA), mfa);
+    if (!verifyResult) {
+      res.status(400).json(invalidCredentialsResponse);
+      return;
+    }
+
+    const updatedUser = await updateUserMfa(user.id, "disable");
+    if (!updatedUser) throw new Error("Error updating user");
+
+    const token = generateToken(user.id);
+    res.json(successResponse(token, updatedUser));
+  } catch (error) {
+    res.status(500).json(serverErrorResponse);
+    console.error("Error during mfa disable: \n", error);
+  }
+}

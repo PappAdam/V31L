@@ -1,7 +1,6 @@
 @use "../../../../../../../styles/styles.scss" as *;
 
 .action-container {
-  padding: $mat-sys-spacing-sm;
   overflow: hidden;
 }
 
@@ -12,6 +11,7 @@
   flex-direction: row;
   justify-content: space-between;
   gap: $mat-sys-spacing-sm;
+  align-items: center;
   cursor: pointer;
 
   &:hover {

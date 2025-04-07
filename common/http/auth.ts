@@ -1,5 +1,9 @@
 import { PublicUser } from "../socket/public";
 
+export type AuthenticatedUser = {
+  mfaEnabled: boolean;
+} & PublicUser;
+
 export type AuthResponse =
   | AuthSuccessResponse
   | AuthNextResponse
@@ -12,7 +16,7 @@ export type AuthNextResponse =
 export type AuthSuccessResponse = {
   result: "Success";
   token: string;
-} & PublicUser;
+} & AuthenticatedUser;
 
 export type AuthNextMfaSetupResponse = {
   result: "Next";
@@ -39,13 +43,14 @@ export type AuthErrorResponse = {
 // Used in both auth requests
 export const successResponse = (
   token: string,
-  user: PublicUser
+  user: PublicUser & { authKey: Uint8Array | null }
 ): AuthSuccessResponse => {
   return {
     result: "Success",
     token,
     id: user.id,
     username: user.username,
+    mfaEnabled: !!user.authKey,
   };
 };
 
