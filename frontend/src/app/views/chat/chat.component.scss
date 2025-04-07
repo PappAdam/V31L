@@ -73,16 +73,7 @@
         min-height: 35px;
         padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
         border-radius: $mat-sys-corner-medium;
-
-        &::before {
-          content: "type a message...";
-          width: 100%;
-          font-size: $mat-sys-label-medium-size;
-          color: grey;
-          font-weight: 400;
-          letter-spacing: 0.5px;
-          cursor: text;
-        }
+        position: relative;
 
         &::-webkit-scrollbar {
           display: none; // Chrome, Safari, Opera
@@ -95,6 +86,24 @@
           font-size: $mat-sys-body-medium;
         }
       }
+
+      .placeholder {
+        position: relative;
+
+        &::before {
+          content: "type a message...";
+          width: 100%;
+          font-size: $mat-sys-label-medium-size;
+          color: grey;
+          font-weight: 400;
+          letter-spacing: 0.5px;
+          cursor: text;
+          position: absolute;
+          pointer-events: none;
+          left: $mat-sys-spacing-md;
+        }
+      }
+
       button {
         display: flex;
         align-items: center;

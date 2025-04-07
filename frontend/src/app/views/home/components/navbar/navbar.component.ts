@@ -23,5 +23,5 @@ export interface ActiveTab {
   styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent {
-  tabs = ['settings', 'add'];
+  tabs = ['settings', 'messages', 'add'];
 }

@@ -9,22 +9,24 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatRipple } from '@angular/material/core';
 import { MessageService } from '@/services/message.service';
 import { combineLatest, firstValueFrom, map, take, tap } from 'rxjs';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgClass } from '@angular/common';
 import { AuthService } from '@/services/auth.service';
 import { MatInputModule } from '@angular/material/input';
-import { FormControl } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-chat',
   imports: [
     HeaderComponent,
     MatButtonModule,
+    NgClass,
     MessageComponent,
     DetailsComponent,
     MatIconModule,
     MatRipple,
     AsyncPipe,
     MatInputModule,
+    ReactiveFormsModule,
   ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
@@ -44,8 +46,10 @@ export class ChatComponent {
       ([chats, id]) => chats.find((chat) => chat.id === id) // Ensure type consistency
     )
   );
-  message = '';
+
   previousUser = '';
+  message = '';
+
   @ViewChild('textInput') textInputDiv!: ElementRef<HTMLElement>;
   constructor() {
     this.platform = this.platformService.info;
@@ -71,4 +75,12 @@ export class ChatComponent {
     this.messageService.sendMessage(selectedChat!.id, message);
     this.textInputDiv.nativeElement.innerText = '';
   }
+
+  placeholder = 'placeholder';
+
+  clickPlaceholder() {
+    this.placeholder = '';
+  }
+
+  focusPlaceholder() {}
 }
