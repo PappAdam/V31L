@@ -1,1 +1,48 @@
-<p>settings works!</p>
+<div class="settings">
+  <div class="profile">
+    <img
+      src="https://play-lh.googleusercontent.com/jInS55DYPnTZq8GpylyLmK2L2cDmUoahVacfN_Js_TsOkBEoizKmAl5-p8iFeLiNjtE=w526-h296-rw"
+      alt=""
+    />
+    <div class="profile-info">
+      <h3 class="username">{{ username$ | async }}</h3>
+      <p class="something">Something here</p>
+    </div>
+  </div>
+  <mat-divider></mat-divider>
+  <div class="options">
+    <app-group-option-card type="expand" label="Edit Profile" fontIcon="edit">
+      <div class="edit-profile">
+        <app-group-option-card
+          label="Change Password"
+          fontIcon="password"
+          (activated)="onChangePassword()"
+        ></app-group-option-card>
+        <app-group-option-card
+          label="Update Profile picture"
+          fontIcon="account_circle"
+        ></app-group-option-card>
+      </div>
+    </app-group-option-card>
+    <app-group-option-card
+      type="toggle"
+      label="Two-factor authentication"
+      fontIcon="lock"
+      (activated)="onToggleTwoFactor($event)"
+      [(isActivated)]="mfaToggleEnabled"
+    >
+    </app-group-option-card>
+    <app-group-option-card
+      label="Delete profile"
+      fontIcon="delete"
+      (click)="onDeleteProfile()"
+    >
+    </app-group-option-card>
+    <app-group-option-card
+      label="Log out"
+      fontIcon="logout"
+      (click)="onLogout()"
+    >
+    </app-group-option-card>
+  </div>
+</div>
