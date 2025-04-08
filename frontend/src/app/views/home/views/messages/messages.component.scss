@@ -4,17 +4,25 @@
 .messages-wrapper {
   width: 100%;
   height: 100%;
-  border-radius: $mat-sys-corner-medium;
+  border-radius: $mat-sys-corner-medium $mat-sys-corner-medium 0px 0px;
   background-color: $mat-sys-surface-container;
   position: relative;
   display: flex;
   flex-direction: column;
   flex-grow: 0;
+  position: relative;
   @include mat.tabs-overrides(
     (
-      container-height: $mat-sys-component-height,
+      container-height: $mat-sys-component-height-medium,
     )
   );
+  .cards {
+    margin-top: $mat-sys-component-height-medium;
+    overflow-y: scroll;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }
 
 .mat-mdc-tab-nav-bar {

@@ -12,6 +12,7 @@ import {
   stringToCharCodeArray,
 } from '@common';
 import { lastValueFrom } from 'rxjs';
+import { FalseEncryptionService } from './false-encryption.service';
 import { MessageService } from './message.service';
 
 @Injectable({

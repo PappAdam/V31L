@@ -144,7 +144,8 @@ export class SocketService {
     callback: () => void = () => {},
     dependsOn: string = ''
   ): PackageQueueItem {
-    const id = crypto.randomUUID();
+    const rawid = crypto.getRandomValues(new Uint8Array(16));
+    const id = String.fromCharCode(...rawid);
     const pkg: ClientPackage = {
       id,
       ...packageDesc,

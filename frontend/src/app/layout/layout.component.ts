@@ -3,7 +3,7 @@ import { Component, inject } from '@angular/core';
 import { DeviceInfo } from '@capacitor/device';
 import { HomeComponent } from '@/views/home/home.component';
 import { ChatComponent } from '@/views/chat/chat.component';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-layout',
   imports: [HomeComponent, ChatComponent],
@@ -14,7 +14,10 @@ export class LayoutComponent {
   platform: DeviceInfo | null = null;
   platformService: PlatformService = inject(PlatformService);
 
-  constructor() {
+  constructor(private router: Router) {
     this.platform = this.platformService.info;
+  }
+  ngOnInit() {
+    this.router.navigate(['/app', { outlets: { home: 'messages' } }]);
   }
 }

@@ -13,13 +13,13 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './message.component.scss',
 })
 export class MessageComponent {
+  previousSender: string | null = null;
+  currentSender: string | null = null;
   protected messageService = inject(MessageService);
   protected authService = inject(AuthService);
 
   @Input({ required: true }) message!: Message;
   @Input() first: boolean = false;
-
-  // Message options and side in the main chat
   @Input() displayedIn: 'Chat' | 'PinnedMessages' = 'Chat';
   img = inject(ImgService);
   imgURL?: String;

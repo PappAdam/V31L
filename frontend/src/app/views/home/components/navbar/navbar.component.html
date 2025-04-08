@@ -3,14 +3,10 @@
   <div
     class="option-wrapper"
     [routerLink]="[{ outlets: { home: [tab] } }]"
-    [ngClass]="{ active: activeTab.name === tab }"
-    (click)="selectTab(tab)"
+    routerLinkActive="active"
   >
     <div class="option-icon">
       <mat-icon fontIcon="{{ tab }}" class="nav-icon"></mat-icon>
-    </div>
-    <div class="option-label">
-      {{ tab }}
     </div>
   </div>
   }

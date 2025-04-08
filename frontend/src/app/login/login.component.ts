@@ -93,7 +93,7 @@ export class LoginComponent {
 
     switch (response.result) {
       case 'Success':
-        this.router.navigate(['/']);
+        this.router.navigate(['/app']);
         return;
 
       case 'Next':

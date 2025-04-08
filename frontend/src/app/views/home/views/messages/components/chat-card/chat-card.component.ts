@@ -15,7 +15,7 @@ export class ChatCardComponent {
   @Input() unread: string = '0';
   @Input() chat?: Chat;
   @Input() status: string = '';
-  @Input() selected: string = '';
+  @Input() selected: boolean = false;
 
   get lastMessage() {
     if (!this.chat || !this.chat.messages.length) {

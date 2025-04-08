@@ -11,6 +11,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { QRcodeComponent } from '../../../../qrcode/qrcode.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MessageComponent } from '../message/message.component';
+import { PlatformService } from '@/services/platform.service';
+import { DeviceInfo } from '@capacitor/device';
 import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog.component';
 
 GroupMemberCardComponent;
@@ -30,6 +32,11 @@ GroupMemberCardComponent;
   styleUrl: './details.component.scss',
 })
 export class DetailsComponent {
+  protected platformService = inject(PlatformService);
+  platform: DeviceInfo | null = null;
+  constructor() {
+    this.platform = this.platformService.info;
+  }
   @Input() state: string = 'closed';
 
   messageService = inject(MessageService);

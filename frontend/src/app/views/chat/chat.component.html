@@ -2,7 +2,7 @@
 <div class="chat-outer-wrapper">
   <div class="chat-wrapper">
     <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
-    <div class="messages-wrapper" #msgsWrapper (scroll)="onScroll()">
+    <div class="messages-wrapper">
       @if (this.selectedChat$ | async; as selectedChat) { @for (message of
       selectedChat.messages; track $index) {
       <app-message
@@ -34,18 +34,15 @@
     </div>
     }
     <div class="input-wrapper">
-      <textarea
-        matInput
-        name="message"
-        class="text-input"
-        [formControl]="messageControl"
-      ></textarea>
-      <button
-        class="message-button"
-        matRipple
-        matRippleColor="#ffffff30"
-        (click)="sendMessage()"
-      >
+      <div class="text-input-box">
+        <div
+          (keydown.enter)="sendOnEnter($event)"
+          #textInput
+          class="text-input"
+          contenteditable="true"
+        ></div>
+      </div>
+      <button mat-mini-fab (click)="sendMessage()">
         <mat-icon fontIcon="send"></mat-icon>
       </button>
       <input
@@ -55,14 +52,19 @@
         accept="image/*"
         hidden
       />
-      <button class="message-button" (click)="imageSelector.click()">
+      <button
+        mat-mini-fab
+        class="message-button"
+        (click)="imageSelector.click()"
+      >
         <mat-icon fontIcon="image"></mat-icon>
       </button>
-      <button class="message-button" disabled>
+      <button mat-mini-fab class="message-button" disabled>
         <mat-icon fontIcon="microphone"></mat-icon>
       </button>
     </div>
   </div>
   <app-details [state]="detailsState"></app-details>
 </div>
-} @else { "this is the mobile type stuff" }
+
+} @else { }

@@ -17,10 +17,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { passwordValidator } from '@/login/login.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { TabHeaderComponent } from '../../components/tab-header/tab-header.component';
 
 @Component({
   selector: 'app-settings',
-  imports: [AsyncPipe, GroupOptionCardComponent, MatDividerModule],
+  imports: [
+    AsyncPipe,
+    GroupOptionCardComponent,
+    MatDividerModule,
+    TabHeaderComponent,
+  ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
 })

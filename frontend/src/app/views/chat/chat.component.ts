@@ -6,14 +6,14 @@ import { MessageComponent } from './components/message/message.component';
 import { DetailsComponent } from './components/details/details.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatRipple } from '@angular/material/core';
-import { Chat, MessageService } from '@/services/message.service';
-import { firstValueFrom, Subscription, take } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
+import { MessageService } from '@/services/message.service';
+import { firstValueFrom, take } from 'rxjs';
 import { AuthService } from '@/services/auth.service';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import { ReactiveFormsModule } from '@angular/forms';
 import { ImgService } from '@/services/img.service';
+
 @Component({
   selector: 'app-chat',
   imports: [
@@ -22,9 +22,7 @@ import { ImgService } from '@/services/img.service';
     MessageComponent,
     DetailsComponent,
     MatIconModule,
-    MatRipple,
     AsyncPipe,
-    FormsModule,
     MatInputModule,
     ReactiveFormsModule,
   ],
@@ -33,8 +31,12 @@ import { ImgService } from '@/services/img.service';
 })
 export class ChatComponent {
   protected platformService: PlatformService = inject(PlatformService);
+  platform: DeviceInfo | null = this.platformService.info;
+
   protected messageService = inject(MessageService);
   protected authService = inject(AuthService);
+  chats$ = this.messageService.chats$;
+  selectedChatId$ = this.messageService.selectedChatId$;
   protected imgService = inject(ImgService);
 
   @Input() chatTitle: string = '';
@@ -50,22 +52,12 @@ export class ChatComponent {
 
   topScrollOffset = 0;
 
-  platform: DeviceInfo | null = this.platformService.info;
   detailsState = 'closed';
 
   selectedChat$ = this.messageService.selectedChat$;
+  message = '';
 
-  messageControl = new FormControl('');
-  private subscription!: Subscription;
-
-  ngOnInit() {
-    this.subscription = this.selectedChat$.subscribe(this.selectedChatChanged);
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-
+  @ViewChild('textInput') textInputDiv!: ElementRef<HTMLElement>;
   onImageUpload(event: any) {
     const file = event.target.files[0] as File | null;
     this.uploadFile(file);
@@ -86,30 +78,14 @@ export class ChatComponent {
     this.imgs.splice(index, 1);
   }
 
-  onScroll() {
-    const elem = this.msgsWrapper!.nativeElement as HTMLDivElement;
-    this.topScrollOffset = elem.scrollHeight - elem.scrollTop;
-    if (elem.scrollTop < 50) {
-      this.messageService.scrollLoadMessages(
-        this.messageService.selectedChat.id
-      );
-
-      // elem.scrollTo({
-      //   top:
-      // });
-    }
-  }
-
   updateDetailsState(event: string) {
     this.detailsState = event;
   }
 
-  selectedChatChanged = (chat: Chat) => {
-    const elem = this.msgsWrapper?.nativeElement as HTMLDivElement;
-    if (elem) {
-      elem.scrollTop = elem.scrollHeight;
-    }
-  };
+  sendOnEnter(event: Event) {
+    event.preventDefault();
+    this.sendMessage();
+  }
 
   async sendMessage() {
     const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
@@ -119,9 +95,9 @@ export class ChatComponent {
 
     this.imgs = [];
 
-    const message = this.messageControl.value?.trim();
-    if (!message || this.messageService.selectedChatIndex == -1) return;
+    let message = this.textInputDiv.nativeElement.innerText;
+    if (!message || this.messageService.selectedChatId == '') return;
     this.messageService.sendMessage(selectedChat.id, message);
-    this.messageControl.reset();
+    this.textInputDiv.nativeElement.innerText = '';
   }
 }

@@ -1,16 +1,21 @@
 <div class="messages-wrapper">
-  <mat-tab-group>
-    <mat-tab label="Direct">
-      @for (chat of chats$ | async; track $index) {
-      <app-chat-card
-        (click)="messageService.selectedChatIndex = $index"
-        [chat]="chat"
-        unread=""
-      ></app-chat-card>
-      }
-    </mat-tab>
-    <mat-tab label="Group">
-      <div class="group-wrapper"></div>
-    </mat-tab>
-  </mat-tab-group>
+  <app-search-bar [control]="searchControl$"></app-search-bar>
+  <div class="cards">
+    @if (this.platformService.info?.platform == "web") { @for (chat of
+    filteredChats$ | async; track $index) {
+    <app-chat-card
+      (click)="messageService.selectedChatId = chat.id"
+      [chat]="chat"
+      unread=""
+      [selected]="this.messageService.selectedChatId == chat.id ? true : false"
+    ></app-chat-card>
+    } } @else { @for (chat of filteredChats$ | async; track $index) {
+
+    <app-chat-card
+      (click)="navToChat(chat.id)"
+      [chat]="chat"
+      unread=""
+    ></app-chat-card>
+    } }
+  </div>
 </div>

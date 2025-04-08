@@ -4,6 +4,7 @@ import {
   BehaviorSubject,
   combineLatest,
   filter,
+  find,
   map,
   merge,
   Observable,
@@ -42,6 +43,14 @@ export class MessageService {
     return this._chats$.asObservable();
   }
 
+  private _selectedChatId$ = new BehaviorSubject<string>('');
+  get selectedChatId$(): Observable<string> {
+    return this._selectedChatId$.asObservable();
+  }
+
+  get selectedChatId(): string {
+    return this._selectedChatId$.getValue();
+  }
   //#region Subscriptions - These subscriptions modify the _chats$ BehaviorSubject, they just show up as unused varibles, don't remove them.
   private loadOnAuthozition = this.socketService.authorized$.subscribe(
     (authorized) => {
@@ -69,28 +78,16 @@ export class MessageService {
     );
   //#endregion
 
-  private _selectedChatIndex$ = new BehaviorSubject<number>(-1);
-  get selectedChatIndex$(): Observable<number> {
-    return this._selectedChatIndex$.asObservable();
+  set selectedChatId(index: string) {
+    this._selectedChatId$.next(index);
   }
 
-  get selectedChatIndex(): number {
-    return this._selectedChatIndex$.value;
-  }
-
-  set selectedChatIndex(index: number) {
-    this._selectedChatIndex$.next(index);
-  }
-
-  get selectedChat$() {
-    return combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
-      map(([messages, index]) => messages[index]),
-      filter((chat) => !!chat)
-    );
-  }
+  selectedChat$ = combineLatest([this.chats$, this.selectedChatId$]).pipe(
+    map(([chats, id]) => chats.find((chat) => chat.id === id)!)
+  );
 
   get selectedChat() {
-    return this._chats$.value[this._selectedChatIndex$.value];
+    return this._chats$.value.find((chat) => chat.id === this.selectedChatId)!;
   }
 
   pinnedMessages$: Observable<Message[]> = merge(
@@ -104,7 +101,9 @@ export class MessageService {
       })
     ),
     this.selectedChat$.pipe(
-      tap((chat) => this.getPinnedMessages(chat.id)),
+      tap((chat) => {
+        if (chat) this.getPinnedMessages(chat.id);
+      }),
       map(() => [])
     )
   );
@@ -169,7 +168,9 @@ export class MessageService {
   }
 
   leaveChat(chatId: string) {
-    this.socketService.createPackage({ header: 'LeaveChat', chatId });
+    this.socketService.createPackage({ header: 'LeaveChat', chatId }, () => {
+      this._selectedChatId$.next('');
+    });
   }
 
   onChatsPackageRecieved = async (pkg: ServerChatsPackage) => {
@@ -212,7 +213,6 @@ export class MessageService {
         rawChatContent.encryptedMessages,
         this._chats$.value[chatIndex].chatKey
       );
-
       if (
         this.lastMessageOfChat(rawChatContent.id) &&
         rawChatContent.encryptedMessages[0].timeStamp >

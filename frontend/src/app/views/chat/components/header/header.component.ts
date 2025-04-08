@@ -1,4 +1,4 @@
-import { MessageService } from '@/services/message.service';
+import { Chat, MessageService } from '@/services/message.service';
 import { PlatformService } from '@/services/platform.service';
 import {
   Component,
@@ -10,18 +10,17 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DeviceInfo } from '@capacitor/device';
-import { combineLatest, lastValueFrom, map } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
-import { ImgService } from '@/services/img.service';
-import { InviteService } from '@/services/invite.service';
 @Component({
   selector: 'app-header',
-  imports: [MatIconModule, AsyncPipe],
+  imports: [MatIconModule, AsyncPipe, MatButtonModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  constructor() {
+  constructor(private router: Router) {
     this.platform = this.platformService.info;
   }
 
@@ -33,11 +32,7 @@ export class HeaderComponent {
   protected messageService = inject(MessageService);
 
   chats$ = this.messageService.chats$;
-  selectedChatIndex$ = this.messageService.selectedChatIndex$;
-
-  selectedChat$ = combineLatest([this.chats$, this.selectedChatIndex$]).pipe(
-    map(([messages, index]) => messages[index])
-  );
+  selectedChat$ = this.messageService.selectedChat$;
 
   ctor() {
     this.platform = this.platformService.info;
@@ -51,5 +46,9 @@ export class HeaderComponent {
     }
 
     this.detailsStateEvent.emit(this.state);
+  }
+
+  goBack() {
+    this.router.navigate(['/app', { outlets: { home: 'messages' } }]);
   }
 }

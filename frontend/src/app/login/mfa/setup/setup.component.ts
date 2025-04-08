@@ -16,7 +16,7 @@ export class MfaSetupComponent {
     const setupCode =
       this.router.getCurrentNavigation()?.extras.state?.['setupCode'];
 
-    console.log(setupCode);
+    console.info(setupCode);
 
     if (!setupCode) {
       throw new Error('No setup code provided!');

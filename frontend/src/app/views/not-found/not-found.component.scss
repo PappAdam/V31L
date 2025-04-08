@@ -1,5 +1,6 @@
 @use "@angular/material" as mat;
-@use "../../../styles/mat-map.scss" as *;
+@use "../../../styles/styles.scss" as *;
+
 .container {
   display: flex;
   align-items: center;

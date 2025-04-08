@@ -10,3 +10,16 @@ export const platformGuard: CanActivateFn = async (route, state) => {
   } catch (error) {}
   return true;
 };
+
+export const androidGuard: CanActivateFn = async (route, state) => {
+  const platformService = inject(PlatformService);
+
+  try {
+    await platformService.loadDeviceInfo();
+  } catch (error) {}
+
+  if (platformService.info?.platform == 'android') {
+    return true;
+  }
+  return false;
+};

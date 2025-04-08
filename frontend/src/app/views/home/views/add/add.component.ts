@@ -1,4 +1,5 @@
 import { InviteService } from '@/services/invite.service';
+import { PlatformService } from '@/services/platform.service';
 import { Component, inject, signal, ViewChild } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,6 +8,8 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
+import { DeviceInfo } from '@capacitor/device';
+import { TabHeaderComponent } from '../../components/tab-header/tab-header.component';
 
 @Component({
   selector: 'app-add',
@@ -16,12 +19,20 @@ import { MatTab, MatTabGroup } from '@angular/material/tabs';
     MatDividerModule,
     MatButtonModule,
     MatIcon,
+    MatButtonModule,
+    TabHeaderComponent,
     FormsModule,
   ],
   templateUrl: './add.component.html',
   styleUrl: './add.component.scss',
 })
 export class AddComponent {
+  platform: DeviceInfo | null = null;
+  platformService: PlatformService = inject(PlatformService);
+
+  constructor() {
+    this.platform = this.platformService.info;
+  }
   chatName = new FormControl('');
   connectionString = new FormControl('');
   @ViewChild('imageSelector') imageSelector?: HTMLInputElement;
@@ -60,7 +71,6 @@ export class AddComponent {
     }
 
     const res = await this.inviteService.sendJoinRequest(v);
-    console.log(res);
   }
 
   async onCreate() {
@@ -70,6 +80,5 @@ export class AddComponent {
     }
 
     const res = await this.inviteService.createChatRequest(v);
-    console.log(res);
   }
 }
