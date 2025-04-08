@@ -15,7 +15,8 @@ import { arrayToString } from "@common";
 export async function createUser(
   username: string,
   password: string,
-  mfaEnabled: boolean
+  mfaEnabled: boolean,
+  profilePictureId?: string
 ): Promise<User | null> {
   if (!username || !password) {
     return null;
@@ -28,6 +29,7 @@ export async function createUser(
       data: {
         username,
         password,
+        profilePictureId: profilePictureId || "pfpImg",
         ...(mfaEnabled
           ? {
               authKey: authKey.encrypted,

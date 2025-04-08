@@ -34,10 +34,11 @@
   </div>
   <div class="message-profile-wrapper">
     @if (first) {
-    <div
+    <img
+      [src]="imgURL"
       class="profile-image"
       [class.has-text-above]="message.user.username"
-    ></div>
+    />
     }
   </div>
 </div>

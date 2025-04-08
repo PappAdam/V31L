@@ -1,5 +1,6 @@
 import { AuthService } from '@/services/auth.service';
 import { Message } from '@/services/encryption.service';
+import { ImgService } from '@/services/img.service';
 import { MessageService } from '@/services/message.service';
 import { Component, inject, Input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,6 +21,12 @@ export class MessageComponent {
   @Input({ required: true }) message!: Message;
   @Input() first: boolean = false;
   @Input() displayedIn: 'Chat' | 'PinnedMessages' = 'Chat';
+  img = inject(ImgService);
+  imgURL?: String;
+
+  async ngOnInit() {
+    this.imgURL = await this.img.getUrl('pfpImg');
+  }
 
   get ownMessage() {
     return this.message.user.username == this.authService.user?.username;

@@ -3,16 +3,16 @@
   [attr.data-unread]="unread"
   [attr.data-selected]="selected"
 >
-  <div class="image-wrapper"><img src="" alt="" /></div>
+  <div class="image-wrapper">
+    <img [src]="chat?.img" alt="" />
+  </div>
   <div class="text-wrapper">
     <div class="title-wrapper">
-      <p class="group_title" [attr.data-unread]="unread">
-        {{ name }}
-      </p>
+      <p class="group_title" [attr.data-unread]="unread">{{ chat?.name }}</p>
     </div>
     <div class="last-msg-wrapper">
       <p class="last-msg" [attr.data-unread]="unread">
-        {{ lastMsg?.content }}
+        {{ this.lastMessage }}
       </p>
     </div>
   </div>

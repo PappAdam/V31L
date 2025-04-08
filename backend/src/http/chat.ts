@@ -14,17 +14,17 @@ import { toPublicChat } from "@/db/public";
 const chatRouter = Router();
 chatRouter.post(
   "/create",
-  validateRequiredFields(["name", "key"]),
+  validateRequiredFields(["name", "key", "chatImgId"]),
   createNewChat
 );
 
 export default chatRouter;
 
 async function createNewChat(req: Request, res: Response) {
-  const { name, key } = req.body;
+  const { name, key, chatImgId } = req.body;
 
   try {
-    const chat = await createChat(name);
+    const chat = await createChat(name, chatImgId);
 
     if (!name) {
       res.status(400).json("No chat name was provided");
@@ -40,8 +40,8 @@ async function createNewChat(req: Request, res: Response) {
       throw Error("Failed to create chat member");
     }
 
-    const client = Client.withUser(user.id);
-    if (!client) {
+    const clients = Client.withUser(user.id).map((c) => c.ws);
+    if (!clients) {
       return;
     }
 
@@ -50,7 +50,7 @@ async function createNewChat(req: Request, res: Response) {
       throw Error("chat is not convertable");
     }
 
-    ServerPackageSender.send([client.ws], {
+    ServerPackageSender.send(clients, {
       header: "Chats",
       chats: [publicChat],
     });

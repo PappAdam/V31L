@@ -8,19 +8,27 @@ datasource db {
 }
 
 model User {
-  id       String       @id @default(uuid())
-  username String       @unique
-  password String
-  authKey  Bytes? // Key for 2FA code generation (TOTP)
-  iv       Bytes?
-  authTag  Bytes?
-  messages Message[]
-  chats    ChatMember[]
+  id               String       @id @default(uuid())
+  username         String       @unique
+  password         String
+  authKey          Bytes? // Key for 2FA code generation (TOTP)
+  iv               Bytes?
+  authTag          Bytes?
+  messages         Message[]
+  chats            ChatMember[]
+  profilePictureId String
+}
+
+model Image {
+  id   String @id @default(uuid())
+  data Bytes
 }
 
 model Chat {
-  id       String       @id @default(uuid())
-  name     String
+  id        String @id @default(uuid())
+  name      String
+  chatImgId String
+
   messages Message[]    @relation("ChatMessages")
   members  ChatMember[]
 

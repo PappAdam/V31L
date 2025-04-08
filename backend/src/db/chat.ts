@@ -33,7 +33,10 @@ export async function findChatById(chatId: string): Promise<Chat | null> {
  * @param {string[]} userIds - An array of user IDs to be added as members to the new chat.
  * @returns {Promise<Chat | null>} `Chat` if successful, `null` if no users are provided or an error occurs.
  */
-export async function createChat(name: string): Promise<Chat | null> {
+export async function createChat(
+  name: string,
+  chatImgId: string
+): Promise<Chat | null> {
   if (!name) {
     return null;
   }
@@ -41,7 +44,8 @@ export async function createChat(name: string): Promise<Chat | null> {
   try {
     const newChat = await prisma.chat.create({
       data: {
-        name: name,
+        name,
+        chatImgId,
       },
     });
     return newChat;
