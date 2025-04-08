@@ -31,14 +31,6 @@ export class AuthService {
     return this._user$.asObservable();
   }
 
-  get tokenPayload() {
-    if (!this.user?.token) return null;
-
-    const payloadBase64 = this.user.token.split('.')[1]; // Extract payload
-    const payloadDecoded = atob(payloadBase64); // Decode Base64
-    return JSON.parse(payloadDecoded); // Parse JSON
-  }
-
   constructor(private http: HttpClient, private router: Router) {
     const user = localStorage.getItem('user');
     if (user) {

@@ -3,8 +3,6 @@ import { SocketService } from './socket.service';
 import {
   BehaviorSubject,
   combineLatest,
-  filter,
-  find,
   map,
   merge,
   Observable,
@@ -56,7 +54,7 @@ export class MessageService {
     return this._selectedChatId$.getValue();
   }
   //#region Subscriptions - These subscriptions modify the _chats$ BehaviorSubject, they just show up as unused varibles, don't remove them.
-  private loadOnAuthozition = this.socketService.authorized$.subscribe(
+  private loadOnAuthozition = this.socketService.isAuthorized$.subscribe(
     (authorized) => {
       this._chats$.next([]);
       if (authorized) {
@@ -97,6 +95,7 @@ export class MessageService {
   pinnedMessages$: Observable<Message[]> = merge(
     this.socketService.addPackageListener('PinnedMessages').pipe(
       switchMap((pkg) => {
+        if (!this.selectedChat) return [];
         const messages = this.decryptAndParseMessages(
           pkg.messages,
           this.selectedChat.chatKey
@@ -190,19 +189,15 @@ export class MessageService {
       let chatIndex = this._chats$.value.findIndex(
         (f) => f.id === rawChatContent.id
       );
-
       let chats = this._chats$.value;
-
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
         if (rawChatContent.encryptedChatKey) {
           const chatKey = await this.encryptionService.unwrapKey(
             rawChatContent.encryptedChatKey,
-            this.encryptionService.privateKey
+            this.encryptionService.privateKey!
           );
-
           const users: User[] = [];
-
           for (const nu of rawChatContent.users) {
             await this.img.storeImage(nu.profilePictureId, chatKey);
             const user = {
@@ -215,9 +210,7 @@ export class MessageService {
             }
             users.push(user);
           }
-
           await this.img.storeImage(rawChatContent.imgID!, chatKey);
-
           const chat = {
             ...rawChatContent,
             chatKey,
@@ -229,16 +222,13 @@ export class MessageService {
         } else {
           throw new Error('Failed to fetch the chat key.');
         }
-
         chatIndex = chats.length - 1;
       }
-
       if (rawChatContent.encryptedMessages.length != 0) {
         const chatMessages = await this.decryptAndParseMessages(
           rawChatContent.encryptedMessages,
           chats[chatIndex].chatKey
         );
-
         if (
           !this.lastMessageOfChat(rawChatContent.id) ||
           rawChatContent.encryptedMessages[0].timeStamp >=
@@ -260,7 +250,6 @@ export class MessageService {
           ];
         }
       }
-
       this._chats$.next(chats);
     }
   };

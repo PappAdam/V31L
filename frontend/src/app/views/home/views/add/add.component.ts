@@ -75,6 +75,9 @@ export class AddComponent {
     }
 
     const res = await this.inviteService.sendJoinRequest(v);
+
+    this.messageService.selectedChatId = res.chatId;
+    this.router.navigate(['app', { outlets: { home: 'messages' } }]);
   }
 
   async onCreate() {
@@ -92,7 +95,6 @@ export class AddComponent {
     );
 
     this.messageService.selectedChatId = chat.id;
-
     this.router.navigate(['app', { outlets: { home: 'messages' } }]);
   }
 }

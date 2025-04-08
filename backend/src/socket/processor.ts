@@ -194,7 +194,7 @@ async function processBasedOnHeader(
         incoming.chatId
       );
 
-      ServerPackageSender.send([client.ws], {
+      ServerPackageSender.send([client.user.id], {
         header: "LeaveChat",
         chatId: incoming.chatId,
       });

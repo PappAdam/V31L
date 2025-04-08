@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import * as msgpack from '@msgpack/msgpack';
 import {
@@ -42,12 +42,14 @@ export type PackageQueueItem = {
   providedIn: 'root',
 })
 export class SocketService {
+  private authService = inject(AuthService);
+
   private ws!: WebSocket;
 
-  private _authorized$ = new BehaviorSubject<boolean>(false);
-  public authorized$ = this._authorized$.asObservable();
-  get authorized() {
-    return this._authorized$.value;
+  private _isAuthorized$ = new BehaviorSubject<boolean>(false);
+  public isAuthorized$ = this._isAuthorized$.asObservable();
+  get isAuthorized() {
+    return this._isAuthorized$.value;
   }
 
   /** Contains all packages sent */
@@ -68,7 +70,7 @@ export class SocketService {
     Observable<PackageForHeader<any>[]>
   >();
 
-  constructor(private authService: AuthService) {
+  constructor() {
     this.connect();
 
     this.addPackageListener('Acknowledgement').subscribe((acknowledgement) => {
@@ -166,7 +168,7 @@ export class SocketService {
 
   /** Reconnects the WebSocket connection when the server is closed */
   private onClose = () => {
-    this._authorized$.next(false);
+    this._isAuthorized$.next(false);
     this._tokenChangedSubscription?.unsubscribe();
     console.warn('WebSocket connection lost');
     console.info('Reconnecting...');
@@ -226,7 +228,7 @@ export class SocketService {
   }
 
   private auth(token: string) {
-    if (this.authorized) {
+    if (this.isAuthorized) {
       console.error('Cannot authorize while authorized!');
       return;
     }
@@ -236,13 +238,13 @@ export class SocketService {
         token,
       },
       () => {
-        this._authorized$.next(true);
+        this._isAuthorized$.next(true);
       }
     );
   }
 
   private deAuth() {
-    if (!this.authorized) {
+    if (!this.isAuthorized) {
       console.error('Cannot deAuthorize while deAuthorized!');
       return;
     }
@@ -252,7 +254,7 @@ export class SocketService {
         header: 'DeAuthorization',
       },
       () => {
-        this._authorized$.next(false);
+        this._isAuthorized$.next(false);
       }
     );
   }
