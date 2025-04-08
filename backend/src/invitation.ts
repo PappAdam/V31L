@@ -11,15 +11,15 @@ export class Invitation {
     this.createdAt = Date.now();
     this.expireTime = expireTime;
     this.chatId = chatId;
-    setTimeout(this.remove, 10);
+    setTimeout(this.remove, expireTime);
 
     Invitations.push(this);
   }
 
   remove = () => {
     const index = Invitations.findIndex((inv) => inv.id == this.id);
-    if (index) {
-      Invitations.splice(index, 1);
+    if (index != -1) {
+      console.log(Invitations.splice(index, 1));
     }
   };
 }
