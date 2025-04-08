@@ -2,19 +2,29 @@ import { effect, inject, Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import { ImageResponse } from '@common';
+import { arrayToString, ImageResponse, stringToCharCodeArray } from '@common';
+import { EncryptionService } from './encryption.service';
+import { MessageService } from './message.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ImgService {
   authService = inject(AuthService);
+  encryptionService = inject(EncryptionService);
   http = inject(HttpClient);
-  baseURL = 'http://localhost:3000/img/';
+  private baseURL = 'http://localhost:3000/img/';
 
-  async getUrl(id: string) {
+  images = new Map<string, string>();
+
+  async getUrl(id: string, chatKey: CryptoKey): Promise<string | undefined> {
     if (!this.authService.user) {
       return;
+    }
+
+    const cachedImg = this.images.get(id);
+    if (cachedImg) {
+      return cachedImg;
     }
 
     const response = await lastValueFrom(
@@ -23,10 +33,24 @@ export class ImgService {
       })
     );
 
-    if (response.result == 'Error') {
-      return;
+    if (!response) {
+      return undefined;
     }
 
-    return `data:image/png;base64,${response.data}`;
+    let imgData = '';
+    if (response.iv) {
+      const rawData = stringToCharCodeArray(atob(response.data), Uint8Array);
+      imgData = await this.encryptionService.decryptText(chatKey, {
+        data: rawData,
+        iv: stringToCharCodeArray(response.iv, Uint8Array),
+      });
+    } else {
+      imgData = response.data;
+    }
+
+    const img = `${response.type},${imgData}`;
+    this.images.set(id, img);
+
+    return img;
   }
 }

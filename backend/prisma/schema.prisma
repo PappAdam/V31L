@@ -20,8 +20,12 @@ model User {
 }
 
 model Image {
-  id   String @id @default(uuid())
-  data Bytes
+  id      String @id @default(uuid())
+  data    Bytes
+  inIv    Bytes?
+  outIv   Bytes
+  authTag Bytes
+  type    String
 }
 
 model Chat {
@@ -36,6 +40,11 @@ model Chat {
   lastMessage   Message? @relation("ChatLastMessage", fields: [lastMessageId], references: [id], onDelete: SetNull)
 }
 
+enum MessageType {
+  IMAGE
+  TEXT
+}
+
 model Message {
   id        String   @id @default(uuid())
   chat      Chat     @relation("ChatMessages", fields: [chatId], references: [id], onDelete: Cascade)
@@ -44,10 +53,12 @@ model Message {
   userId    String
   timeStamp DateTime @default(now())
   content   Bytes
-  inIv      Bytes
+  inIv      Bytes?
   outIv     Bytes
   authTag   Bytes
   pinned    Boolean  @default(false)
+
+  type MessageType
 
   lastMessageForChat Chat? @relation("ChatLastMessage")
 }

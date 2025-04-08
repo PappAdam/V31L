@@ -19,6 +19,20 @@
       </div>
       }
     </div>
+    @if (imgUploaded) {
+    <div class="images-wrapper">
+      @for (img of imgs; track $index) {
+      <div class="image-preview">
+        <img [src]="img" alt="" />
+        <mat-icon
+          class="remove-btn"
+          fontIcon="close"
+          (click)="removeImage($index)"
+        ></mat-icon>
+      </div>
+      }
+    </div>
+    }
     <div class="input-wrapper">
       <div class="text-input-box">
         <div
@@ -31,7 +45,18 @@
       <button mat-mini-fab (click)="sendMessage()">
         <mat-icon fontIcon="send"></mat-icon>
       </button>
-      <button mat-mini-fab class="message-button" disabled>
+      <input
+        #imageSelector
+        type="file"
+        (change)="onImageUpload($event)"
+        accept="image/*"
+        hidden
+      />
+      <button
+        mat-mini-fab
+        class="message-button"
+        (click)="imageSelector.click()"
+      >
         <mat-icon fontIcon="image"></mat-icon>
       </button>
       <button mat-mini-fab class="message-button" disabled>

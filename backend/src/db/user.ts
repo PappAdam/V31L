@@ -2,8 +2,7 @@ import bcrypt from "bcryptjs";
 import { User } from "@prisma/client";
 import prisma from "./_db";
 import authenticator from "authenticator";
-import { decryptData, encryptData } from "@/encryption";
-import { arrayToString } from "@common";
+import { encryptData } from "@/encryption";
 
 /**
  * Creates a new user.
@@ -92,5 +91,64 @@ export async function findUserById(userId: string): Promise<User | null> {
   } catch (error) {
     console.error("Error finding user:\n", error);
     return null;
+  }
+}
+
+export async function deleteUser(userId: string): Promise<User | null> {
+  try {
+    const deletedUser = await prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+    return deletedUser;
+  } catch (error) {
+    console.error("Error deleting user:\n", error);
+    return null;
+  }
+}
+
+export async function updateUser(
+  user: Partial<User> & { id: string }
+): Promise<User | null> {
+  try {
+    if (user.password) {
+      user.password = await bcrypt.hash(user.password, 10);
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: user,
+    });
+
+    return updatedUser;
+  } catch (error) {
+    console.error("Error updating user:\n", error);
+    return null;
+  }
+}
+
+export async function updateUserMfa(
+  userId: string,
+  // Update could be a feature here later?
+  mode: "enable" | "disable"
+): Promise<User | null> {
+  switch (mode) {
+    case "enable":
+      const authKey = encryptData(authenticator.generateKey());
+      return await updateUser({
+        id: userId,
+        authKey: authKey.encrypted,
+        iv: authKey.iv,
+        authTag: authKey.authTag,
+      });
+    case "disable":
+      return await updateUser({
+        id: userId,
+        authKey: null,
+        authTag: null,
+      });
   }
 }

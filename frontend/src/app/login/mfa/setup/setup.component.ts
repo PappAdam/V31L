@@ -1,7 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
-import QRCode from 'qrcode';
 import { QRcodeComponent } from '../../../qrcode/qrcode.component';
 
 @Component({
@@ -27,6 +26,6 @@ export class MfaSetupComponent {
   }
 
   onNextClick() {
-    this.router.navigate([`/login/mfa/verify`]);
+    this.router.navigate([`/login`]);
   }
 }

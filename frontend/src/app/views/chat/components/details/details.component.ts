@@ -9,15 +9,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { QRcodeComponent } from '../../../../qrcode/qrcode.component';
-import {
-  MatDialog,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MessageComponent } from '../message/message.component';
-import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { PlatformService } from '@/services/platform.service';
 import { DeviceInfo } from '@capacitor/device';
+import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog.component';
 
 GroupMemberCardComponent;
 @Component({
@@ -78,7 +74,11 @@ export class DetailsComponent {
   }
 
   async onLeaveChat() {
-    const leaveDialogRef = this.dialog.open(LeaveChatDialog);
+    const leaveDialogRef = this.dialog.open(ConfirmDialog, {
+      data: {
+        title: 'Are you sure you want to leave this chat?',
+      },
+    });
 
     leaveDialogRef.afterClosed().subscribe((leaveConfirmed: boolean) => {
       if (leaveConfirmed) {
@@ -86,23 +86,4 @@ export class DetailsComponent {
       }
     });
   }
-}
-
-@Component({
-  selector: 'dialog-leave-chat',
-  imports: [MatDialogModule, MatButtonModule],
-  template: `
-    <h3 mat-dialog-title>Are you sure you want to leave this chat?</h3>
-    <mat-dialog-actions>
-      <button mat-button [mat-dialog-close]="false">No</button>
-      <button mat-flat-button cdkFocusInitial [mat-dialog-close]="true">
-        Yes
-      </button>
-    </mat-dialog-actions>
-  `,
-
-  styles: '',
-})
-export class LeaveChatDialog {
-  readonly dialogRef = inject(MatDialogRef<LeaveChatDialog>);
 }

@@ -23,6 +23,46 @@
     min-width: 230px;
     overflow: hidden;
 
+    .images-wrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: $mat-sys-spacing-sm;
+      flex-wrap: wrap;
+
+      .image-preview {
+        height: 100px;
+        width: fit-content;
+        position: relative;
+
+        img {
+          border-radius: $mat-sys-corner-medium;
+          height: 100%;
+        }
+
+        .remove-btn {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background-color: rgba(0, 0, 0, 0.6);
+          color: white;
+          border-radius: 50%;
+          cursor: pointer;
+          width: 24px;
+          height: 24px;
+          font-size: 18px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.2s;
+
+          &:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+          }
+        }
+      }
+    }
+
     .messages-wrapper {
       margin-top: $mat-sys-component-height-medium;
       width: 100%;
@@ -31,6 +71,11 @@
       overflow-y: scroll;
       scroll-behavior: smooth;
       padding-bottom: $mat-sys-spacing-sm;
+
+      img {
+        height: 100px;
+        width: fit-content;
+      }
 
       -ms-overflow-style: none; // IE and Edge
       &::-webkit-scrollbar {

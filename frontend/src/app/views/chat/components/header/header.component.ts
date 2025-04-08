@@ -1,6 +1,13 @@
 import { Chat, MessageService } from '@/services/message.service';
 import { PlatformService } from '@/services/platform.service';
-import { Component, Output, EventEmitter, inject, Input } from '@angular/core';
+import {
+  Component,
+  Output,
+  EventEmitter,
+  inject,
+  Input,
+  ViewChild,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DeviceInfo } from '@capacitor/device';
 import { MatButtonModule } from '@angular/material/button';

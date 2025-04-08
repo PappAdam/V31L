@@ -25,7 +25,10 @@ export class MessageComponent {
   imgURL?: String;
 
   async ngOnInit() {
-    this.imgURL = await this.img.getUrl('pfpImg');
+    this.imgURL = await this.img.getUrl(
+      'pfpImg',
+      this.messageService.selectedChat.chatKey
+    );
   }
 
   get ownMessage() {

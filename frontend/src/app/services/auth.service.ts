@@ -7,6 +7,7 @@ import {
   AuthSuccessResponse,
   AuthErrorResponse,
   AuthNextResponse,
+  AuthNextMfaSetupResponse,
 } from '@common';
 
 @Injectable({
@@ -37,15 +38,6 @@ export class AuthService {
     const payloadDecoded = atob(payloadBase64); // Decode Base64
     return JSON.parse(payloadDecoded); // Parse JSON
   }
-
-  /**
-   * Used in 2FA login, so the user doesn't have to type his username again.
-   */
-  private lastUsername = '';
-  /**
-   * Used in 2FA login, so the user doesn't have to type his password again.
-   */
-  private lastPassword = '';
 
   constructor(private http: HttpClient, private router: Router) {
     const user = localStorage.getItem('user');
@@ -84,11 +76,6 @@ export class AuthService {
       if (response.result == 'Success') {
         this.saveUser(response);
       }
-      // Storing username and password for 2FA authentication.
-      else if (response.result == 'Next') {
-        this.lastPassword = password;
-        this.lastUsername = username;
-      }
 
       return response;
     } catch (httpError: any) {
@@ -96,16 +83,10 @@ export class AuthService {
     }
   }
 
-  async authorize2FA(code: string) {
-    if (!this.lastPassword || !this.lastUsername) {
-      console.warn(
-        'You should not use authorize2FA without having lastUsername and lastPassword set!'
-      );
-    }
-
+  async authorize2FA(username: string, password: string, code: string) {
     const body = {
-      username: this.lastUsername,
-      password: this.lastPassword,
+      username,
+      password,
       mfa: code,
     };
 
@@ -143,9 +124,9 @@ export class AuthService {
     );
 
     try {
-      const res = await lastValueFrom(refreshRequest);
-      this.saveUser(res);
-      return res.token;
+      const response = await lastValueFrom(refreshRequest);
+      this.saveUser(response);
+      return response.token;
     } catch {
       return null;
     }
@@ -154,6 +135,89 @@ export class AuthService {
   private saveUser(user: StoredUser): void {
     this._user$.next(user);
     localStorage.setItem('user', JSON.stringify(user));
+  }
+
+  async deleteUser(): Promise<void> {
+    if (!this.user) {
+      return;
+    }
+
+    const refreshRequest = this.http.delete<void>(this.baseUrl, {
+      headers: { Authorization: this.user.token },
+    });
+
+    try {
+      await lastValueFrom(refreshRequest);
+      this.logout();
+      return;
+    } catch {
+      return;
+    }
+  }
+
+  async enableMfa(): Promise<void> {
+    if (!this.user) {
+      return;
+    }
+
+    const refreshRequest = this.http.post<AuthNextMfaSetupResponse>(
+      this.baseUrl + 'enablemfa',
+      {},
+      { headers: { Authorization: this.user.token } }
+    );
+
+    try {
+      const response = await lastValueFrom(refreshRequest);
+      this._user$.next(null);
+      localStorage.removeItem('user');
+      this.router.navigateByUrl('/login', {
+        state: { setupCode: response.setupCode },
+      });
+      return;
+    } catch {
+      return;
+    }
+  }
+
+  async disableMfa(mfa: string): Promise<AuthSuccessResponse | null> {
+    if (!this.user || !mfa) {
+      return null;
+    }
+
+    const refreshRequest = this.http.post<AuthSuccessResponse>(
+      this.baseUrl + 'disablemfa',
+      { mfa },
+      { headers: { Authorization: this.user.token } }
+    );
+
+    try {
+      const response = await lastValueFrom(refreshRequest);
+      return response;
+    } catch {
+      return null;
+    }
+  }
+
+  async changePassword(
+    oldPassword: string,
+    newPassword: string
+  ): Promise<AuthSuccessResponse | null> {
+    if (!this.user || !oldPassword || !newPassword) {
+      return null;
+    }
+
+    const refreshRequest = this.http.put<AuthSuccessResponse>(
+      this.baseUrl + '',
+      { oldPassword, newPassword },
+      { headers: { Authorization: this.user.token } }
+    );
+
+    try {
+      const response = await lastValueFrom(refreshRequest);
+      return response;
+    } catch {
+      return null;
+    }
   }
 
   logout(): void {
