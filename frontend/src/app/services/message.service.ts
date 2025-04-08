@@ -108,9 +108,13 @@ export class MessageService {
     )
   );
 
-  async sendMessage(chatId: string, message: string) {
+  async sendMessage(chatId: string, message: string, chatKey?: CryptoKey) {
+    if (!chatKey) {
+      chatKey = this._chats$.value.find((c) => c.id === chatId)!.chatKey;
+    }
+
     const encrypted = await this.encryptionService.encryptText(
-      this.selectedChat.chatKey,
+      chatKey,
       message
     );
 
@@ -174,10 +178,12 @@ export class MessageService {
   }
 
   onChatsPackageRecieved = async (pkg: ServerChatsPackage) => {
-    pkg.chats.forEach(async (rawChatContent) => {
+    for (const rawChatContent of pkg.chats) {
       let chatIndex = this._chats$.value.findIndex(
         (f) => f.id === rawChatContent.id
       );
+
+      let chats = this._chats$.value;
 
       // Add the chat if it doesn't exist
       if (chatIndex < 0) {
@@ -197,38 +203,44 @@ export class MessageService {
             messages: [],
             img,
           };
-          this._chats$.next([...this._chats$.value, chat]);
+          chats = [...chats, chat];
         } else {
           throw new Error('Failed to fetch the chat key.');
         }
 
-        chatIndex = this._chats$.value.length - 1;
+        chatIndex = chats.length - 1;
       }
 
-      if (rawChatContent.encryptedMessages.length == 0) {
-        return;
+      if (rawChatContent.encryptedMessages.length != 0) {
+        const chatMessages = await this.decryptAndParseMessages(
+          rawChatContent.encryptedMessages,
+          chats[chatIndex].chatKey
+        );
+
+        if (
+          !this.lastMessageOfChat(rawChatContent.id) ||
+          rawChatContent.encryptedMessages[0].timeStamp >=
+            this.lastMessageOfChat(rawChatContent.id)!.timeStamp
+        ) {
+          // New message recieved
+          chats[chatIndex].messages = [
+            ...chats[chatIndex].messages,
+            ...chatMessages,
+          ];
+          // Push the chat in front when a new message is received
+          const chat = chats.splice(chatIndex, 1)[0]!;
+          chats = [chat, ...chats];
+        } else {
+          // Old message recieved (scrolling back)
+          chats[chatIndex].messages = [
+            ...chatMessages,
+            ...chats[chatIndex].messages,
+          ];
+        }
       }
 
-      const chatMessages = await this.decryptAndParseMessages(
-        rawChatContent.encryptedMessages,
-        this._chats$.value[chatIndex].chatKey
-      );
-      if (
-        this.lastMessageOfChat(rawChatContent.id) &&
-        rawChatContent.encryptedMessages[0].timeStamp >
-          this.lastMessageOfChat(rawChatContent.id)!.timeStamp
-      ) {
-        this._chats$.value[chatIndex].messages = [
-          ...this._chats$.value[chatIndex].messages,
-          ...chatMessages,
-        ];
-      } else {
-        this._chats$.value[chatIndex].messages = [
-          ...chatMessages,
-          ...this._chats$.value[chatIndex].messages,
-        ];
-      }
-    });
+      this._chats$.next(chats);
+    }
   };
 
   private async decryptAndParseMessages(

@@ -1,6 +1,7 @@
 import { Chat, Message } from "@prisma/client";
 import prisma from "./_db";
 import { encryptData } from "@/encryption";
+import { createMessage } from "./message";
 
 /**
  * Gets a chat with the given id.
@@ -48,6 +49,7 @@ export async function createChat(
         chatImgId,
       },
     });
+
     return newChat;
   } catch (error) {
     console.error("Error creating chat:\n", error);

@@ -1,5 +1,6 @@
 import { Request, Response, Router } from "express";
 import {
+  arrayToString,
   chatCreationSuccessResponse,
   serverErrorResponse,
   stringToCharCodeArray,
@@ -55,7 +56,7 @@ async function createNewChat(req: Request, res: Response) {
       chats: [publicChat],
     });
 
-    res.status(200).json(chatCreationSuccessResponse());
+    res.status(200).json(chatCreationSuccessResponse(publicChat));
     return;
   } catch (error) {
     console.error("Error during creating invitation: \n", error);

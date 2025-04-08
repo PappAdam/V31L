@@ -10,9 +10,9 @@ import {
   InviteSuccess,
   JoinSuccess,
   stringToCharCodeArray,
+  ChatCreateSuccess,
 } from '@common';
 import { lastValueFrom } from 'rxjs';
-import { FalseEncryptionService } from './false-encryption.service';
 import { MessageService } from './message.service';
 
 @Injectable({
@@ -123,7 +123,9 @@ export class InviteService {
     }
   }
 
-  async createChatRequest(chatName: string): Promise<ChatResponse> {
+  async createChatRequest(
+    chatName: string
+  ): Promise<ChatCreateSuccess & { key: CryptoKey }> {
     const rawKey = crypto.getRandomValues(new Uint8Array(32));
     const key = await crypto.subtle.importKey(
       'raw',
@@ -141,12 +143,16 @@ export class InviteService {
       chatImgId: 'groupImg',
     };
 
-    const response = lastValueFrom(
-      this.http.post<ChatResponse>('http://localhost:3000/chat/create', body, {
-        headers: { Authorization: this.enc.user.token },
-      })
+    const response = await lastValueFrom(
+      this.http.post<ChatCreateSuccess>(
+        'http://localhost:3000/chat/create',
+        body,
+        {
+          headers: { Authorization: this.enc.user.token },
+        }
+      )
     );
 
-    return response;
+    return { ...response, key };
   }
 }
