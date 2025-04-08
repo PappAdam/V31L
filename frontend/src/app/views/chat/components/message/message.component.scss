@@ -35,7 +35,6 @@
     .message-bubble {
       background-color: $mat-sys-surface-variant;
       border-radius: calc($mat-sys-img-profile-medium / 2);
-      padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
       max-width: 580px;
       min-height: $mat-sys-img-profile-medium;
       font: $mat-sys-body-medium-font;
@@ -46,6 +45,23 @@
       word-wrap: break-word;
       word-wrap: wrap;
       color: $mat-sys-on-surface-variant;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &.text {
+        padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
+      }
+
+      &.image {
+        padding: 0;
+      }
+
+      img {
+        height: 150px;
+        width: fit-content;
+        border-radius: $mat-sys-corner-medium;
+      }
     }
   }
 

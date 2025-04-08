@@ -11,11 +11,15 @@ export type ClientPackageDescription =
 
 export type ClientPackage = ClientPackageDescription & { id: string };
 
+export type MessageType =
+  | { type: "Text" }
+  | { type: "Image"; encoding: string };
+
 export type ClientNewMessagePackage = {
   header: "NewMessage";
   chatId: string;
   messageContent: EncryptedMessage;
-};
+} & MessageType;
 
 export type ClientConnectionPackage = {
   header: "Authorization";

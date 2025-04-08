@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { EncryptedMessage, PublicMessage } from '@common';
+import { EncryptedMessage, MessageType, PublicMessage } from '@common';
 import { StoredUser } from './auth.service';
 
 export type Message = Omit<PublicMessage, 'encryptedData'> & {
   content: string;
+  type: 'IMAGE' | 'TEXT';
 };
 
 @Injectable({
@@ -63,7 +64,8 @@ export class EncryptionService {
       );
 
       return this.decoder.decode(decrypted);
-    } catch {
+    } catch (error) {
+      console.error(error);
       return 'Failed to decrypt message';
     }
   }

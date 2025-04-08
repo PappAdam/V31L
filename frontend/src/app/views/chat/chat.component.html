@@ -19,6 +19,20 @@
       </div>
       }
     </div>
+    @if (imgUploaded) {
+    <div class="images-wrapper">
+      @for (img of imgs; track $index) {
+      <div class="image-preview">
+        <img [src]="img" alt="" />
+        <mat-icon
+          class="remove-btn"
+          fontIcon="close"
+          (click)="removeImage($index)"
+        ></mat-icon>
+      </div>
+      }
+    </div>
+    }
     <div class="input-wrapper">
       <textarea
         matInput
@@ -34,7 +48,14 @@
       >
         <mat-icon fontIcon="send"></mat-icon>
       </button>
-      <button class="message-button" disabled>
+      <input
+        #imageSelector
+        type="file"
+        (change)="onImageUpload($event)"
+        accept="image/*"
+        hidden
+      />
+      <button class="message-button" (click)="imageSelector.click()">
         <mat-icon fontIcon="image"></mat-icon>
       </button>
       <button class="message-button" disabled>
@@ -44,5 +65,4 @@
   </div>
   <app-details [state]="detailsState"></app-details>
 </div>
-
 } @else { "this is the mobile type stuff" }

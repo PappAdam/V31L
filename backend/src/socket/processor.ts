@@ -1,8 +1,10 @@
 import {
   ClientPackage,
+  EncryptedMessage,
   PublicChat,
   PublicMessage,
   ServerChatsPackage,
+  stringToCharCodeArray,
 } from "@common";
 import { deleteChatMember, findChatMembersByChat } from "../db/chatMember";
 import {
@@ -15,6 +17,8 @@ import { Client } from "./client";
 import ServerPackageSender from "./server";
 import { getPublicChatsWithMessages, toPublicMessage } from "@/db/public";
 import { findUserById } from "@/db/user";
+import { createImage } from "@/db/image";
+import { Message, MessageType } from "@prisma/client";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
@@ -57,10 +61,30 @@ async function processBasedOnHeader(
       return true;
 
     case "NewMessage":
+      let msgType: MessageType = "TEXT";
+      let content: EncryptedMessage;
+      if (incoming.type == "Image") {
+        const image = await createImage(
+          incoming.messageContent.data,
+          incoming.encoding,
+          undefined,
+          incoming.messageContent.iv
+        );
+        msgType = "IMAGE";
+
+        if (!image) {
+          return false;
+        }
+        content = { data: stringToCharCodeArray(image.id, Uint8Array) };
+      } else {
+        content = incoming.messageContent;
+      }
+
       const createdMessage = await createMessage(
         incoming.chatId,
         client.user.id,
-        incoming.messageContent
+        content,
+        msgType
       );
 
       if (!createdMessage) {
@@ -77,9 +101,10 @@ async function processBasedOnHeader(
               {
                 id: createdMessage.id,
                 user: client.user,
-                encryptedData: incoming.messageContent,
+                encryptedData: content,
                 timeStamp: createdMessage.timeStamp,
                 pinned: createdMessage.pinned,
+                type: msgType,
               },
             ],
             users: [],

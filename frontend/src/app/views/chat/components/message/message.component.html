@@ -28,8 +28,16 @@
       }}
     </div>
     }
-    <div class="message-bubble">
+    <div
+      class="message-bubble"
+      [class.image]="message.type == 'IMAGE'"
+      [class.text]="message.type == 'TEXT'"
+    >
+      @if (message.type == "IMAGE") {
+      <img [src]="message.content" alt="" />
+      } @else {
       {{ message.content }}
+      }
     </div>
   </div>
   <div class="message-profile-wrapper">
