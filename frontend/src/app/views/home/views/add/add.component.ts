@@ -10,6 +10,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { DeviceInfo } from '@capacitor/device';
 import { TabHeaderComponent } from '../../components/tab-header/tab-header.component';
+import { MessageService } from '@/services/message.service';
+import { EncryptionService } from '@/services/encryption.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-add',
@@ -27,18 +30,19 @@ import { TabHeaderComponent } from '../../components/tab-header/tab-header.compo
   styleUrl: './add.component.scss',
 })
 export class AddComponent {
-  platform: DeviceInfo | null = null;
   platformService: PlatformService = inject(PlatformService);
+  platform: DeviceInfo | null = this.platformService.info;
+  inviteService = inject(InviteService);
+  messageService = inject(MessageService);
+  encryptionService = inject(EncryptionService);
+  router = inject(Router);
+  route = inject(ActivatedRoute);
 
-  constructor() {
-    this.platform = this.platformService.info;
-  }
   chatName = new FormControl('');
   connectionString = new FormControl('');
   @ViewChild('imageSelector') imageSelector?: HTMLInputElement;
   img = '';
   selectedFile: File | null = null;
-  inviteService = inject(InviteService);
 
   public get imgUploaded(): boolean {
     return !!this.img;
@@ -79,6 +83,16 @@ export class AddComponent {
       return;
     }
 
-    const res = await this.inviteService.createChatRequest(v);
+    const { chat, key } = await this.inviteService.createChatRequest(v);
+
+    this.messageService.sendMessage(
+      chat.id,
+      `This is the start of this conversation.`,
+      key
+    );
+
+    this.messageService.selectedChatId = chat.id;
+
+    this.router.navigate(['app', { outlets: { home: 'messages' } }]);
   }
 }
