@@ -40,12 +40,6 @@ authRouter.post(
   validateRequiredFields(["username", "password"]),
   loginUser
 );
-authRouter.post(
-  "/changepassword",
-  validateRequiredFields(["oldPassword", "newPassword"]),
-  extractUserFromTokenMiddleWare,
-  changePassword
-);
 authRouter.post("/refresh", extractUserFromTokenMiddleWare, refreshToken);
 authRouter.post("/enablemfa", extractUserFromTokenMiddleWare, enableMfa);
 authRouter.post(
@@ -55,6 +49,12 @@ authRouter.post(
   disableMfa
 );
 
+authRouter.put(
+  "/",
+  validateRequiredFields(["oldPassword", "newPassword"]),
+  extractUserFromTokenMiddleWare,
+  changePassword
+);
 authRouter.delete("/", extractUserFromTokenMiddleWare, deleteProfile);
 export default authRouter;
 

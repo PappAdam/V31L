@@ -43,7 +43,7 @@ export type AuthErrorResponse = {
 // Used in both auth requests
 export const successResponse = (
   token: string,
-  user: PublicUser & { authKey: Uint8Array | null }
+  user: PublicUser & { authKey?: Uint8Array | null }
 ): AuthSuccessResponse => {
   return {
     result: "Success",

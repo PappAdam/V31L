@@ -162,7 +162,7 @@ export class LoginComponent {
   }
 }
 
-function passwordValidator(): ValidatorFn {
+export function passwordValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
 

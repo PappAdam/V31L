@@ -16,6 +16,7 @@
         <app-group-option-card
           label="Change Password"
           fontIcon="password"
+          (activated)="onChangePassword()"
         ></app-group-option-card>
         <app-group-option-card
           label="Update Profile picture"
@@ -30,8 +31,6 @@
       (activated)="onToggleTwoFactor($event)"
       [(isActivated)]="mfaToggleEnabled"
     >
-    </app-group-option-card>
-    <app-group-option-card label="Reset profile" fontIcon="change_circle">
     </app-group-option-card>
     <app-group-option-card
       label="Delete profile"

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, lastValueFrom, Observable, tap } from 'rxjs';
-import { ActivatedRoute, Route, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   AuthResponse,
   AuthSuccessResponse,
@@ -39,11 +39,7 @@ export class AuthService {
     return JSON.parse(payloadDecoded); // Parse JSON
   }
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {
+  constructor(private http: HttpClient, private router: Router) {
     const user = localStorage.getItem('user');
     if (user) {
       this._user$.next(JSON.parse(user));
@@ -191,6 +187,28 @@ export class AuthService {
     const refreshRequest = this.http.post<AuthSuccessResponse>(
       this.baseUrl + 'disablemfa',
       { mfa },
+      { headers: { Authorization: this.user.token } }
+    );
+
+    try {
+      const response = await lastValueFrom(refreshRequest);
+      return response;
+    } catch {
+      return null;
+    }
+  }
+
+  async changePassword(
+    oldPassword: string,
+    newPassword: string
+  ): Promise<AuthSuccessResponse | null> {
+    if (!this.user || !oldPassword || !newPassword) {
+      return null;
+    }
+
+    const refreshRequest = this.http.put<AuthSuccessResponse>(
+      this.baseUrl + '',
+      { oldPassword, newPassword },
       { headers: { Authorization: this.user.token } }
     );
 
