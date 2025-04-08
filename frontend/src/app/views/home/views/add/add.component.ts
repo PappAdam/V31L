@@ -19,6 +19,7 @@ import { TabHeaderComponent } from '../../components/tab-header/tab-header.compo
     MatDividerModule,
     MatButtonModule,
     MatIcon,
+    MatButtonModule,
     TabHeaderComponent,
     FormsModule,
   ],

@@ -68,3 +68,20 @@ app-app-layout {
   align-items: center;
   justify-content: center;
 }
+
+.mdc-notched-outline__trailing {
+  border-radius: 0px $mat-sys-corner-medium $mat-sys-corner-medium 0px !important;
+}
+
+.mdc-notched-outline__leading {
+  border-radius: $mat-sys-corner-medium 0px 0px $mat-sys-corner-medium !important;
+}
+
+.mat-mdc-text-field-wrapper {
+  border-radius: $mat-sys-corner-medium !important;
+  background-color: $mat-sys-surface-container !important;
+}
+
+.mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
