@@ -9,12 +9,12 @@
       <mat-icon
         class="expand-arrow"
         fontIcon="expand_less"
-        [style.transform]="'rotate(' + (isActivated ? 0 : 180) + 'deg)'"
+        [style.transform]="'rotate(' + (isActivated() ? 0 : 180) + 'deg)'"
       ></mat-icon>
       } @if (type == 'toggle') {
       <mat-slide-toggle
         class="toggle"
-        [checked]="isActivated"
+        [checked]="isActivated()"
       ></mat-slide-toggle>
       }
     </div>
@@ -22,7 +22,7 @@
   <div
     #content
     class="content"
-    [style.maxHeight]="isActivated ? '100vh' : '0vh'"
+    [style.maxHeight]="isActivated() ? '100vh' : '0vh'"
   >
     <ng-content></ng-content>
   </div>

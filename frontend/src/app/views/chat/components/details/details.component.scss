@@ -32,9 +32,13 @@
     flex-shrink: 0;
 
     .group-action-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: $mat-sys-spacing-md;
       width: 100%;
       border-radius: $mat-sys-corner-small;
       background-color: $mat-sys-surface-container-high;
+      padding: $mat-sys-spacing-sm;
 
       .inv-body {
         display: flex;
