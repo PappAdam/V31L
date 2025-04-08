@@ -4,7 +4,7 @@
   [attr.data-selected]="selected"
 >
   <div class="image-wrapper">
-    <img [src]="chat?.img" alt="" />
+    <img [src]="(chat?.img)!.data" alt="" />
   </div>
   <div class="text-wrapper">
     <div class="title-wrapper">

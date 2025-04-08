@@ -16,18 +16,21 @@ import {
   arrayToString,
   PublicChat,
   PublicMessage,
+  PublicUser,
   ServerChatsPackage,
 } from '@common';
 import { EncryptionService, Message } from './encryption.service';
-import { ImgService } from './img.service';
+import { Image, ImgService } from './img.service';
 
+export type User = PublicUser & { img: Image };
 export type Chat = Omit<
   PublicChat,
-  'encryptedMessages' | 'encryptedChatKey' | 'imgID'
+  'encryptedMessages' | 'encryptedChatKey' | 'users'
 > & {
   messages: Message[];
   chatKey: CryptoKey;
-  img: string;
+  users: User[];
+  img: Image;
 };
 
 @Injectable({
@@ -37,6 +40,7 @@ export class MessageService {
   socketService = inject(SocketService);
   encryptionService = inject(EncryptionService);
   img = inject(ImgService);
+  users: User[] = [];
 
   private _chats$ = new BehaviorSubject<Chat[]>([]);
   get chats$(): Observable<Chat[]> {
@@ -173,8 +177,12 @@ export class MessageService {
     });
   }
 
+  getUser(userId: string): User | undefined {
+    return this.users.find((u) => u.id == userId);
+  }
+
   onChatsPackageRecieved = async (pkg: ServerChatsPackage) => {
-    pkg.chats.forEach(async (rawChatContent) => {
+    for (const rawChatContent of pkg.chats) {
       let chatIndex = this._chats$.value.findIndex(
         (f) => f.id === rawChatContent.id
       );
@@ -186,16 +194,30 @@ export class MessageService {
             rawChatContent.encryptedChatKey,
             this.encryptionService.privateKey
           );
-          let img = '';
-          if (rawChatContent.imgID) {
-            img = (await this.img.getUrl(rawChatContent.imgID, chatKey)) || '';
+
+          const users: User[] = [];
+
+          for (const nu of rawChatContent.users) {
+            await this.img.storeImage(nu.profilePictureId, chatKey);
+            const user = {
+              ...nu,
+              img: this.img.images.get(nu.profilePictureId)!,
+            };
+            const exsistingUser = this.users.find((u) => u.id == nu.id);
+            if (!exsistingUser) {
+              this.users.push(user);
+            }
+            users.push(user);
           }
+
+          await this.img.storeImage(rawChatContent.imgID!, chatKey);
 
           const chat = {
             ...rawChatContent,
             chatKey,
             messages: [],
-            img,
+            users,
+            img: this.img.images.get(rawChatContent.imgID!)!,
           };
           this._chats$.next([...this._chats$.value, chat]);
         } else {
@@ -228,7 +250,7 @@ export class MessageService {
           ...this._chats$.value[chatIndex].messages,
         ];
       }
-    });
+    }
   };
 
   private async decryptAndParseMessages(
@@ -248,17 +270,8 @@ export class MessageService {
         }
 
         let type = msg.type;
-
-        let img: string | undefined;
-        if (msg.type == 'IMAGE') {
-          img = await this.img.getUrl(messageContent, key);
-        }
-
-        if (!img && msg.type == 'IMAGE') {
-          type = 'TEXT';
-          messageContent = 'Failed to load img';
-        } else if (img) {
-          messageContent = img;
+        if (type == 'IMAGE') {
+          this.img.storeImage(messageContent, key);
         }
 
         return {

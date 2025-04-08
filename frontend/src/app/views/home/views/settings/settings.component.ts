@@ -1,7 +1,7 @@
 import { AuthService } from '@/services/auth.service';
 import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { map } from 'rxjs';
+import { lastValueFrom, map } from 'rxjs';
 import { GroupOptionCardComponent } from '../../../chat/components/details/components/group-option-card/group-option-card.component';
 import { MatDividerModule } from '@angular/material/divider';
 import {
@@ -18,6 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { passwordValidator } from '@/login/login.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TabHeaderComponent } from '../../components/tab-header/tab-header.component';
+import { ImgService } from '@/services/img.service';
 
 @Component({
   selector: 'app-settings',
@@ -33,10 +34,12 @@ import { TabHeaderComponent } from '../../components/tab-header/tab-header.compo
 export class SettingsComponent {
   authService = inject(AuthService);
   dialog = inject(MatDialog);
+  imgService = inject(ImgService);
+
   private snackBar = inject(MatSnackBar);
 
+  user = this.authService.user;
   username$ = this.authService.user$.pipe(map((u) => u?.username));
-
   mfaToggleEnabled: boolean = this.authService.user?.mfaEnabled || false;
 
   onChangePassword() {

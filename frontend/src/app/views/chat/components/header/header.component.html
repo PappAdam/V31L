@@ -2,7 +2,7 @@
 <div class="header-wrapper">
   @if (this.selectedChat$ | async; as selectedChat) {
   <div class="title-wrapper">
-    <img class="image" [src]="selectedChat.img" />
+    <img class="image" [src]="selectedChat.img.data" />
     <div class="title">
       {{ selectedChat.name }}
     </div>

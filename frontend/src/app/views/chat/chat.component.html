@@ -8,8 +8,7 @@
       <app-message
         [first]="
           $index === 0 ||
-          selectedChat.messages[$index - 1].user.username !==
-            message.user.username
+          selectedChat.messages[$index - 1].user !== message.user
         "
         [message]="message"
       ></app-message>

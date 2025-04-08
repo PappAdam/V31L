@@ -51,6 +51,7 @@ export const successResponse = (
     id: user.id,
     username: user.username,
     mfaEnabled: !!user.authKey,
+    profilePictureId: user.profilePictureId,
   };
 };
 

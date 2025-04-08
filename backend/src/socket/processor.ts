@@ -18,7 +18,7 @@ import ServerPackageSender from "./server";
 import { getPublicChatsWithMessages, toPublicMessage } from "@/db/public";
 import { findUserById } from "@/db/user";
 import { createImage } from "@/db/image";
-import { Message, MessageType } from "@prisma/client";
+import { MessageType } from "@prisma/client";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
@@ -56,6 +56,7 @@ async function processBasedOnHeader(
       client.user = {
         username: user!.username,
         id: user!.id,
+        profilePictureId: user!.profilePictureId,
       };
 
       return true;
@@ -100,7 +101,7 @@ async function processBasedOnHeader(
             encryptedMessages: [
               {
                 id: createdMessage.id,
-                user: client.user,
+                user: client.user.id,
                 encryptedData: content,
                 timeStamp: createdMessage.timeStamp,
                 pinned: createdMessage.pinned,
@@ -111,6 +112,7 @@ async function processBasedOnHeader(
           },
         ],
       };
+
       ServerPackageSender.send(
         chatMembers.map((member) => member.userId),
         responsePackage
@@ -122,6 +124,7 @@ async function processBasedOnHeader(
       client.user = {
         username: "",
         id: "",
+        profilePictureId: "",
       };
 
       return true;

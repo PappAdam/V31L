@@ -3,11 +3,12 @@ import { MessageType } from "./client";
 export type PublicUser = {
   id: string;
   username: string;
+  profilePictureId: string;
 };
 
 export type PublicMessage = {
   id: string;
-  user: PublicUser;
+  user: string;
   timeStamp: Date;
   pinned: boolean;
   encryptedData: EncryptedMessage;

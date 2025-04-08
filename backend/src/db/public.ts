@@ -37,7 +37,7 @@ export async function getPublicChatsWithMessages(
           return {
             username: m.user.username,
             id: m.user.id,
-            pfpImgId: m.user.profilePictureId,
+            profilePictureId: m.user.profilePictureId,
           };
         });
 
@@ -84,9 +84,15 @@ export async function toPublicChat(
     let messages = (await findChatMessages(chat.id, messageCount)).map(
       toPublicMessage
     );
-    let users = (await findChatMembersByChat(chat.id)).map((m) => {
-      return { username: m.user.username, id: m.user.id };
-    });
+    let users: PublicUser[] = (await findChatMembersByChat(chat.id)).map(
+      (m) => {
+        return {
+          username: m.user.username,
+          id: m.user.id,
+          profilePictureId: m.user.profilePictureId,
+        };
+      }
+    );
 
     return {
       id: chat.id,
@@ -117,7 +123,7 @@ export function toPublicMessage(msg: RawPublicMessage): PublicMessage {
     pinned: msg.pinned,
     type: msg.type,
     id: msg.id,
-    user: msg.user,
+    user: msg.user.id,
     timeStamp: msg.timeStamp,
   };
 }

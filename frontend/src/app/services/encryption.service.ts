@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { EncryptedMessage, MessageType, PublicMessage } from '@common';
 import { StoredUser } from './auth.service';
+import { User } from './message.service';
 
 export type Message = Omit<PublicMessage, 'encryptedData'> & {
   content: string;
-  type: 'IMAGE' | 'TEXT';
 };
 
 @Injectable({
