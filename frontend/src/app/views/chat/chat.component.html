@@ -4,9 +4,7 @@
     <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
     <div class="messages-wrapper" #msgsWrapper (scroll)="onScroll()">
       @if (this.selectedChat$ | async; as selectedChat) { @for (message of
-      selectedChat.messages; track $index) { @if (message.type == "IMAGE") {
-      <img [src]="message.content" alt="" />
-      } @else {
+      selectedChat.messages; track $index) {
       <app-message
         [first]="
           $index === 0 ||
@@ -15,7 +13,7 @@
         "
         [message]="message"
       ></app-message>
-      } } } @else {
+      } } @else {
       <div class="no-chat-selected">
         <h3>No chat selected</h3>
       </div>

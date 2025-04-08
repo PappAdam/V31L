@@ -10,12 +10,12 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+
 import {
   arrayToString,
   PublicChat,
   PublicMessage,
   ServerChatsPackage,
-  stringToCharCodeArray,
 } from '@common';
 import { EncryptionService, Message } from './encryption.service';
 import { ImgService } from './img.service';
@@ -123,7 +123,7 @@ export class MessageService {
     });
   }
 
-  async sendImage(chatId: string, img: string) {
+  async sendImage(chatId: string, img: string, after?: () => void) {
     const [imgtype, imgdata] = img.split(',');
     if (!imgdata) {
       console.error('Failed to send img. Sending its plain text data instead.');
@@ -136,13 +136,16 @@ export class MessageService {
       imgdata
     );
 
-    this.socketService.createPackage({
-      header: 'NewMessage',
-      chatId,
-      messageContent: encrypted,
-      type: 'Image',
-      encoding: imgtype,
-    });
+    this.socketService.createPackage(
+      {
+        header: 'NewMessage',
+        chatId,
+        messageContent: encrypted,
+        type: 'Image',
+        encoding: imgtype,
+      },
+      after
+    );
   }
 
   pinMessage(messageId: string, pinState: boolean) {

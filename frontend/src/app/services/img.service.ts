@@ -13,11 +13,18 @@ export class ImgService {
   authService = inject(AuthService);
   encryptionService = inject(EncryptionService);
   http = inject(HttpClient);
-  baseURL = 'http://localhost:3000/img/';
+  private baseURL = 'http://localhost:3000/img/';
+
+  images = new Map<string, string>();
 
   async getUrl(id: string, chatKey: CryptoKey): Promise<string | undefined> {
     if (!this.authService.user) {
       return;
+    }
+
+    const cachedImg = this.images.get(id);
+    if (cachedImg) {
+      return cachedImg;
     }
 
     const response = await lastValueFrom(
@@ -41,6 +48,9 @@ export class ImgService {
       imgData = response.data;
     }
 
-    return `${response.type},${imgData}`;
+    const img = `${response.type},${imgData}`;
+    this.images.set(id, img);
+
+    return img;
   }
 }

@@ -117,6 +117,8 @@ export class ChatComponent {
       this.messageService.sendImage(selectedChat.id, img);
     });
 
+    this.imgs = [];
+
     const message = this.messageControl.value?.trim();
     if (!message || this.messageService.selectedChatIndex == -1) return;
     this.messageService.sendMessage(selectedChat.id, message);
