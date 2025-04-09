@@ -1,13 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { EncryptionService } from './encryption.service';
-import { StoredUser } from './auth.service';
+import { AuthService } from './auth.service';
 import {
-  arrayToString,
   CreateSuccess,
   InviteError,
   ChatResponse,
-  InviteSuccess,
   JoinSuccess,
   stringToCharCodeArray,
   ChatCreateSuccess,
@@ -21,8 +19,9 @@ import { MessageService } from './message.service';
 export class InviteService {
   baseUrl: string = 'http://localhost:3000/inv/';
   http = inject(HttpClient);
-  enc = inject(EncryptionService);
-  msg = inject(MessageService);
+  encryptionService = inject(EncryptionService);
+  authService = inject(AuthService);
+  messageService = inject(MessageService);
 
   sensitiveDataWarning = true;
 
@@ -31,7 +30,10 @@ export class InviteService {
   async wrapInvitation(invId: string): Promise<string> {
     const raw = Uint16Array.from(
       new Uint8Array(
-        await crypto.subtle.exportKey('raw', this.msg.selectedChat.chatKey)
+        await crypto.subtle.exportKey(
+          'raw',
+          this.messageService.selectedChat.chatKey
+        )
       )
     ).map((b) => b + 1);
 
@@ -71,7 +73,7 @@ export class InviteService {
           this.baseUrl + 'create',
           body,
           {
-            headers: { Authorization: this.enc.user.token },
+            headers: { Authorization: this.authService.user!.token },
           }
         )
       );
@@ -91,9 +93,7 @@ export class InviteService {
    * @param invId Id of the recieved invitaiton
    * @param key AES-GCM key for decrypting and encrypting messages in chat
    */
-  async sendJoinRequest(
-    connectionString: string
-  ): Promise<JoinSuccess | InviteError> {
+  async sendJoinRequest(connectionString: string): Promise<JoinSuccess> {
     try {
       const invIdKeyPair = await this.unwrapInvitation(connectionString);
       const key = await crypto.subtle.importKey(
@@ -104,7 +104,10 @@ export class InviteService {
         ['encrypt', 'decrypt']
       );
 
-      const wrapped = await this.enc.wrapKey(key, this.enc.privateKey);
+      const wrapped = await this.encryptionService.wrapKey(
+        key,
+        this.encryptionService.privateKey!
+      );
 
       const body = {
         key: String.fromCharCode(...wrapped),
@@ -112,8 +115,8 @@ export class InviteService {
       };
 
       const response = await lastValueFrom(
-        this.http.post<JoinSuccess | InviteError>(this.baseUrl + 'join', body, {
-          headers: { Authorization: this.enc.user.token },
+        this.http.post<JoinSuccess>(this.baseUrl + 'join', body, {
+          headers: { Authorization: this.authService.user!.token },
         })
       );
 
@@ -135,7 +138,10 @@ export class InviteService {
       ['encrypt', 'decrypt']
     );
 
-    const wrappedKey = await this.enc.wrapKey(key, this.enc.privateKey);
+    const wrappedKey = await this.encryptionService.wrapKey(
+      key,
+      this.encryptionService.privateKey!
+    );
 
     const body = {
       name: chatName,
@@ -148,7 +154,7 @@ export class InviteService {
         'http://localhost:3000/chat/create',
         body,
         {
-          headers: { Authorization: this.enc.user.token },
+          headers: { Authorization: this.authService.user!.token },
         }
       )
     );

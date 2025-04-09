@@ -22,17 +22,9 @@ export class MessageComponent {
   @Input() first: boolean = false;
   @Input() displayedIn: 'Chat' | 'PinnedMessages' = 'Chat';
   img = inject(ImgService);
-  imgURL?: String;
-
-  async ngOnInit() {
-    this.imgURL = await this.img.getUrl(
-      'pfpImg',
-      this.messageService.selectedChat.chatKey
-    );
-  }
 
   get ownMessage() {
-    return this.message.user.username == this.authService.user?.username;
+    return this.message.user == this.authService.user?.id;
   }
 
   togglePinMessage() {

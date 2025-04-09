@@ -38,6 +38,7 @@ export async function findChatMessages(
             select: {
               username: true,
               id: true,
+              profilePictureId: true,
             },
           },
         },

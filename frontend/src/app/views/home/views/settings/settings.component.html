@@ -2,10 +2,7 @@
   <app-tab-header Title="Settings"></app-tab-header>
 
   <div class="profile">
-    <img
-      src="https://play-lh.googleusercontent.com/jInS55DYPnTZq8GpylyLmK2L2cDmUoahVacfN_Js_TsOkBEoizKmAl5-p8iFeLiNjtE=w526-h296-rw"
-      alt=""
-    />
+    <img [src]="imgService.images.get(user?.profilePictureId!)?.data" alt="" />
     <div class="profile-info">
       <h3 class="username">{{ username$ | async }}</h3>
       <p class="something">Something here</p>

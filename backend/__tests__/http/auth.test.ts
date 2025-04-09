@@ -37,6 +37,7 @@ describe(`POST ${registerRoute}`, () => {
       successResponse(response.body.token, {
         id: response.body.id,
         username: "newUser",
+        profilePictureId: response.body.profilePictureId,
       })
     );
     expect(prisma.user.create).toHaveBeenCalled();

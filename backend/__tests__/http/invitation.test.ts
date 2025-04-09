@@ -129,7 +129,7 @@ describe(`POST ${joinInvitationRoute}`, () => {
       (cM) => !usersInChatIds.includes(cM.userId)
     )!;
     const bearerToken = generateToken(chatMemberNotInChat.userId);
-    const invitation = new Invitation(chat.id, 60 * 1000);
+    const invitation = new Invitation(chat.id, 100);
 
     const response = await request(httpServer)
       .post(joinInvitationRoute)
@@ -158,7 +158,7 @@ describe(`POST ${joinInvitationRoute}`, () => {
   async function chatMemberExists() {
     const chatMember = database.chatMembers[0]!;
     const bearerToken = generateToken(chatMember.userId);
-    const invitation = new Invitation(chatMember.chatId, 60 * 1000);
+    const invitation = new Invitation(chatMember.chatId, 100);
 
     const response = await request(httpServer)
       .post(joinInvitationRoute)

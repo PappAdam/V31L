@@ -125,7 +125,7 @@ export async function findChatsByUser(
       },
       orderBy: {
         lastMessage: {
-          timeStamp: "desc",
+          timeStamp: "asc",
         },
       },
       ...(limit > 0 ? { take: limit } : {}),

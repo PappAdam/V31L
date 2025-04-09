@@ -5,10 +5,7 @@
   "
 >
   @if (displayedIn == "Chat") {
-  <div
-    class="message-options"
-    [class.has-text-above]="first && message.user.username"
-  >
+  <div class="message-options" [class.has-text-above]="first && message.user">
     <div
       class="option pin"
       [class.active]="message.pinned"
@@ -23,7 +20,7 @@
     <div class="profile-name">
       {{
         !ownMessage || displayedIn == "PinnedMessages"
-          ? message.user.username
+          ? messageService.getUser(message.user)?.username
           : ""
       }}
     </div>
@@ -34,7 +31,7 @@
       [class.text]="message.type == 'TEXT'"
     >
       @if (message.type == "IMAGE") {
-      <img [src]="message.content" alt="" />
+      <img [src]="img.images.get(message.content)?.data" alt="" />
       } @else {
       {{ message.content }}
       }
@@ -43,9 +40,9 @@
   <div class="message-profile-wrapper">
     @if (first) {
     <img
-      [src]="imgURL"
+      [src]="messageService.getUser(message.user)?.img?.data"
       class="profile-image"
-      [class.has-text-above]="message.user.username"
+      [class.has-text-above]="message.user"
     />
     }
   </div>
