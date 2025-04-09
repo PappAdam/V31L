@@ -1,40 +1,48 @@
 import { Request, Response, Router } from "express";
 import {
-  arrayToString,
   chatCreationSuccessResponse,
+  PublicChat,
   serverErrorResponse,
   stringToCharCodeArray,
+  unauthorizedResponse,
 } from "@common";
-import { createChatMember } from "@/db/chatMember";
-import { validateRequiredFields } from "./middlewares/validate";
-import { createChat } from "@/db/chat";
+import { createChatMember, findChatMembersByChat } from "@/db/chatMember";
+import {
+  extractUserFromTokenMiddleWare,
+  validateRequiredFields,
+} from "./middlewares/validate";
+import { createChat, updateChat } from "@/db/chat";
 import { Client } from "@/socket/client";
 import ServerPackageSender from "@/socket/server";
 import { toPublicChat } from "@/db/public";
 
 const chatRouter = Router();
 chatRouter.post(
-  "/create",
+  "/",
+  extractUserFromTokenMiddleWare,
   validateRequiredFields(["name", "key", "chatImgId"]),
   createNewChat
+);
+chatRouter.put(
+  "/",
+  extractUserFromTokenMiddleWare,
+  validateRequiredFields(["chatId"]),
+  updateChatH
 );
 
 export default chatRouter;
 
 async function createNewChat(req: Request, res: Response) {
   const { name, key, chatImgId } = req.body;
+  const user = req.user!;
 
   try {
     const chat = await createChat(name, chatImgId);
 
-    if (!name) {
-      res.status(400).json("No chat name was provided");
-    }
     if (!chat) {
       throw Error("Failed to create chat");
     }
 
-    const user = req.user!;
     const rawKey = stringToCharCodeArray(key, Uint8Array);
     const chatMember = await createChatMember(user.id, chat.id, rawKey);
     if (!chatMember) {
@@ -56,10 +64,51 @@ async function createNewChat(req: Request, res: Response) {
       chats: [publicChat],
     });
 
-    res.status(200).json(chatCreationSuccessResponse(publicChat));
+    res.json(chatCreationSuccessResponse(publicChat));
     return;
   } catch (error) {
     console.error("Error during creating invitation: \n", error);
+    res.status(500).json(serverErrorResponse);
+  }
+}
+
+// updateChat function name was taken (its a db function), H stands for handler.
+async function updateChatH(req: Request, res: Response) {
+  const { name, chatImgId, chatId } = req.body;
+  const user = req.user!;
+
+  try {
+    const chatMemberIds = (await findChatMembersByChat(chatId)).map(
+      (m) => m.userId
+    );
+
+    if (!chatMemberIds.includes(user.id)) {
+      res.status(401).json(unauthorizedResponse);
+      return;
+    }
+
+    const updatedChat = await updateChat({ id: chatId, chatImgId, name });
+
+    if (!updatedChat) {
+      throw new Error("Failed to update chat");
+    }
+
+    // Key is only used to send it back. We won't use it in the client, so we don't need it.
+    const publicChat: PublicChat = {
+      id: updatedChat.id,
+      name: updatedChat.name,
+      users: [],
+      encryptedMessages: [],
+    };
+
+    ServerPackageSender.send(chatMemberIds, {
+      header: "Chats",
+      chats: [publicChat!],
+    });
+
+    res.json({ message: "Success" });
+  } catch (error) {
+    console.error("Error during chat update: \n", error);
     res.status(500).json(serverErrorResponse);
   }
 }

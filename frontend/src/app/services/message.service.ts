@@ -224,6 +224,10 @@ export class MessageService {
         }
         chatIndex = chats.length - 1;
       }
+
+      // On chat update request, we get back a chats package with the modified name.
+      if (rawChatContent.name) chats[chatIndex].name = rawChatContent.name;
+
       if (rawChatContent.encryptedMessages.length != 0) {
         const chatMessages = await this.decryptAndParseMessages(
           rawChatContent.encryptedMessages,

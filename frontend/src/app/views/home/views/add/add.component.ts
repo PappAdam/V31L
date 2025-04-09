@@ -13,6 +13,7 @@ import { TabHeaderComponent } from '../../components/tab-header/tab-header.compo
 import { MessageService } from '@/services/message.service';
 import { EncryptionService } from '@/services/encryption.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ChatService } from '@/services/chat.service';
 
 @Component({
   selector: 'app-add',
@@ -33,6 +34,7 @@ export class AddComponent {
   platformService: PlatformService = inject(PlatformService);
   platform: DeviceInfo | null = this.platformService.info;
   inviteService = inject(InviteService);
+  chatService = inject(ChatService);
   messageService = inject(MessageService);
   encryptionService = inject(EncryptionService);
   router = inject(Router);
@@ -86,7 +88,7 @@ export class AddComponent {
       return;
     }
 
-    const { chat, key } = await this.inviteService.createChatRequest(v);
+    const { chat, key } = await this.chatService.createChatRequest(v);
 
     this.messageService.sendMessage(
       chat.id,

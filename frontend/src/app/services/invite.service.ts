@@ -8,7 +8,6 @@ import {
   ChatResponse,
   JoinSuccess,
   stringToCharCodeArray,
-  ChatCreateSuccess,
 } from '@common';
 import { lastValueFrom } from 'rxjs';
 import { MessageService } from './message.service';
@@ -124,41 +123,5 @@ export class InviteService {
     } catch (error: any) {
       return error.error;
     }
-  }
-
-  async createChatRequest(
-    chatName: string
-  ): Promise<ChatCreateSuccess & { key: CryptoKey }> {
-    const rawKey = crypto.getRandomValues(new Uint8Array(32));
-    const key = await crypto.subtle.importKey(
-      'raw',
-      rawKey,
-      { name: 'AES-GCM' },
-      true,
-      ['encrypt', 'decrypt']
-    );
-
-    const wrappedKey = await this.encryptionService.wrapKey(
-      key,
-      this.encryptionService.privateKey!
-    );
-
-    const body = {
-      name: chatName,
-      key: String.fromCharCode(...wrappedKey),
-      chatImgId: 'groupImg',
-    };
-
-    const response = await lastValueFrom(
-      this.http.post<ChatCreateSuccess>(
-        'http://localhost:3000/chat/create',
-        body,
-        {
-          headers: { Authorization: this.authService.user!.token },
-        }
-      )
-    );
-
-    return { ...response, key };
   }
 }
