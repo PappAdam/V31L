@@ -26,6 +26,7 @@ export class Client {
   user: PublicUser = {
     id: "",
     username: "",
+    profilePictureId: "",
   };
 
   constructor(connection: WebSocket) {
