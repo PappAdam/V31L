@@ -19,6 +19,7 @@ import {
 } from '@common';
 import { EncryptionService, Message } from './encryption.service';
 import { Image, ImgService } from './img.service';
+import { FalseEncryptionService } from './false-encryption.service';
 
 export type User = PublicUser & { img: Image };
 export type Chat = Omit<
@@ -36,7 +37,7 @@ export type Chat = Omit<
 })
 export class MessageService {
   socketService = inject(SocketService);
-  encryptionService = inject(EncryptionService);
+  encryptionService = inject(FalseEncryptionService);
   img = inject(ImgService);
   users: User[] = [];
 

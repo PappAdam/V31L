@@ -152,7 +152,7 @@ export class InviteService {
 
     const response = await lastValueFrom(
       this.http.post<ChatCreateSuccess>(
-        'http://localhost:3000/chat/create',
+        'http://192.168.50.15:3000/chat/create',
         body,
         {
           headers: { Authorization: this.authService.user!.token },
