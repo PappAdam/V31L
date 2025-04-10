@@ -1,4 +1,10 @@
+const url = 'localhost';
+const httpProtocol = 'http';
+const httpPort = 3000;
+const socketProtocol = 'ws';
+const socketPort = 8080;
+
 export const environment = {
-  apiUrl: 'http://10.153.161.51',
-  socketUrl: 'ws://10.153.161.51',
+  httpUrl: `${httpProtocol}://${url}:${httpPort}`,
+  socketUrl: `${socketProtocol}://${url}:${socketPort}`,
 };

@@ -9,13 +9,13 @@ import {
   AuthNextResponse,
   AuthNextMfaSetupResponse,
 } from '@common';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  baseUrl: string = environment.apiUrl + ':3000/auth/';
+  baseUrl: string = `${environment.httpUrl}/auth/`;
 
   private _user$: BehaviorSubject<StoredUser | null> =
     new BehaviorSubject<StoredUser | null>(null);
