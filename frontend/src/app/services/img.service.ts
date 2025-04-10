@@ -11,6 +11,7 @@ import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { ImageResponse, stringToCharCodeArray } from '@common';
 import { EncryptionService } from './encryption.service';
+import { environment } from '../../environments/environment.development';
 
 export type Image = { data: string };
 
@@ -21,7 +22,7 @@ export class ImgService {
   authService = inject(AuthService);
   encryptionService = inject(EncryptionService);
   http = inject(HttpClient);
-  private baseURL = 'http://localhost:3000/img/';
+  private baseURL = environment.apiUrl + ':3000/img/';
 
   images = new Map<string, Image>();
 

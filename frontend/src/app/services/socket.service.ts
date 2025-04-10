@@ -17,8 +17,9 @@ import {
   shareReplay,
   Subscription,
 } from 'rxjs';
+import { environment } from '../../environments/environment.development';
 
-const URL: string = 'ws://localhost:8080';
+const URL: string = environment.socketUrl + ':8080';
 
 /**
  * Represents an item in the package queue, which tracks the state and dependencies of a package to be sent to the server.
