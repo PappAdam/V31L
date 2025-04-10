@@ -28,14 +28,14 @@ export class LoginComponent {
   loginForm = new FormGroup({
     username: new FormControl('', [
       Validators.required,
-      // Validators.minLength(8),
-      // Validators.pattern('^[a-zA-Z0-9_-]+$'),
+      Validators.minLength(8),
+      Validators.pattern('^[a-zA-Z0-9_-]+$'),
       // Allows only letters, numbers, underscores, and dashes
     ]),
     password: new FormControl('', [
       Validators.required, // Field is required
-      // Validators.minLength(8), // At least 8 characters
-      // passwordValidator(),
+      Validators.minLength(8), // At least 8 characters
+      passwordValidator(),
       // Ensures at least one uppercase letter, one lowercase letter, and one digit
     ]),
   });
