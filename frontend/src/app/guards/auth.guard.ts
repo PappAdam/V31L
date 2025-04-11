@@ -6,7 +6,10 @@ export const authGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (!authService.user?.token) return false;
+  if (!authService.user?.token) {
+    router.navigateByUrl('/login');
+    return false;
+  }
 
   const payloadBase64 = authService.user.token.split('.')[1]; // Extract payload
   const payloadDecoded = atob(payloadBase64); // Decode Base64
