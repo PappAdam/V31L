@@ -1,4 +1,4 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, ElementRef, inject, Input, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { GroupOptionCardComponent } from './components/group-option-card/group-option-card.component';
 import { GroupMemberCardComponent } from './components/group-member-card/group-member-card.component';
@@ -14,6 +14,18 @@ import { MessageComponent } from '../message/message.component';
 import { PlatformService } from '@/services/platform.service';
 import { DeviceInfo } from '@capacitor/device';
 import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog.component';
+import {
+  concat,
+  filter,
+  from,
+  lastValueFrom,
+  map,
+  Observable,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 GroupMemberCardComponent;
 @Component({
@@ -27,6 +39,7 @@ GroupMemberCardComponent;
     AsyncPipe,
     MessageComponent,
     QRcodeComponent,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './details.component.html',
   styleUrl: './details.component.scss',
@@ -44,29 +57,34 @@ export class DetailsComponent {
   dialog = inject(MatDialog);
   snackBar = inject(MatSnackBar);
 
-  invitation: string = 'Creating you invitation...';
+  invitation$: Observable<string> = this.messageService.selectedChat$.pipe(
+    switchMap((chat) =>
+      concat(
+        of(''),
+        from(this.inviteService.createInvitation(chat.id)).pipe(
+          map((invitation) => invitation || '')
+        )
+      )
+    )
+  );
+
+  @ViewChild('invBody') invBody!: ElementRef;
+  protected invHeight$: Observable<number | null> = this.invitation$.pipe(
+    map((invitation) =>
+      invitation ? null : this.invBody.nativeElement.offsetHeight
+    )
+  );
 
   async copyToClipboard() {
-    if (!this.invitation) return;
+    const invitation = await lastValueFrom(this.invitation$);
 
-    await navigator.clipboard.writeText(this.invitation);
-
-    this.snackBar.open('Invitation copied to clipboard', 'close', {
-      duration: 2000,
-      horizontalPosition: 'right',
-    });
-  }
-
-  async onAddMemberExpand() {
-    if (!this.messageService.selectedChat) return;
-
-    const invitation = await this.inviteService.createInvitation(
-      this.messageService.selectedChat.id
-    );
-
-    if (invitation) {
-      this.invitation = invitation;
+    if (!invitation) {
+      this.snackBar.open('There was no invitation to copy.', 'close');
+      return;
     }
+
+    await navigator.clipboard.writeText(invitation);
+    this.snackBar.open('Invitation copied to clipboard', 'close');
   }
 
   async onPinnedMessageExpand() {

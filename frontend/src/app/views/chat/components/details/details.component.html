@@ -11,14 +11,10 @@
           }
         </div>
       </app-group-option-card>
-      <app-group-option-card
-        fontIcon="add"
-        label="Add member"
-        type="expand"
-        (expanded)="onAddMemberExpand()"
-      >
-        <div class="inv-body">
-          <app-qrcode class="inv-qr-code" [from]="this.invitation" />
+      <app-group-option-card fontIcon="add" label="Add member" type="expand">
+        <div class="inv-body" #invBody [style.height.px]="invHeight$ | async">
+          @if (invitation$ |async; as invitation) {
+          <app-qrcode class="inv-qr-code" [from]="invitation" />
           <mat-divider></mat-divider>
           <div class="inv-string-container">
             <p>
@@ -30,6 +26,9 @@
           <button mat-flat-button (click)="copyToClipboard()">
             Copy to clipboard
           </button>
+          } @else {
+          <mat-spinner diameter="40"></mat-spinner>
+          }
         </div>
       </app-group-option-card>
       <app-group-option-card

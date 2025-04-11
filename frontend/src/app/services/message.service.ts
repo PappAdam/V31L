@@ -3,6 +3,7 @@ import { SocketService } from './socket.service';
 import {
   BehaviorSubject,
   combineLatest,
+  filter,
   map,
   merge,
   Observable,
@@ -85,7 +86,8 @@ export class MessageService {
   }
 
   selectedChat$ = combineLatest([this.chats$, this.selectedChatId$]).pipe(
-    map(([chats, id]) => chats.find((chat) => chat.id === id)!)
+    map(([chats, id]) => chats.find((chat) => chat.id === id)!),
+    filter((chat) => !!chat)
   );
 
   get selectedChat() {
