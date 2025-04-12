@@ -1,7 +1,9 @@
 @if (this.platform?.platform == "web") {
 <div class="chat-outer-wrapper">
   <div class="chat-wrapper">
-    <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
+    <app-header
+      (detailsStateEvent)="updateDetailsState(this.detailsState ? false : true)"
+    ></app-header>
     <div class="messages-wrapper">
       @if (this.selectedChat$ | async; as selectedChat) { @for (message of
       selectedChat.messages; track $index) {
@@ -70,7 +72,9 @@
 
 <div class="chat-outer-wrapper">
   <div class="chat-wrapper">
-    <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
+    <app-header
+      (detailsStateEvent)="updateDetailsState(this.detailsState ? false : true)"
+    ></app-header>
     <div class="messages-wrapper">
       @if (this.selectedChat$ | async; as selectedChat) { @for (message of
       selectedChat.messages; track $index) {
@@ -132,7 +136,14 @@
       </button>
     </div>
   </div>
-  <app-details [state]="detailsState"></app-details>
+  <div [ngClass]="{ 'detail-mobile-wrapper': detailsState }" class="base">
+    <div
+      class="de-focus"
+      [ngClass]="{ 'de-focus-expanded': detailsState }"
+      (click)="updateDetailsState(this.detailsState ? false : true)"
+    ></div>
+    <app-details [state]="detailsState"></app-details>
+  </div>
 </div>
 
 }

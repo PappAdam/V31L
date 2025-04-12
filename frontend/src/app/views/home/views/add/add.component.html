@@ -30,7 +30,12 @@
       <form class="input-fields" (ngSubmit)="onCreate()">
         <mat-form-field appearance="outline" class="input"
           ><mat-label>Name of the chat</mat-label>
-          <input matInput placeholder="Best friends" [formControl]="chatName" />
+          <input
+            class="new-chat-input"
+            matInput
+            placeholder="Best friends"
+            [formControl]="chatName"
+          />
         </mat-form-field>
         <button mat-fab type="submit">
           <mat-icon>add</mat-icon>
@@ -40,7 +45,9 @@
     <div class="join-chat">
       <div class="card-header"><h3>Join existing chat</h3></div>
       <div class="description">
-        <mat-icon>warning</mat-icon>
+        <div class="warning-wrapper">
+          <mat-icon class="warning">warning</mat-icon>
+        </div>
         <span
           >Only join chats from trusted sources. Invalid links might expose you
           to harmful content.
@@ -51,14 +58,6 @@
         </span>
       </div>
       <form class="input-fields" (ngSubmit)="onJoin($event)">
-        <mat-form-field appearance="outline" class="input">
-          <mat-label>Connection string</mat-label>
-          <input
-            matInput
-            placeholder="chat://..."
-            [formControl]="connectionString"
-          />
-        </mat-form-field>
         <button mat-flat-button color="primary" (click)="startScan()">
           Join Chat
         </button>

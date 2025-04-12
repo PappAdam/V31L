@@ -13,7 +13,7 @@ import { AuthService } from '@/services/auth.service';
 import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ImgService } from '@/services/img.service';
-
+import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-chat',
   imports: [
@@ -21,6 +21,7 @@ import { ImgService } from '@/services/img.service';
     MatButtonModule,
     MessageComponent,
     DetailsComponent,
+    CommonModule,
     MatIconModule,
     AsyncPipe,
     MatInputModule,
@@ -52,7 +53,7 @@ export class ChatComponent {
 
   topScrollOffset = 0;
 
-  detailsState = 'closed';
+  detailsState = false;
 
   selectedChat$ = this.messageService.selectedChat$;
   message = '';
@@ -78,7 +79,7 @@ export class ChatComponent {
     this.imgs.splice(index, 1);
   }
 
-  updateDetailsState(event: string) {
+  updateDetailsState(event: boolean) {
     this.detailsState = event;
   }
 

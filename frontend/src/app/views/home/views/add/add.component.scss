@@ -131,6 +131,10 @@
         display: flex;
         width: 100%;
         gap: 8px;
+
+        .mat-mdc-form-field {
+          width: 100%;
+        }
       }
     }
     .join-chat {
@@ -176,11 +180,16 @@
         font-size: $mat-sys-body-small-size;
         line-height: $mat-sys-body-small-line-height;
 
-        mat-icon {
+        .warning-wrapper {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
           color: $mat-sys-error;
           font-size: $mat-sys-body-medium-size;
-          width: $mat-sys-body-medium-size;
-          height: $mat-sys-body-medium-size;
+
+          .warning {
+            display: block;
+          }
         }
       }
 
