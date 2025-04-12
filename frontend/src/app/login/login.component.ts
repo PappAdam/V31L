@@ -18,6 +18,8 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { QRcodeComponent } from '../qrcode/qrcode.component';
+import { PlatformService } from '@/services/platform.service';
+import { DeviceInfo } from '@capacitor/device';
 
 @Component({
   selector: 'app-login',
@@ -38,6 +40,8 @@ export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
+  platform: DeviceInfo | null = null;
+  platformService: PlatformService = inject(PlatformService);
 
   protected loginForm = new FormGroup({
     username: new FormControl('', [
@@ -70,6 +74,8 @@ export class LoginComponent {
     if (setupCode) {
       this.openSetupDialog(setupCode);
     }
+
+    this.platform = this.platformService.info;
   }
 
   async onSubmit(): Promise<void> {
