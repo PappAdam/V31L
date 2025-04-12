@@ -1,9 +1,11 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { NgClass } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
+import { PlatformService } from '@/services/platform.service';
+import { DeviceInfo } from '@capacitor/device';
 
 export interface ActiveTab {
   index: number;
@@ -24,4 +26,11 @@ export interface ActiveTab {
 })
 export class NavbarComponent {
   tabs = ['settings', 'messages', 'add'];
+
+  platform: DeviceInfo | null = null;
+  platformService: PlatformService = inject(PlatformService);
+
+  constructor() {
+    this.platform = this.platformService.info;
+  }
 }

@@ -1,3 +1,4 @@
+@if (this.platform?.platform == "web") {
 <div class="navbar-wrapper">
   @for (tab of tabs; track $index) {
   <div
@@ -11,3 +12,18 @@
   </div>
   }
 </div>
+} @else {
+<div class="navbar-wrapper mobile-rounding">
+  @for (tab of tabs; track $index) {
+  <div
+    class="option-wrapper"
+    [routerLink]="[{ outlets: { home: [tab] } }]"
+    routerLinkActive="active"
+  >
+    <div class="option-icon">
+      <mat-icon fontIcon="{{ tab }}" class="nav-icon"></mat-icon>
+    </div>
+  </div>
+  }
+</div>
+}

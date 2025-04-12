@@ -1,4 +1,4 @@
-const url = '192.168.50.15';
+const url = 'localhost';
 const httpProtocol = 'http';
 const httpPort = 3000;
 const socketProtocol = 'ws';

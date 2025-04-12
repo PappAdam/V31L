@@ -19,6 +19,8 @@ import { passwordValidator } from '@/login/login.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TabHeaderComponent } from '../../components/tab-header/tab-header.component';
 import { ImgService } from '@/services/img.service';
+import { PlatformService } from '@/services/platform.service';
+import { DeviceInfo } from '@capacitor/device';
 
 @Component({
   selector: 'app-settings',
@@ -41,6 +43,13 @@ export class SettingsComponent {
   user = this.authService.user;
   username$ = this.authService.user$.pipe(map((u) => u?.username));
   mfaToggleEnabled: boolean = this.authService.user?.mfaEnabled || false;
+
+  platform: DeviceInfo | null = null;
+  platformService: PlatformService = inject(PlatformService);
+
+  constructor() {
+    this.platform = this.platformService.info;
+  }
 
   onChangePassword() {
     this.dialog

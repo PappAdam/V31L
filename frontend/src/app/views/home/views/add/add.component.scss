@@ -10,6 +10,11 @@
   flex-direction: column;
   flex-grow: 0;
   position: relative;
+  overflow-y: scroll;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
   // padding: $mat-sys-spacing-sm $mat-sys-spacing-sm 0 $mat-sys-spacing-sm;
 
   .forms {
@@ -22,7 +27,6 @@
     border-radius: $mat-sys-corner-small;
     flex-direction: column;
     gap: $mat-sys-spacing-sm;
-    padding: 0 $mat-sys-spacing-sm $mat-sys-spacing-sm $mat-sys-spacing-sm;
 
     .card-header {
       width: 100%;
@@ -62,6 +66,7 @@
       flex-direction: column;
       padding: $mat-sys-spacing-sm;
       gap: $mat-sys-spacing-sm;
+      width: 100%;
 
       .image-input-wrapper {
         width: 100%;
@@ -187,7 +192,7 @@
         button {
           align-self: flex-end;
           width: 100%;
-          padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
+          padding: $mat-sys-spacing-sm $mat-sys-spacing-sm;
         }
       }
     }

@@ -13,7 +13,10 @@ import { TabHeaderComponent } from '../../components/tab-header/tab-header.compo
 import { MessageService } from '@/services/message.service';
 import { EncryptionService } from '@/services/encryption.service';
 import { ActivatedRoute, Router } from '@angular/router';
-
+import {
+  CapacitorBarcodeScanner,
+  CapacitorBarcodeScannerTypeHint,
+} from '@capacitor/barcode-scanner';
 @Component({
   selector: 'app-add',
   imports: [
@@ -96,5 +99,14 @@ export class AddComponent {
 
     this.messageService.selectedChatId = chat.id;
     this.router.navigate(['app', { outlets: { home: 'messages' } }]);
+  }
+
+  async startScan() {
+    const result = await CapacitorBarcodeScanner.scanBarcode({
+      hint: CapacitorBarcodeScannerTypeHint.ALL,
+      cameraDirection: 1,
+    });
+
+    console.log(result);
   }
 }

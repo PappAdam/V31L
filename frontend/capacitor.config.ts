@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   appName: 'v31l',
   webDir: 'dist/message_app/browser',
   server: {
-    url: 'http://192.168.50.15:4200',
+    url: 'http://localhost:4200',
     cleartext: true,
   },
 };

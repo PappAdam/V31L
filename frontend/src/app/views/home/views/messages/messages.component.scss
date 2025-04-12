@@ -11,11 +11,7 @@
   flex-direction: column;
   flex-grow: 0;
   position: relative;
-  @include mat.tabs-overrides(
-    (
-      container-height: $mat-sys-component-height-medium,
-    )
-  );
+
   .cards {
     margin-top: $mat-sys-component-height-medium;
     overflow-y: scroll;
@@ -38,4 +34,8 @@
 .mat-mdc-tab-content {
   flex-grow: 1;
   overflow: auto;
+}
+
+.mobile-rounding {
+  border-radius: 0px;
 }

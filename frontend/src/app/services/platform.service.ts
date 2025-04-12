@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Device, DeviceInfo } from '@capacitor/device';
-
 @Injectable({
   providedIn: 'root',
 })
@@ -16,6 +15,7 @@ export class PlatformService {
 
   async loadDeviceInfo() {
     this.deviceInfo = await Device.getInfo();
+    this.deviceInfo.platform = 'web';
     return this.deviceInfo;
   }
 

@@ -1,3 +1,4 @@
+@if (this.platform?.platform == "web") {
 <div class="messages-wrapper">
   <app-search-bar [control]="searchControl$"></app-search-bar>
   <div class="cards">
@@ -19,3 +20,26 @@
     } }
   </div>
 </div>
+} @else {
+<div class="messages-wrapper mobile-rounding">
+  <app-search-bar [control]="searchControl$"></app-search-bar>
+  <div class="cards">
+    @if (this.platformService.info?.platform == "web") { @for (chat of
+    filteredChats$ | async; track $index) {
+    <app-chat-card
+      (click)="messageService.selectedChatId = chat.id"
+      [chat]="chat"
+      unread=""
+      [selected]="this.messageService.selectedChatId == chat.id ? true : false"
+    ></app-chat-card>
+    } } @else { @for (chat of filteredChats$ | async; track $index) {
+
+    <app-chat-card
+      (click)="navToChat(chat.id)"
+      [chat]="chat"
+      unread=""
+    ></app-chat-card>
+    } }
+  </div>
+</div>
+}
