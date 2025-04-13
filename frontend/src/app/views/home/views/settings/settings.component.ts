@@ -19,6 +19,7 @@ import { passwordValidator } from '@/login/login.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TabHeaderComponent } from '../../components/tab-header/tab-header.component';
 import { ImgService } from '@/services/img.service';
+import { EncryptionService } from '@/services/encryption.service';
 
 @Component({
   selector: 'app-settings',
@@ -33,6 +34,7 @@ import { ImgService } from '@/services/img.service';
 })
 export class SettingsComponent {
   authService = inject(AuthService);
+  encryptionService = inject(EncryptionService);
   dialog = inject(MatDialog);
   imgService = inject(ImgService);
 
@@ -257,6 +259,7 @@ class DisableMfaDialog {
 class PasswordChangeDialog {
   private authService = inject(AuthService);
   private dialogRef = inject(MatDialogRef<PasswordChangeDialog>);
+  encryptionService = inject(EncryptionService);
 
   oldPassword = new FormControl('', [Validators.required]);
   newPassword = new FormControl('', [
@@ -269,6 +272,7 @@ class PasswordChangeDialog {
     if (this.oldPassword.invalid || this.newPassword.invalid) return;
 
     try {
+      await this.encryptionService.updateChatKeys(this.newPassword.value!);
       const response = await this.authService.changePassword(
         this.oldPassword.value!,
         this.newPassword.value!

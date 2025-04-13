@@ -2,10 +2,17 @@ import { Request, Response, Router } from "express";
 import {
   arrayToString,
   chatCreationSuccessResponse,
+  PublicChatMember,
   serverErrorResponse,
   stringToCharCodeArray,
+  UpdateChatMemberParams,
 } from "@common";
-import { createChatMember } from "@/db/chatMember";
+import {
+  createChatMember,
+  findChatMembersByChat,
+  findChatMembersByUser,
+  updateEncryptedChatKeys,
+} from "@/db/chatMember";
 import { validateRequiredFields } from "./middlewares/validate";
 import { createChat } from "@/db/chat";
 import { Client } from "@/socket/client";
@@ -18,6 +25,9 @@ chatRouter.post(
   validateRequiredFields(["name", "key", "chatImgId"]),
   createNewChat
 );
+
+chatRouter.get("/get", findChatMembers);
+chatRouter.put("/update", updateChatMemberKeys);
 
 export default chatRouter;
 
@@ -57,6 +67,47 @@ async function createNewChat(req: Request, res: Response) {
     });
 
     res.status(200).json(chatCreationSuccessResponse(publicChat));
+    return;
+  } catch (error) {
+    console.error("Error during creating invitation: \n", error);
+    res.status(500).json(serverErrorResponse);
+  }
+}
+
+async function findChatMembers(req: Request, res: Response) {
+  try {
+    const user = req.user!;
+    const chatMembers: PublicChatMember[] = (
+      await findChatMembersByUser(user.id)
+    ).map((c) => {
+      return {
+        id: c.id,
+        key: arrayToString(c.key),
+      };
+    });
+
+    res.status(200).json(chatMembers);
+    return;
+  } catch (error) {
+    console.error("Error during creating invitation: \n", error);
+    res.status(500).json(serverErrorResponse);
+  }
+}
+
+async function updateChatMemberKeys(
+  req: Request<UpdateChatMemberParams>,
+  res: Response
+) {
+  try {
+    const chatMembers = await updateEncryptedChatKeys(req.body);
+    if (!chatMembers.length) {
+      res
+        .status(400)
+        .json({ result: "Error", message: "No chat members were updated" });
+    }
+
+    res.status(200).json({ result: "Success" });
+
     return;
   } catch (error) {
     console.error("Error during creating invitation: \n", error);

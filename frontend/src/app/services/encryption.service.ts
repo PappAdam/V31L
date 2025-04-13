@@ -2,18 +2,21 @@ import { inject, Injectable } from '@angular/core';
 import {
   arrayToString,
   EncryptedMessage,
+  PublicChatMember,
   PublicMessage,
   stringToCharCodeArray,
+  UpdateChatMemberParams,
 } from '@common';
 import { AuthService } from './auth.service';
 import {
   BehaviorSubject,
   filter,
+  lastValueFrom,
   Observable,
   Subscription,
   switchMap,
 } from 'rxjs';
-import { ContentObserver } from '@angular/cdk/observers';
+import { HttpClient } from '@angular/common/http';
 
 export type Message = Omit<PublicMessage, 'encryptedData'> & {
   content: string;
@@ -24,8 +27,10 @@ export type Message = Omit<PublicMessage, 'encryptedData'> & {
 })
 export class EncryptionService {
   authService = inject(AuthService);
+  http = inject(HttpClient);
   encoder = new TextEncoder();
   decoder = new TextDecoder();
+  masterKey: string = '';
 
   _privateKey$ = new BehaviorSubject<CryptoKey | null>(null);
 
@@ -61,11 +66,15 @@ export class EncryptionService {
 
   /**
    *
-   * @param password 6 digit pin converted to string
+   * @param masterKey 6 digit pin converted to string
    */
-  private async storeMasterPassword(password: string = '000000') {
-    if (localStorage.getItem('keys')?.includes(this.authService.user?.id!)) {
-      return;
+  private async storeMasterPassword(masterKey: string = '000000') {
+    const keys: { id: string; encKey: string }[] = JSON.parse(
+      localStorage.getItem('keys')!
+    );
+    const userIndex = keys.findIndex((k) => k.id == this.authService.user?.id);
+    if (userIndex != -1) {
+      keys.splice(userIndex, 1);
     }
 
     const rawKey = await crypto.subtle.exportKey(
@@ -85,7 +94,7 @@ export class EncryptionService {
       {
         name: 'HKDF',
         hash: 'SHA-256',
-        salt: await this.rawKeyFrom(password),
+        salt: await this.rawKeyFrom(masterKey),
         info: this.encoder.encode('info'),
       },
       key,
@@ -97,10 +106,6 @@ export class EncryptionService {
     this._privateKey$.next(master);
 
     const wrapped = await this.wrapKey(master, this.authService.masterWrapKey!);
-
-    const keys: { id: string; encKey: string }[] = JSON.parse(
-      localStorage.getItem('keys')!
-    );
 
     keys.push({
       id: this.authService.user?.id!,
@@ -212,6 +217,50 @@ export class EncryptionService {
     } catch (error) {
       console.error('Could not unwrap key:', error);
       throw new Error('Failed to unwrap key');
+    }
+  }
+
+  async updateChatKeys(newPassword: string, masterKey: string = '000000') {
+    const chats = await lastValueFrom(
+      this.http.get<PublicChatMember[]>('http://localhost:3000/chat/get', {
+        headers: { Authorization: this.authService.user!.token },
+      })
+    );
+
+    const oldPrivateKey = this.privateKey!;
+    await this.authService.changeMasterWrapKey(newPassword);
+    await this.storeMasterPassword(masterKey);
+
+    const updateParams: PublicChatMember[] = await Promise.all(
+      chats.map(async (c) => {
+        const rawKey = stringToCharCodeArray(c.key, Uint8Array);
+        const chatKey = await this.unwrapKey(rawKey, oldPrivateKey);
+
+        const newWrapped = await this.wrapKey(chatKey, this.privateKey!);
+
+        return {
+          id: c.id,
+          key: arrayToString(newWrapped),
+        };
+      })
+    );
+
+    const body: UpdateChatMemberParams = {
+      chatMembers: updateParams,
+    };
+
+    const res = await lastValueFrom(
+      this.http.put<{ result: string }>(
+        'http://localhost:3000/chat/update',
+        body,
+        {
+          headers: { Authorization: this.authService.user!.token },
+        }
+      )
+    );
+
+    if (res.result == 'Error') {
+      console.warn(res);
     }
   }
 }

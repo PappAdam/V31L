@@ -51,6 +51,27 @@ export class AuthService {
     );
   }
 
+  async changeMasterWrapKey(newPassword: string): Promise<CryptoKey> {
+    const rawKey = new Uint8Array(
+      await crypto.subtle.digest(
+        { name: 'SHA-256' },
+        stringToCharCodeArray(this.user?.username + newPassword, Uint8Array)
+      )
+    );
+
+    this._masterKey = await crypto.subtle.importKey(
+      'raw',
+      rawKey,
+      { name: 'AES-KW', length: 256 },
+      true,
+      ['wrapKey', 'unwrapKey']
+    );
+
+    this.saveUser({ ...this.user!, masterWrapKey: arrayToString(rawKey) });
+
+    return this._masterKey;
+  }
+
   constructor(private http: HttpClient, private router: Router) {
     const user = localStorage.getItem('user');
     if (!localStorage.getItem('keys')) {

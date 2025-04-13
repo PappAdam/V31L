@@ -22,3 +22,12 @@ export const chatCreationSuccessResponse = (
     chat,
   };
 };
+
+export type PublicChatMember = {
+  id: string;
+  key: string;
+};
+
+export interface UpdateChatMemberParams {
+  chatMembers: PublicChatMember[];
+}
