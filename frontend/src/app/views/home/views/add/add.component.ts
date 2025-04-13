@@ -14,6 +14,7 @@ import { MessageService } from '@/services/message.service';
 import { EncryptionService } from '@/services/encryption.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChatService } from '@/services/chat.service';
+import { ImgService } from '@/services/img.service';
 
 @Component({
   selector: 'app-add',
@@ -35,6 +36,7 @@ export class AddComponent {
   platform: DeviceInfo | null = this.platformService.info;
   inviteService = inject(InviteService);
   chatService = inject(ChatService);
+  imgService = inject(ImgService);
   messageService = inject(MessageService);
   encryptionService = inject(EncryptionService);
   router = inject(Router);
@@ -95,6 +97,17 @@ export class AddComponent {
       `This is the start of this conversation.`,
       key
     );
+
+    if (this.img) {
+      const image = await this.imgService.createImage(this.img, key);
+
+      if (image) {
+        await this.imgService.storeImage(image, key);
+        await this.chatService.updateChatRequest(chat.id, {
+          chatImgId: image,
+        });
+      }
+    }
 
     this.messageService.selectedChatId = chat.id;
     this.router.navigate(['app', { outlets: { home: 'messages' } }]);

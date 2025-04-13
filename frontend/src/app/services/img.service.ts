@@ -25,6 +25,27 @@ export class ImgService {
 
   images = new Map<string, Image>();
 
+  async createImage(img: string, key: CryptoKey) {
+    const [imgtype, imgdata] = img.split(',');
+
+    console.log(imgdata);
+
+    const body = {
+      img: imgdata,
+      type: imgtype,
+      id: undefined,
+      iv: undefined,
+    };
+
+    const res = await lastValueFrom(
+      this.http.post<string | undefined>(this.baseURL + 'create', body, {
+        headers: { Authorization: this.authService.user!.token },
+      })
+    );
+
+    return res;
+  }
+
   async storeImage(id: string, chatKey: CryptoKey): Promise<void> {
     if (!this.authService.user) {
       return;
