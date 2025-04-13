@@ -28,17 +28,15 @@ export class InviteService {
   constructor() {}
 
   async wrapInvitation(invId: string): Promise<string> {
-    const raw = Uint16Array.from(
-      new Uint8Array(
-        await crypto.subtle.exportKey(
-          'raw',
-          this.messageService.selectedChat.chatKey
-        )
+    const raw = new Uint8Array(
+      await crypto.subtle.exportKey(
+        'raw',
+        this.messageService.selectedChat.chatKey
       )
-    ).map((b) => b + 1);
+    );
 
     const key = String.fromCharCode(...raw);
-    const inv = invId + key;
+    const inv = invId + btoa(key);
 
     return inv;
   }
@@ -47,12 +45,7 @@ export class InviteService {
     wrapped: string
   ): Promise<{ id: string; key: string }> {
     const id = wrapped.slice(0, 36);
-    const key = String.fromCharCode(
-      ...stringToCharCodeArray(
-        wrapped.slice(36, wrapped.length),
-        Uint16Array
-      ).map((b) => b - 1)
-    );
+    const key = atob(wrapped.slice(36, wrapped.length));
 
     return {
       id,
