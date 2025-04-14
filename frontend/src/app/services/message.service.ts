@@ -227,6 +227,10 @@ export class MessageService {
 
       // On chat update request, we get back a chats package with the modified name.
       if (rawChatContent.name) chats[chatIndex].name = rawChatContent.name;
+      if (rawChatContent.imgID) {
+        chats[chatIndex].imgID = rawChatContent.imgID;
+        chats[chatIndex].img = this.img.images.get(rawChatContent.imgID)!;
+      }
 
       if (rawChatContent.encryptedMessages.length != 0) {
         const chatMessages = await this.decryptAndParseMessages(

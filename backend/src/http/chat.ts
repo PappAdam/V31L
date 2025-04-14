@@ -96,6 +96,7 @@ async function updateChatH(req: Request, res: Response) {
     // Key is only used to send it back. We won't use it in the client, so we don't need it.
     const publicChat: PublicChat = {
       id: updatedChat.id,
+      imgID: updatedChat.chatImgId,
       name: updatedChat.name,
       users: [],
       encryptedMessages: [],

@@ -15,17 +15,10 @@ export class ChatService {
   http = inject(HttpClient);
 
   async createChatRequest(
-    chatName: string
+    chatName: string,
+    key: CryptoKey,
+    imgID?: string
   ): Promise<ChatSuccess & { key: CryptoKey }> {
-    const rawKey = crypto.getRandomValues(new Uint8Array(32));
-    const key = await crypto.subtle.importKey(
-      'raw',
-      rawKey,
-      { name: 'AES-GCM' },
-      true,
-      ['encrypt', 'decrypt']
-    );
-
     const wrappedKey = await this.encryptionService.wrapKey(
       key,
       this.encryptionService.privateKey!
@@ -34,7 +27,7 @@ export class ChatService {
     const body = {
       name: chatName,
       key: String.fromCharCode(...wrappedKey),
-      chatImgId: 'groupImg',
+      chatImgId: imgID || 'groupImg',
     };
 
     const response = await lastValueFrom(

@@ -49,6 +49,10 @@ export class DetailsComponent {
 
   invitation: string = 'Creating you invitation...';
 
+  get chat() {
+    return this.messageService.selectedChat;
+  }
+
   async copyToClipboard() {
     if (!this.invitation) return;
 

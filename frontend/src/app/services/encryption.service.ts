@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import {
   BehaviorSubject,
   filter,
-  Observable, 
+  Observable,
   Subscription,
   switchMap,
 } from 'rxjs';
@@ -121,5 +121,18 @@ export class EncryptionService {
       console.error('Could not unwrap key:', error);
       throw new Error('Failed to unwrap key');
     }
+  }
+
+  async generateChatKey() {
+    const rawKey = crypto.getRandomValues(new Uint8Array(32));
+    const key = await crypto.subtle.importKey(
+      'raw',
+      rawKey,
+      { name: 'AES-GCM' },
+      true,
+      ['encrypt', 'decrypt']
+    );
+
+    return key;
   }
 }

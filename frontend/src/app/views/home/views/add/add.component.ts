@@ -90,24 +90,24 @@ export class AddComponent {
       return;
     }
 
-    const { chat, key } = await this.chatService.createChatRequest(v);
+    const key = await this.encryptionService.generateChatKey();
+
+    let image: string | undefined = undefined;
+    if (this.img) {
+      image = await this.imgService.createImage(this.img, key);
+
+      if (image) {
+        await this.imgService.storeImage(image, key);
+      }
+    }
+
+    const { chat } = await this.chatService.createChatRequest(v, key, image);
 
     this.messageService.sendMessage(
       chat.id,
       `This is the start of this conversation.`,
       key
     );
-
-    if (this.img) {
-      const image = await this.imgService.createImage(this.img, key);
-
-      if (image) {
-        await this.imgService.storeImage(image, key);
-        await this.chatService.updateChatRequest(chat.id, {
-          chatImgId: image,
-        });
-      }
-    }
 
     this.messageService.selectedChatId = chat.id;
     this.router.navigate(['app', { outlets: { home: 'messages' } }]);
