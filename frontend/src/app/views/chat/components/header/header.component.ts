@@ -24,8 +24,8 @@ export class HeaderComponent {
     this.platform = this.platformService.info;
   }
 
-  state: string = 'closed';
-  @Output() detailsStateEvent = new EventEmitter<string>();
+  detailsState: 'open' | 'closed' = 'closed';
+  @Output() detailsStateEvent = new EventEmitter<'open' | 'closed'>();
   platform: DeviceInfo | null = null;
 
   platformService: PlatformService = inject(PlatformService);
@@ -39,13 +39,13 @@ export class HeaderComponent {
   }
 
   async openDetails() {
-    if (this.state == 'closed') {
-      this.state = 'open';
+    if (this.detailsState == 'closed') {
+      this.detailsState = 'open';
     } else {
-      this.state = 'closed';
+      this.detailsState = 'closed';
     }
 
-    this.detailsStateEvent.emit(this.state);
+    this.detailsStateEvent.emit(this.detailsState);
   }
 
   goBack() {

@@ -45,6 +45,9 @@ export class MessageService {
   get chats$(): Observable<Chat[]> {
     return this._chats$.asObservable();
   }
+  get chats(): Chat[] {
+    return this._chats$.value;
+  }
 
   private _selectedChatId$ = new BehaviorSubject<string>('');
   get selectedChatId$(): Observable<string> {
@@ -86,12 +89,11 @@ export class MessageService {
   }
 
   selectedChat$ = combineLatest([this.chats$, this.selectedChatId$]).pipe(
-    map(([chats, id]) => chats.find((chat) => chat.id === id)!),
-    filter((chat) => !!chat)
+    map(([chats, id]) => chats.find((chat) => chat.id === id))
   );
 
   get selectedChat() {
-    return this._chats$.value.find((chat) => chat.id === this.selectedChatId)!;
+    return this._chats$.value.find((chat) => chat.id === this.selectedChatId);
   }
 
   pinnedMessages$: Observable<Message[]> = merge(
@@ -132,6 +134,8 @@ export class MessageService {
   }
 
   async sendImage(chatId: string, img: string, after?: () => void) {
+    if (!this.selectedChat) return;
+
     const [imgtype, imgdata] = img.split(',');
     if (!imgdata) {
       console.error('Failed to send img. Sending its plain text data instead.');
@@ -157,6 +161,8 @@ export class MessageService {
   }
 
   pinMessage(messageId: string, pinState: boolean) {
+    if (!this.selectedChat) return;
+
     const chatId = this.selectedChat.id;
     this.socketService.createPackage(
       { header: 'PinMessage', messageId, pinState },
@@ -178,7 +184,8 @@ export class MessageService {
 
   leaveChat(chatId: string) {
     this.socketService.createPackage({ header: 'LeaveChat', chatId }, () => {
-      this._selectedChatId$.next('');
+      const nextChat = this._chats$.value.find((c) => c.id != chatId);
+      this._selectedChatId$.next(nextChat?.id || '');
     });
   }
 

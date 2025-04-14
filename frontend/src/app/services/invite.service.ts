@@ -27,14 +27,9 @@ export class InviteService {
 
   constructor() {}
 
-  async wrapInvitation(invId: string): Promise<string> {
+  async wrapInvitation(invId: string, chatKey: CryptoKey): Promise<string> {
     const raw = Uint16Array.from(
-      new Uint8Array(
-        await crypto.subtle.exportKey(
-          'raw',
-          this.messageService.selectedChat.chatKey
-        )
-      )
+      new Uint8Array(await crypto.subtle.exportKey('raw', chatKey))
     ).map((b) => b + 1);
 
     const key = String.fromCharCode(...raw);
@@ -65,6 +60,9 @@ export class InviteService {
    * {@link ChatResponse}
    */
   async createInvitation(chatId: string): Promise<string | null> {
+    const chat = this.messageService.chats.find((c) => c.id == chatId);
+    if (!chat) return null;
+
     const body = { chatId };
     let result: string | null = null;
     try {
@@ -79,7 +77,7 @@ export class InviteService {
       );
 
       if (response.result == 'Success') {
-        result = await this.wrapInvitation(response.invId);
+        result = await this.wrapInvitation(response.invId, chat.chatKey);
       }
     } catch (error: any) {
       console.error(error.error);

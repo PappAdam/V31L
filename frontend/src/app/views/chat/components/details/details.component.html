@@ -1,4 +1,4 @@
-<div class="details-wrapper" [attr.data-state]="state">
+<div class="details-wrapper" [attr.data-state]="detailsState$ | async">
   <div class="inner-wrapper">
     <div class="group-action-wrapper">
       <app-group-option-card fontIcon="group" label="Members" type="expand">

@@ -15,6 +15,8 @@ import { PlatformService } from '@/services/platform.service';
 import { DeviceInfo } from '@capacitor/device';
 import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog.component';
 import {
+  BehaviorSubject,
+  combineLatest,
   concat,
   filter,
   from,
@@ -23,7 +25,6 @@ import {
   Observable,
   of,
   switchMap,
-  tap,
 } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -46,18 +47,31 @@ GroupMemberCardComponent;
 })
 export class DetailsComponent {
   protected platformService = inject(PlatformService);
-  platform: DeviceInfo | null = null;
-  constructor() {
-    this.platform = this.platformService.info;
-  }
-  @Input() state: string = 'closed';
-
+  platform: DeviceInfo | null = this.platformService.info;
   messageService = inject(MessageService);
   inviteService = inject(InviteService);
   dialog = inject(MatDialog);
   snackBar = inject(MatSnackBar);
 
+  private detailsStatePreference$ = new BehaviorSubject<'open' | 'closed'>(
+    'open'
+  );
+
+  @Input() set detailsStatePreference(value: 'open' | 'closed') {
+    this.detailsStatePreference$.next(value);
+  }
+
+  protected detailsState$: Observable<'open' | 'closed'> = combineLatest([
+    this.messageService.chats$,
+    this.detailsStatePreference$,
+  ]).pipe(
+    map(([chats, preference]) => {
+      return chats.length > 0 ? preference : 'closed';
+    })
+  );
+
   invitation$: Observable<string> = this.messageService.selectedChat$.pipe(
+    filter((chat) => !!chat),
     switchMap((chat) =>
       concat(
         of(''),
@@ -88,7 +102,7 @@ export class DetailsComponent {
   }
 
   async onPinnedMessageExpand() {
-    this.messageService.getPinnedMessages(this.messageService.selectedChat.id);
+    this.messageService.getPinnedMessages(this.messageService.selectedChatId);
   }
 
   async onLeaveChat() {
@@ -98,9 +112,11 @@ export class DetailsComponent {
       },
     });
 
+    
+
     leaveDialogRef.afterClosed().subscribe((leaveConfirmed: boolean) => {
       if (leaveConfirmed) {
-        this.messageService.leaveChat(this.messageService.selectedChat.id);
+        this.messageService.leaveChat(this.messageService.selectedChatId);
       }
     });
   }
