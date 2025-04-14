@@ -272,7 +272,6 @@ class PasswordChangeDialog {
     if (this.oldPassword.invalid || this.newPassword.invalid) return;
 
     try {
-      await this.encryptionService.updateChatKeys(this.newPassword.value!);
       const response = await this.authService.changePassword(
         this.oldPassword.value!,
         this.newPassword.value!
@@ -281,6 +280,7 @@ class PasswordChangeDialog {
       if (!response || response.result !== 'Success') {
         this.handleError('oldPassword');
       } else {
+        await this.encryptionService.updateChatKeys(this.newPassword.value!);
         this.dialogRef.close(true);
       }
     } catch (error) {

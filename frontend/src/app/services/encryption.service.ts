@@ -41,23 +41,20 @@ export class EncryptionService {
       switchMap(async (user) => {
         await this.authService.importMasterWrapKey();
 
-        // FIXME  this line isonly for debug purpuses, should be removed and only called, when a new user is logged in
-        // Also the password parameter should be used, the default master key is 000000 for the debug users
-        await this.storeMasterPassword();
-
         const keysStr = localStorage.getItem('keys');
         if (keysStr) {
           const keys: { id: string; encKey: string }[] = JSON.parse(keysStr);
           const encKey = keys.find((k) => k.id == user.id)?.encKey;
 
           if (encKey) {
-            this._privateKey$.next(
-              await this.unwrapKey(
-                stringToCharCodeArray(encKey, Uint8Array),
-                this.authService.masterWrapKey!,
-                'AES-KW'
-              )
+            console.log('asd');
+            const newKey = await this.unwrapKey(
+              stringToCharCodeArray(encKey, Uint8Array),
+              this.authService.masterWrapKey!,
+              'AES-KW'
             );
+            console.log('asd2');
+            this._privateKey$.next(newKey);
           }
         }
       })
@@ -68,7 +65,7 @@ export class EncryptionService {
    *
    * @param masterKey 6 digit pin converted to string
    */
-  private async storeMasterPassword(masterKey: string = '000000') {
+  public async storeMasterPassword(masterKey: string = '000000') {
     const keys: { id: string; encKey: string }[] = JSON.parse(
       localStorage.getItem('keys')!
     );
