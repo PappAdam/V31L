@@ -28,8 +28,6 @@ export class ImgService {
   async createImage(img: string, key: CryptoKey) {
     const [imgtype, imgdata] = img.split(',');
 
-    console.log(imgdata);
-
     const body = {
       img: imgdata,
       type: imgtype,

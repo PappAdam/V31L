@@ -1,4 +1,5 @@
 import { createImage, findImageById } from "@/db/image";
+import { decryptData } from "@/encryption";
 import { arrayToString, ImageResponse, serverErrorResponse } from "@common";
 import { Request, Response, Router } from "express";
 
@@ -35,7 +36,7 @@ export async function getImage(
 export async function createImg(req: Request, res: Response) {
   try {
     const { img, type, id, iv } = req.body;
-    const image = await createImage(img, type, id, iv);
+    const image = await createImage(Buffer.from(img, "base64"), type, id, iv);
 
     if (!image) {
       res.status(400).json(undefined);
