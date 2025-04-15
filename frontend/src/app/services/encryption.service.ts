@@ -10,6 +10,7 @@ import {
 import { AuthService } from './auth.service';
 import {
   BehaviorSubject,
+  catchError,
   filter,
   lastValueFrom,
   Observable,
@@ -47,14 +48,16 @@ export class EncryptionService {
           const encKey = keys.find((k) => k.id == user.id)?.encKey;
 
           if (encKey) {
-            console.log('asd');
-            const newKey = await this.unwrapKey(
-              stringToCharCodeArray(encKey, Uint8Array),
-              this.authService.masterWrapKey!,
-              'AES-KW'
-            );
-            console.log('asd2');
-            this._privateKey$.next(newKey);
+            try {
+              const newKey = await this.unwrapKey(
+                stringToCharCodeArray(encKey, Uint8Array),
+                this.authService.masterWrapKey!,
+                'AES-KW'
+              );
+              this._privateKey$.next(newKey);
+            } catch (error) {
+              // Do nothing!
+            }
           }
         }
       })
@@ -212,12 +215,11 @@ export class EncryptionService {
 
       return unwrapped;
     } catch (error) {
-      console.error('Could not unwrap key:', error);
-      throw new Error('Failed to unwrap key');
+      throw new Error('unwrapKey failed: ' + error);
     }
   }
 
-  async updateChatKeys(newPassword: string, masterKey: string = '000000') {
+  async updateChatKeys(newPassword: string, masterKey: string) {
     const chats = await lastValueFrom(
       this.http.get<PublicChatMember[]>('http://localhost:3000/chat/get', {
         headers: { Authorization: this.authService.user!.token },

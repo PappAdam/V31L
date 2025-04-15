@@ -267,6 +267,7 @@ export class AuthService {
 
     try {
       const response = await lastValueFrom(refreshRequest);
+      
       return response;
     } catch {
       return null;
