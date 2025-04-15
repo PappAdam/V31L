@@ -9,7 +9,12 @@ import {
 import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import { ImageResponse, stringToCharCodeArray } from '@common';
+import {
+  arrayToString,
+  EncryptedMessage,
+  ImageResponse,
+  stringToCharCodeArray,
+} from '@common';
 import { EncryptionService } from './encryption.service';
 
 export type Image = { data: string };
@@ -25,14 +30,22 @@ export class ImgService {
 
   images = new Map<string, Image>();
 
-  async createImage(img: string, key: CryptoKey) {
-    const [imgtype, imgdata] = img.split(',');
+  async createImage(img: string, key?: CryptoKey) {
+    let [imgtype, imgdata] = img.split(',');
+    let iv: string | undefined;
+
+    imgdata = atob(imgdata);
+    if (key) {
+      const encrypted = await this.encryptionService.encryptText(key, imgdata);
+      imgdata = arrayToString(encrypted.data);
+      iv = arrayToString(encrypted.iv!);
+    }
 
     const body = {
       img: imgdata,
       type: imgtype,
       id: undefined,
-      iv: undefined,
+      iv,
     };
 
     const res = await lastValueFrom(
@@ -63,15 +76,17 @@ export class ImgService {
       return;
     }
 
-    let imgData = '';
+    let imgData = response.data;
     if (response.iv && chatKey) {
-      const rawData = stringToCharCodeArray(atob(response.data), Uint8Array);
-      imgData = await this.encryptionService.decryptText(chatKey, {
-        data: rawData,
-        iv: stringToCharCodeArray(response.iv, Uint8Array),
-      });
+      const rawData = stringToCharCodeArray(response.data, Uint8Array);
+      imgData = btoa(
+        await this.encryptionService.decryptText(chatKey, {
+          data: rawData,
+          iv: stringToCharCodeArray(response.iv, Uint8Array),
+        })
+      );
     } else {
-      imgData = response.data;
+      imgData = btoa(response.data);
     }
 
     const img = `${response.type},${imgData}`;
