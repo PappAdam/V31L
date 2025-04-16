@@ -145,7 +145,7 @@ export class MessageService {
 
     const encrypted = await this.encryptionService.encryptText(
       this.selectedChat.chatKey,
-      imgdata
+      atob(imgdata)
     );
 
     this.socketService.createPackage(
@@ -211,7 +211,7 @@ export class MessageService {
             await this.img.storeImage(nu.profilePictureId, chatKey);
             const user = {
               ...nu,
-              img: this.img.images.get(nu.profilePictureId)!,
+              img: this.img.imgRef(nu.profilePictureId)!,
             };
             const exsistingUser = this.users.find((u) => u.id == nu.id);
             if (!exsistingUser) {
@@ -225,14 +225,23 @@ export class MessageService {
             chatKey,
             messages: [],
             users,
-            img: this.img.images.get(rawChatContent.imgID!)!,
+            img: this.img.imgRef(rawChatContent.imgID!)!,
           };
           chats = [...chats, chat];
         } else {
           throw new Error('Failed to fetch the chat key.');
         }
+
         chatIndex = chats.length - 1;
       }
+
+      // On chat update request, we get back a chats package with the modified name.
+      if (rawChatContent.name) chats[chatIndex].name = rawChatContent.name;
+      if (rawChatContent.imgID) {
+        chats[chatIndex].imgID = rawChatContent.imgID;
+        chats[chatIndex].img = this.img.imgRef(rawChatContent.imgID)!;
+      }
+
       if (rawChatContent.encryptedMessages.length != 0) {
         const chatMessages = await this.decryptAndParseMessages(
           rawChatContent.encryptedMessages,

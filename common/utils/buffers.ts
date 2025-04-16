@@ -8,6 +8,7 @@ export function stringToCharCodeArray<T extends ArrayBufferView>(
   }
   return decoded;
 }
+
 export function arrayToString(array: Uint8Array): string {
   return String.fromCharCode(...array);
 }

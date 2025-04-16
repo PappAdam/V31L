@@ -19,7 +19,7 @@ export class Invitation {
   remove = () => {
     const index = Invitations.findIndex((inv) => inv.id == this.id);
     if (index != -1) {
-      console.log(Invitations.splice(index, 1));
+      Invitations.splice(index, 1);
     }
   };
 }

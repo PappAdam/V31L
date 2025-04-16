@@ -17,7 +17,7 @@ import { Client } from "./client";
 import ServerPackageSender from "./server";
 import { getPublicChatsWithMessages, toPublicMessage } from "@/db/public";
 import { findUserById } from "@/db/user";
-import { createImage } from "@/db/image";
+import { createImage, findImageById } from "@/db/image";
 import { MessageType } from "@prisma/client";
 
 // Nothing here needs validation, since the package has been validated already
@@ -71,6 +71,7 @@ async function processBasedOnHeader(
           undefined,
           incoming.messageContent.iv
         );
+
         msgType = "IMAGE";
 
         if (!image) {
@@ -200,6 +201,20 @@ async function processBasedOnHeader(
       });
 
       return !!deletedChatMember;
+
+    case "RefreshChat":
+      const chatToRefresh: PublicChat = {
+        ...incoming.chat,
+        users: [],
+        encryptedMessages: [],
+      };
+
+      ServerPackageSender.send([client.user.id], {
+        header: "Chats",
+        chats: [chatToRefresh!],
+      });
+
+      return true;
 
     default:
       console.error(

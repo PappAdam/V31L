@@ -8,4 +8,5 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class GroupMemberCardComponent {
   @Input() name: string = '';
+  @Input() img: string = '';
 }

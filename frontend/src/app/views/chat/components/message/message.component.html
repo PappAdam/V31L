@@ -31,7 +31,7 @@
       [class.text]="message.type == 'TEXT'"
     >
       @if (message.type == "IMAGE") {
-      <img [src]="img.images.get(message.content)?.data" alt="" />
+      <img [src]="img.img(message.content)" alt="" />
       } @else {
       {{ message.content }}
       }

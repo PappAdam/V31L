@@ -2,7 +2,7 @@ import { Component, ElementRef, inject, Input, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { GroupOptionCardComponent } from './components/group-option-card/group-option-card.component';
 import { GroupMemberCardComponent } from './components/group-member-card/group-member-card.component';
-import { MessageService } from '@/services/message.service';
+import { Chat, MessageService } from '@/services/message.service';
 import { AsyncPipe } from '@angular/common';
 import { InviteService } from '@/services/invite.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,6 +14,12 @@ import { MessageComponent } from '../message/message.component';
 import { PlatformService } from '@/services/platform.service';
 import { DeviceInfo } from '@capacitor/device';
 import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog.component';
+import { FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { ChatService } from '@/services/chat.service';
+import { ImgService } from '@/services/img.service';
 import {
   BehaviorSubject,
   combineLatest,
@@ -40,6 +46,10 @@ GroupMemberCardComponent;
     AsyncPipe,
     MessageComponent,
     QRcodeComponent,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './details.component.html',
@@ -52,10 +62,46 @@ export class DetailsComponent {
   inviteService = inject(InviteService);
   dialog = inject(MatDialog);
   snackBar = inject(MatSnackBar);
+  chatService = inject(ChatService);
+  imgService = inject(ImgService);
+
+  img?: string;
+  newChatName = new FormControl<string | null>(null);
+  selectedFile: File | null = null;
+
+  @Input() state: string = 'closed';
 
   private detailsStatePreference$ = new BehaviorSubject<'open' | 'closed'>(
     'open'
   );
+
+  get chat(): Chat | null {
+    return this.messageService.selectedChat || null;
+  }
+
+  public get imgUploaded(): boolean {
+    return !!this.img;
+  }
+
+  onImageUpload(event: any) {
+    const file = event.target.files[0] as File | null;
+    this.uploadFile(file);
+  }
+
+  uploadFile(file: File | null): void {
+    if (file && file.type.startsWith('image/')) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.img = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeImage() {
+    this.img = '';
+  }
 
   @Input() set detailsStatePreference(value: 'open' | 'closed') {
     this.detailsStatePreference$.next(value);
@@ -101,8 +147,46 @@ export class DetailsComponent {
     this.snackBar.open('Invitation copied to clipboard', 'close');
   }
 
+  async onEditChat() {
+    let updateName;
+    let updateImg;
+    if (this.newChatName.value) {
+      updateName = this.chatService.updateChatRequest(
+        this.messageService.selectedChat!.id,
+        {
+          chatName: this.newChatName.value,
+        }
+      );
+    }
+    if (this.img) {
+      const imgId = await this.imgService.createImage(
+        this.img,
+        this.chat?.chatKey
+      );
+
+      if (imgId && this.chat) {
+        updateImg = this.chatService.updateChatRequest(this.chat.id, {
+          chatImgId: imgId,
+        });
+      }
+    }
+
+    if (await updateName) {
+      this.newChatName.reset();
+    }
+
+    if (await updateImg) {
+      this.removeImage();
+    }
+  }
+
+  onReset() {
+    this.removeImage();
+    this.newChatName.reset();
+  }
+
   async onPinnedMessageExpand() {
-    this.messageService.getPinnedMessages(this.messageService.selectedChatId);
+    this.messageService.getPinnedMessages(this.messageService.selectedChat!.id);
   }
 
   async onLeaveChat() {
@@ -111,8 +195,6 @@ export class DetailsComponent {
         title: 'Are you sure you want to leave this chat?',
       },
     });
-
-    
 
     leaveDialogRef.afterClosed().subscribe((leaveConfirmed: boolean) => {
       if (leaveConfirmed) {

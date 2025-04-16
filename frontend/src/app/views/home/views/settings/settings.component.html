@@ -2,10 +2,7 @@
   <app-tab-header Title="Settings"></app-tab-header>
   <div class="settings-container">
     <div class="profile">
-      <img
-        [src]="imgService.images.get(user?.profilePictureId!)?.data"
-        alt=""
-      />
+      <img [src]="imgService.img(user?.profilePictureId!)" alt="" />
       <div class="profile-info">
         <h3 class="username">{{ username$ | async }}</h3>
         <p class="something">Something here</p>

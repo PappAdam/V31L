@@ -13,6 +13,8 @@ import { TabHeaderComponent } from '../../components/tab-header/tab-header.compo
 import { MessageService } from '@/services/message.service';
 import { EncryptionService } from '@/services/encryption.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ChatService } from '@/services/chat.service';
+import { ImgService } from '@/services/img.service';
 
 @Component({
   selector: 'app-add',
@@ -33,6 +35,8 @@ export class AddComponent {
   platformService: PlatformService = inject(PlatformService);
   platform: DeviceInfo | null = this.platformService.info;
   inviteService = inject(InviteService);
+  chatService = inject(ChatService);
+  imgService = inject(ImgService);
   messageService = inject(MessageService);
   encryptionService = inject(EncryptionService);
   router = inject(Router);
@@ -86,7 +90,14 @@ export class AddComponent {
       return;
     }
 
-    const { chat, key } = await this.inviteService.createChatRequest(v);
+    const key = await this.encryptionService.generateChatKey();
+
+    let image: string | undefined = undefined;
+    if (this.img) {
+      image = await this.imgService.createImage(this.img, key);
+    }
+
+    const { chat } = await this.chatService.createChatRequest(v, key, image);
 
     this.messageService.sendMessage(
       chat.id,
