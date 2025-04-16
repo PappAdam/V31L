@@ -95,10 +95,6 @@ export class AddComponent {
     let image: string | undefined = undefined;
     if (this.img) {
       image = await this.imgService.createImage(this.img, key);
-
-      if (image) {
-        await this.imgService.storeImage(image, key);
-      }
     }
 
     const { chat } = await this.chatService.createChatRequest(v, key, image);

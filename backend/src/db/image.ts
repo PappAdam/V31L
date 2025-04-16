@@ -45,13 +45,11 @@ export async function findImageById(
     }
 
     return {
-      data: arrayToString(
-        decryptData({
-          iv: img.outIv,
-          authTag: img.authTag,
-          encrypted: img.data,
-        })
-      ),
+      data: decryptData({
+        iv: img.outIv,
+        authTag: img.authTag,
+        encrypted: img.data,
+      }).toString("base64"),
       iv: img.inIv ? arrayToString(img.inIv) : undefined,
       type: img.type,
     };

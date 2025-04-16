@@ -123,6 +123,10 @@ export class Client {
         var chatMember = await findChatMember(this.user.id, incoming.chatId);
         return this.isAuthorized && !!chatMember;
 
+      case "RefreshChat":
+        var chatMember = await findChatMember(this.user.id, incoming.chat.id);
+        return this.isAuthorized && !!chatMember;
+
       default:
         throw new Error(
           "Validation for this package type has not been implemented."

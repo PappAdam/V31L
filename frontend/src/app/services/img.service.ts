@@ -28,7 +28,15 @@ export class ImgService {
   http = inject(HttpClient);
   private baseURL = 'http://localhost:3000/img/';
 
-  images = new Map<string, Image>();
+  private images = new Map<string, Image>();
+
+  img(id: string) {
+    return this.images.get(id)?.data;
+  }
+
+  imgRef(id: string) {
+    return this.images.get(id);
+  }
 
   async createImage(img: string, key?: CryptoKey) {
     let [imgtype, imgdata] = img.split(',');
@@ -54,10 +62,14 @@ export class ImgService {
       })
     );
 
+    if (res) {
+      await this.storeImage(res, key);
+    }
+
     return res;
   }
 
-  async storeImage(id: string, chatKey: CryptoKey): Promise<void> {
+  async storeImage(id: string, chatKey?: CryptoKey): Promise<void> {
     if (!this.authService.user) {
       return;
     }
@@ -78,17 +90,14 @@ export class ImgService {
 
     let imgData = response.data;
     if (response.iv && chatKey) {
-      const rawData = stringToCharCodeArray(response.data, Uint8Array);
+      const rawData = stringToCharCodeArray(atob(response.data), Uint8Array);
       imgData = btoa(
         await this.encryptionService.decryptText(chatKey, {
           data: rawData,
           iv: stringToCharCodeArray(response.iv, Uint8Array),
         })
       );
-    } else {
-      imgData = btoa(response.data);
     }
-
     const img = `${response.type},${imgData}`;
     this.images.set(id, { data: img });
   }

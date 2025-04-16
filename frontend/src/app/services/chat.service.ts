@@ -4,6 +4,7 @@ import { lastValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 import { EncryptionService } from './encryption.service';
 import { HttpClient } from '@angular/common/http';
+import { SocketService } from './socket.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,7 @@ import { HttpClient } from '@angular/common/http';
 export class ChatService {
   baseUrl: string = 'http://localhost:3000/chat/';
   encryptionService = inject(EncryptionService);
+  socketService = inject(SocketService);
   authService = inject(AuthService);
   http = inject(HttpClient);
 
@@ -53,11 +55,23 @@ export class ChatService {
         chatImgId: data.chatImgId,
       };
 
-      await lastValueFrom(
+      const res = await lastValueFrom(
         this.http.put(this.baseUrl, body, {
           headers: { Authorization: this.authService.user!.token },
+          observe: 'response',
         })
       );
+
+      if (res.status == 200) {
+        this.socketService.createPackage({
+          header: 'RefreshChat',
+          chat: {
+            id: chatId,
+            name: data.chatName,
+            imgID: data.chatImgId,
+          },
+        });
+      }
 
       return true;
     } catch (error) {

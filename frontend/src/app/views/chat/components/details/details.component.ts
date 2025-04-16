@@ -2,7 +2,7 @@ import { Component, inject, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { GroupOptionCardComponent } from './components/group-option-card/group-option-card.component';
 import { GroupMemberCardComponent } from './components/group-member-card/group-member-card.component';
-import { MessageService } from '@/services/message.service';
+import { Chat, MessageService } from '@/services/message.service';
 import { AsyncPipe } from '@angular/common';
 import { InviteService } from '@/services/invite.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,6 +19,7 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ChatService } from '@/services/chat.service';
+import { ImgService } from '@/services/img.service';
 
 GroupMemberCardComponent;
 @Component({
@@ -32,25 +33,58 @@ GroupMemberCardComponent;
     AsyncPipe,
     MessageComponent,
     QRcodeComponent,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
   ],
   templateUrl: './details.component.html',
   styleUrl: './details.component.scss',
 })
 export class DetailsComponent {
   protected platformService = inject(PlatformService);
-  platform: DeviceInfo | null = this.platformService.info;
   messageService = inject(MessageService);
   inviteService = inject(InviteService);
   dialog = inject(MatDialog);
   snackBar = inject(MatSnackBar);
   chatService = inject(ChatService);
+  imgService = inject(ImgService);
+
+  img?: string;
+  newChatName = new FormControl<string | null>(null);
+  platform: DeviceInfo | null = this.platformService.info;
+  selectedFile: File | null = null;
 
   @Input() state: string = 'closed';
 
   invitation: string = 'Creating you invitation...';
 
-  get chat() {
-    return this.messageService.selectedChat;
+  get chat(): Chat | null {
+    return this.messageService.selectedChat || null;
+  }
+
+  public get imgUploaded(): boolean {
+    return !!this.img;
+  }
+
+  onImageUpload(event: any) {
+    const file = event.target.files[0] as File | null;
+    this.uploadFile(file);
+  }
+
+  uploadFile(file: File | null): void {
+    if (file && file.type.startsWith('image/')) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.img = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeImage() {
+    this.img = '';
   }
 
   async copyToClipboard() {
@@ -80,18 +114,42 @@ export class DetailsComponent {
     this.messageService.getPinnedMessages(this.messageService.selectedChat.id);
   }
 
-  async onEditChatName() {
-    const dialogRef = this.dialog.open(ChangeChatNameDialog);
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.chatService.updateChatRequest(
-          this.messageService.selectedChat.id,
-          {
-            chatName: result,
-          }
-        );
+  async onEditChat() {
+    let updateName;
+    let updateImg;
+    if (this.newChatName.value) {
+      updateName = this.chatService.updateChatRequest(
+        this.messageService.selectedChat.id,
+        {
+          chatName: this.newChatName.value,
+        }
+      );
+    }
+    if (this.img) {
+      const imgId = await this.imgService.createImage(
+        this.img,
+        this.chat?.chatKey
+      );
+
+      if (imgId && this.chat) {
+        updateImg = this.chatService.updateChatRequest(this.chat.id, {
+          chatImgId: imgId,
+        });
       }
-    });
+    }
+
+    if (await updateName) {
+      this.newChatName.reset();
+    }
+
+    if (await updateImg) {
+      this.removeImage();
+    }
+  }
+
+  async onReset() {
+    this.newChatName.reset();
+    this.removeImage();
   }
 
   async onLeaveChat() {

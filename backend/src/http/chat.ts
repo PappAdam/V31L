@@ -93,21 +93,7 @@ async function updateChatH(req: Request, res: Response) {
       throw new Error("Failed to update chat");
     }
 
-    // Key is only used to send it back. We won't use it in the client, so we don't need it.
-    const publicChat: PublicChat = {
-      id: updatedChat.id,
-      imgID: updatedChat.chatImgId,
-      name: updatedChat.name,
-      users: [],
-      encryptedMessages: [],
-    };
-
-    ServerPackageSender.send(chatMemberIds, {
-      header: "Chats",
-      chats: [publicChat!],
-    });
-
-    res.json({ message: "Success" });
+    res.status(200).json({ message: "Success" });
   } catch (error) {
     console.error("Error during chat update: \n", error);
     res.status(500).json(serverErrorResponse);
