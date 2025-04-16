@@ -67,6 +67,7 @@ export class DetailsComponent {
 
   img?: string;
   newChatName = new FormControl<string | null>(null);
+  imageInput = new FormControl<string>('');
   selectedFile: File | null = null;
 
   @Input() state: string = 'closed';
@@ -100,6 +101,8 @@ export class DetailsComponent {
   }
 
   removeImage() {
+    this.imageInput.reset();
+    this.selectedFile = null;
     this.img = '';
   }
 
