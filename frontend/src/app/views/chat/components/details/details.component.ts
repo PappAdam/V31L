@@ -147,10 +147,6 @@ export class DetailsComponent {
     this.snackBar.open('Invitation copied to clipboard', 'close');
   }
 
-  async onPinnedMessageExpand() {
-    this.messageService.getPinnedMessages(this.messageService.selectedChatId);
-  }
-
   async onEditChat() {
     let updateName;
     let updateImg;
@@ -184,9 +180,13 @@ export class DetailsComponent {
     }
   }
 
-  async onReset() {
-    this.newChatName.reset();
+  onReset() {
     this.removeImage();
+    this.newChatName.reset();
+  }
+
+  async onPinnedMessageExpand() {
+    this.messageService.getPinnedMessages(this.messageService.selectedChat!.id);
   }
 
   async onLeaveChat() {
@@ -201,57 +201,5 @@ export class DetailsComponent {
         this.messageService.leaveChat(this.messageService.selectedChatId);
       }
     });
-  }
-}
-
-@Component({
-  selector: 'change-chat-name-dialog',
-  imports: [
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    ReactiveFormsModule,
-    MatButtonModule,
-  ],
-  template: `
-    <h3 mat-dialog-title>Change Chat Name</h3>
-    <mat-dialog-content>
-      <mat-form-field appearance="outline" [style.margin-top.px]="10">
-        <mat-label>New Chat Name</mat-label>
-        <input
-          matInput
-          [formControl]="name"
-          placeholder="Enter new chat name"
-          maxlength="30"
-          type="text"
-        />
-        @if (name.hasError('required')) {
-        <mat-error> Name is required </mat-error>
-        } @if (name.hasError('maxlength')) {
-        <mat-error> Maximum 30 characters </mat-error>
-        }
-      </mat-form-field>
-    </mat-dialog-content>
-    <mat-dialog-actions>
-      <button mat-button [mat-dialog-close]="''">Cancel</button>
-      <button
-        mat-flat-button
-        color="primary"
-        [disabled]="name.invalid"
-        (click)="submitName()"
-      >
-        Save
-      </button>
-    </mat-dialog-actions>
-  `,
-  standalone: true,
-})
-export class ChangeChatNameDialog {
-  name = new FormControl('', [Validators.required, Validators.maxLength(30)]);
-
-  constructor(private dialogRef: MatDialogRef<ChangeChatNameDialog>) {}
-
-  submitName() {
-    this.dialogRef.close(this.name.value);
   }
 }
