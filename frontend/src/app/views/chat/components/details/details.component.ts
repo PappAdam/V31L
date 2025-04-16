@@ -1,4 +1,4 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, ElementRef, inject, Input, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { GroupOptionCardComponent } from './components/group-option-card/group-option-card.component';
 import { GroupMemberCardComponent } from './components/group-member-card/group-member-card.component';
@@ -20,6 +20,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ChatService } from '@/services/chat.service';
 import { ImgService } from '@/services/img.service';
+import {
+  BehaviorSubject,
+  combineLatest,
+  concat,
+  filter,
+  from,
+  lastValueFrom,
+  map,
+  Observable,
+  of,
+  switchMap,
+} from 'rxjs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 GroupMemberCardComponent;
 @Component({
@@ -37,12 +50,14 @@ GroupMemberCardComponent;
     MatFormFieldModule,
     MatInputModule,
     ReactiveFormsModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './details.component.html',
   styleUrl: './details.component.scss',
 })
 export class DetailsComponent {
   protected platformService = inject(PlatformService);
+  platform: DeviceInfo | null = this.platformService.info;
   messageService = inject(MessageService);
   inviteService = inject(InviteService);
   dialog = inject(MatDialog);
@@ -52,12 +67,13 @@ export class DetailsComponent {
 
   img?: string;
   newChatName = new FormControl<string | null>(null);
-  platform: DeviceInfo | null = this.platformService.info;
   selectedFile: File | null = null;
 
   @Input() state: string = 'closed';
 
-  invitation: string = 'Creating you invitation...';
+  private detailsStatePreference$ = new BehaviorSubject<'open' | 'closed'>(
+    'open'
+  );
 
   get chat(): Chat | null {
     return this.messageService.selectedChat || null;
@@ -87,31 +103,52 @@ export class DetailsComponent {
     this.img = '';
   }
 
-  async copyToClipboard() {
-    if (!this.invitation) return;
-
-    await navigator.clipboard.writeText(this.invitation);
-
-    this.snackBar.open('Invitation copied to clipboard', 'close', {
-      duration: 2000,
-      horizontalPosition: 'right',
-    });
+  @Input() set detailsStatePreference(value: 'open' | 'closed') {
+    this.detailsStatePreference$.next(value);
   }
 
-  async onAddMemberExpand() {
-    if (!this.messageService.selectedChat) return;
+  protected detailsState$: Observable<'open' | 'closed'> = combineLatest([
+    this.messageService.chats$,
+    this.detailsStatePreference$,
+  ]).pipe(
+    map(([chats, preference]) => {
+      return chats.length > 0 ? preference : 'closed';
+    })
+  );
 
-    const invitation = await this.inviteService.createInvitation(
-      this.messageService.selectedChat.id
-    );
+  invitation$: Observable<string> = this.messageService.selectedChat$.pipe(
+    filter((chat) => !!chat),
+    switchMap((chat) =>
+      concat(
+        of(''),
+        from(this.inviteService.createInvitation(chat.id)).pipe(
+          map((invitation) => invitation || '')
+        )
+      )
+    )
+  );
 
-    if (invitation) {
-      this.invitation = invitation;
+  @ViewChild('invBody') invBody!: ElementRef;
+  protected invHeight$: Observable<number | null> = this.invitation$.pipe(
+    map((invitation) =>
+      invitation ? null : this.invBody.nativeElement.offsetHeight
+    )
+  );
+
+  async copyToClipboard() {
+    const invitation = await lastValueFrom(this.invitation$);
+
+    if (!invitation) {
+      this.snackBar.open('There was no invitation to copy.', 'close');
+      return;
     }
+
+    await navigator.clipboard.writeText(invitation);
+    this.snackBar.open('Invitation copied to clipboard', 'close');
   }
 
   async onPinnedMessageExpand() {
-    this.messageService.getPinnedMessages(this.messageService.selectedChat.id);
+    this.messageService.getPinnedMessages(this.messageService.selectedChatId);
   }
 
   async onEditChat() {
@@ -119,7 +156,7 @@ export class DetailsComponent {
     let updateImg;
     if (this.newChatName.value) {
       updateName = this.chatService.updateChatRequest(
-        this.messageService.selectedChat.id,
+        this.messageService.selectedChat!.id,
         {
           chatName: this.newChatName.value,
         }
@@ -161,7 +198,7 @@ export class DetailsComponent {
 
     leaveDialogRef.afterClosed().subscribe((leaveConfirmed: boolean) => {
       if (leaveConfirmed) {
-        this.messageService.leaveChat(this.messageService.selectedChat.id);
+        this.messageService.leaveChat(this.messageService.selectedChatId);
       }
     });
   }

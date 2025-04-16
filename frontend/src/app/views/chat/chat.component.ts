@@ -8,7 +8,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { MessageService } from '@/services/message.service';
-import { firstValueFrom, take } from 'rxjs';
 import { AuthService } from '@/services/auth.service';
 import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -52,7 +51,7 @@ export class ChatComponent {
 
   topScrollOffset = 0;
 
-  detailsState = 'closed';
+  detailsState: 'open' | 'closed' = 'closed';
 
   selectedChat$ = this.messageService.selectedChat$;
   message = '';
@@ -78,7 +77,7 @@ export class ChatComponent {
     this.imgs.splice(index, 1);
   }
 
-  updateDetailsState(event: string) {
+  updateDetailsState(event: 'open' | 'closed') {
     this.detailsState = event;
   }
 
@@ -88,7 +87,9 @@ export class ChatComponent {
   }
 
   async sendMessage() {
-    const selectedChat = await firstValueFrom(this.selectedChat$.pipe(take(1)));
+    const selectedChat = this.messageService.selectedChat;
+    if (!selectedChat) return;
+
     this.imgs.forEach((img) => {
       this.messageService.sendImage(selectedChat.id, img);
     });
