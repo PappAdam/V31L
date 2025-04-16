@@ -229,8 +229,6 @@ export class MessageService {
       // On chat update request, we get back a chats package with the modified name.
       if (rawChatContent.name) chats[chatIndex].name = rawChatContent.name;
       if (rawChatContent.imgID) {
-        console.log(rawChatContent.imgID, rawChatContent.name);
-
         chats[chatIndex].imgID = rawChatContent.imgID;
         chats[chatIndex].img = this.img.imgRef(rawChatContent.imgID)!;
       }

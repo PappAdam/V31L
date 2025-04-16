@@ -203,8 +203,6 @@ async function processBasedOnHeader(
       return !!deletedChatMember;
 
     case "RefreshChat":
-      console.log("asd");
-
       const chatToRefresh: PublicChat = {
         ...incoming.chat,
         users: [],
@@ -215,6 +213,8 @@ async function processBasedOnHeader(
         header: "Chats",
         chats: [chatToRefresh!],
       });
+
+      return true;
 
     default:
       console.error(
