@@ -58,16 +58,11 @@
           display: flex;
           flex-direction: row;
           align-items: center;
-          justify-content: space-evenly;
+          justify-content: space-between;
           gap: $mat-sys-spacing-sm;
 
           button {
-            width: calc(
-              (
-                  ($mat-sys-side-width - 2 * $mat-sys-spacing-md) * 0.6 - 2 *
-                    $mat-sys-spacing-sm
-                ) / 2 - $mat-sys-spacing-sm
-            );
+            flex-grow: 1;
           }
           .reset-btn {
             background-color: $mat-sys-surface-bright;

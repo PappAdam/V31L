@@ -2,9 +2,14 @@
 <div class="chat-outer-wrapper">
   <div class="chat-wrapper">
     <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
-    <div class="messages-wrapper">
-      @if (this.selectedChat$ | async; as selectedChat) { @for (message of
-      selectedChat.messages; track $index) {
+    <div class="messages-wrapper" #messagesWrapper (scroll)="onScroll($event)">
+      @if (this.selectedChat$ | async; as selectedChat) {
+      <div class="spinner">
+        @if (loadingMessages) {
+        <mat-spinner diameter="32"></mat-spinner>
+        }
+      </div>
+      @for (message of selectedChat.messages; track $index) {
       <app-message
         [first]="
           $index === 0 ||

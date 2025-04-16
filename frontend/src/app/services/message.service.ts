@@ -65,7 +65,7 @@ export class MessageService {
         this.socketService.createPackage({
           header: 'GetChats',
           chatCount: 10,
-          messageCount: 20,
+          messageCount: 25,
         });
       }
     }
@@ -309,17 +309,22 @@ export class MessageService {
     return chat?.messages[chat.messages.length - 1] || null;
   }
 
-  scrollLoadMessages(chatId: string) {
+  scrollLoadMessages(chatId: string): Promise<boolean> {
     const chat = this._chats$.value.find((c) => c.id === chatId);
     if (!chat) {
-      return;
+      return new Promise((resolve) => resolve(false));
     }
 
-    this.socketService.createPackage({
-      header: 'GetChatMessages',
-      chatId: chat.id,
-      messageCount: 10,
-      fromId: chat.messages[0].id,
+    return new Promise((resolve) => {
+      this.socketService.createPackage(
+        {
+          header: 'GetChatMessages',
+          chatId: chat.id,
+          messageCount: 10,
+          fromId: chat.messages[0].id,
+        },
+        () => resolve(true)
+      );
     });
   }
 }
