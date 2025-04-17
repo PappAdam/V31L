@@ -1,11 +1,12 @@
-import { PublicChat, PublicMessage } from "./public";
+import { PublicChat, PublicMessage, PublicUser } from "./public";
 
 export type ServerPackage =
   | ServerAcknowledgement
   | ServerChatsPackage
   | ServerPinnedMessagesPackage
   | ServerLeaveChatPackage
-  | ServerErrorPackage;
+  | ServerErrorPackage
+  | ServerUsersPackage;
 
 export type ServerHeaderType = ServerPackage["header"];
 export type PackageForHeader<T extends ServerHeaderType> = Extract<
@@ -37,4 +38,9 @@ export type ServerLeaveChatPackage = {
 export type ServerErrorPackage = {
   header: "Error";
   errorMessage: string;
+};
+
+export type ServerUsersPackage = {
+  header: "Users";
+  users: PublicUser[];
 };

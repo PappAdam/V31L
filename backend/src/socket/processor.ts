@@ -3,10 +3,15 @@ import {
   EncryptedMessage,
   PublicChat,
   PublicMessage,
+  PublicUser,
   ServerChatsPackage,
   stringToCharCodeArray,
 } from "@common";
-import { deleteChatMember, findChatMembersByChat } from "../db/chatMember";
+import {
+  deleteChatMember,
+  findChatMembersByChat,
+  findChatMembersByUser,
+} from "../db/chatMember";
 import {
   createMessage,
   findChatMessages,
@@ -19,6 +24,7 @@ import { getPublicChatsWithMessages, toPublicMessage } from "@/db/public";
 import { findUserById } from "@/db/user";
 import { createImage, findImageById } from "@/db/image";
 import { MessageType } from "@prisma/client";
+import { findChatById } from "@/db/chat";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
@@ -209,9 +215,34 @@ async function processBasedOnHeader(
         encryptedMessages: [],
       };
 
-      ServerPackageSender.send([client.user.id], {
+      const users = (await findChatMembersByChat(incoming.chat.id)).map(
+        (m) => m.userId
+      );
+
+      ServerPackageSender.send(users, {
         header: "Chats",
         chats: [chatToRefresh!],
+      });
+
+      return true;
+
+    case "RefreshUser":
+      const userToRefresh = await findUserById(incoming.user.id);
+      const userChats = await findChatMembersByUser(incoming.user.id);
+
+      const usersToRefresh: string[] = [];
+      for (let cm of userChats) {
+        const members = await findChatMembersByChat(cm.chatId);
+        members.forEach((m) => {
+          if (!usersToRefresh.includes(m.userId)) {
+            usersToRefresh.push(m.userId);
+          }
+        });
+      }
+
+      ServerPackageSender.send(usersToRefresh, {
+        header: "Users",
+        users: [{ ...userToRefresh! }],
       });
 
       return true;

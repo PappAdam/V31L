@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, lastValueFrom, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import {
@@ -11,6 +11,8 @@ import {
   stringToCharCodeArray,
   arrayToString,
 } from '@common';
+import { SocketService } from './socket.service';
+import { Image } from './img.service';
 
 @Injectable({
   providedIn: 'root',
@@ -192,22 +194,24 @@ export class AuthService {
     }
   }
 
-  async changePassword(
-    oldPassword: string,
-    newPassword: string
-  ): Promise<AuthSuccessResponse | null> {
-    if (!this.user || !oldPassword || !newPassword) {
+  async updateUser(params: {
+    oldPassword?: string;
+    newPassword?: string;
+    imgId?: string;
+  }): Promise<AuthSuccessResponse | null> {
+    if (!this.user) {
       return null;
     }
 
     const refreshRequest = this.http.put<AuthSuccessResponse>(
       this.baseUrl + '',
-      { oldPassword, newPassword },
+      params,
       { headers: { Authorization: this.user.token } }
     );
 
     try {
       const response = await lastValueFrom(refreshRequest);
+
       return response;
     } catch {
       return null;

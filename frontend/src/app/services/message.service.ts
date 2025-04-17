@@ -17,9 +17,11 @@ import {
   PublicMessage,
   PublicUser,
   ServerChatsPackage,
+  ServerUsersPackage,
 } from '@common';
 import { EncryptionService, Message } from './encryption.service';
 import { Image, ImgService } from './img.service';
+import { AuthService } from './auth.service';
 
 export type User = PublicUser & { img: Image };
 export type Chat = Omit<
@@ -38,8 +40,13 @@ export type Chat = Omit<
 export class MessageService {
   socketService = inject(SocketService);
   encryptionService = inject(EncryptionService);
+  authService = inject(AuthService);
   img = inject(ImgService);
   users: User[] = [];
+
+  get currentUser() {
+    return this.users.find((u) => u.id == this.authService.user?.id);
+  }
 
   private _chats$ = new BehaviorSubject<Chat[]>([]);
   get chats$(): Observable<Chat[]> {
@@ -75,6 +82,10 @@ export class MessageService {
     .addPackageListener('Chats')
     .subscribe((p) => this.onChatsPackageRecieved(p));
 
+  private usersPackageSubscription = this.socketService
+    .addPackageListener('Users')
+    .subscribe((p) => this.onUsersPackageRecieved(p));
+
   private removeChatSubscription = this.socketService
     .addPackageListener('LeaveChat')
     .subscribe((p) =>
@@ -107,9 +118,9 @@ export class MessageService {
         return messages;
       })
     ),
-    this.selectedChat$.pipe(
-      tap((chat) => {
-        if (chat) this.getPinnedMessages(chat.id);
+    this.selectedChatId$.pipe(
+      tap((chatId) => {
+        if (chatId) this.getPinnedMessages(chatId);
       }),
       map(() => [])
     )
@@ -182,6 +193,17 @@ export class MessageService {
     });
   }
 
+  onUsersPackageRecieved(p: ServerUsersPackage): void {
+    p.users.forEach((ru) => {
+      const userIndex = this.users.findIndex((u) => ru.id == u.id);
+
+      if (userIndex != -1) {
+        this.users[userIndex].profilePictureId = ru.profilePictureId;
+        this.users[userIndex].img = this.img.imgRef(ru.profilePictureId)!;
+      }
+    });
+  }
+
   leaveChat(chatId: string) {
     this.socketService.createPackage({ header: 'LeaveChat', chatId }, () => {
       const nextChat = this._chats$.value.find((c) => c.id != chatId);
@@ -213,11 +235,13 @@ export class MessageService {
               ...nu,
               img: this.img.imgRef(nu.profilePictureId)!,
             };
-            const exsistingUser = this.users.find((u) => u.id == nu.id);
+            let exsistingUser = this.users.find((u) => u.id == nu.id);
             if (!exsistingUser) {
-              this.users.push(user);
+              let i = this.users.push(user);
+              exsistingUser = this.users[i - 1];
             }
-            users.push(user);
+
+            users.push(exsistingUser);
           }
           await this.img.storeImage(rawChatContent.imgID!, chatKey);
           const chat = {

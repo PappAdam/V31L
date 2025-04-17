@@ -8,7 +8,8 @@ export type ClientPackageDescription =
   | ClientGetMessagesPackage
   | ClientPinMessagePackage
   | ClientLeaveChatPackage
-  | ClientRefreshChatPackage;
+  | ClientRefreshChatPackage
+  | ClientRefreshUserPackage;
 
 export type ClientPackage = ClientPackageDescription & { id: string };
 
@@ -75,5 +76,13 @@ export type ClientRefreshChatPackage = {
     id: string;
     name?: string;
     imgID?: string;
+  };
+};
+
+export type ClientRefreshUserPackage = {
+  header: "RefreshUser";
+  user: {
+    id: string;
+    imgId?: string;
   };
 };

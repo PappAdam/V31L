@@ -49,12 +49,8 @@ authRouter.post(
   disableMfa
 );
 
-authRouter.put(
-  "/",
-  validateRequiredFields(["oldPassword", "newPassword"]),
-  extractUserFromTokenMiddleWare,
-  changePassword
-);
+authRouter.put("/", extractUserFromTokenMiddleWare, changeUser);
+
 authRouter.delete("/", extractUserFromTokenMiddleWare, deleteProfile);
 export default authRouter;
 
@@ -167,21 +163,27 @@ async function loginUser(req: Request, res: Response) {
   }
 }
 
-async function changePassword(req: Request, res: Response) {
+async function changeUser(req: Request, res: Response) {
   try {
     const user = req.user as User;
-    const { oldPassword, newPassword } = req.body;
+    const { oldPassword, newPassword, imgId } = req.body;
 
-    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isPasswordMatch) {
-      res.status(400).json(invalidCredentialsResponse);
-      return;
+    console.log(req.body);
+
+    if (oldPassword && newPassword) {
+      const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isPasswordMatch) {
+        res.status(400).json(invalidCredentialsResponse);
+        return;
+      }
     }
 
     const updatedUser = await updateUser({
       id: user.id,
       password: newPassword,
+      profilePictureId: imgId,
     });
+
     if (!updatedUser) {
       throw new Error("Error updating user");
     }

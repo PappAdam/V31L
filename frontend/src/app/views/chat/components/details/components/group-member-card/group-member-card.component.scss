@@ -7,13 +7,16 @@
 
   .profile-image-wrapper {
     flex-shrink: 0; // Prevent image from shrinking
-    background-color: $mat-sys-primary-container;
     height: $mat-sys-img-profile-medium;
     aspect-ratio: 1/1;
     border-radius: $mat-sys-corner-full;
+    display: block;
 
     img {
+      background-color: $mat-sys-primary-container;
       height: 100%;
+      object-fit: contain;
+      object-position: center;
     }
   }
 

@@ -1,11 +1,10 @@
 import { AuthService } from '@/services/auth.service';
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { lastValueFrom, map } from 'rxjs';
+import { Component, inject, ViewChild } from '@angular/core';
+import { map } from 'rxjs';
 import { GroupOptionCardComponent } from '../../../chat/components/details/components/group-option-card/group-option-card.component';
 import { MatDividerModule } from '@angular/material/divider';
 import {
-  MAT_DIALOG_DATA,
   MatDialog,
   MatDialogModule,
   MatDialogRef,
@@ -19,6 +18,11 @@ import { passwordValidator } from '@/login/login.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TabHeaderComponent } from '../../components/tab-header/tab-header.component';
 import { ImgService } from '@/services/img.service';
+import imageCompression from 'browser-image-compression';
+import { MatIcon } from '@angular/material/icon';
+import { HttpClient } from '@angular/common/http';
+import { SocketService } from '@/services/socket.service';
+import { MessageService } from '@/services/message.service';
 
 @Component({
   selector: 'app-settings',
@@ -27,6 +31,8 @@ import { ImgService } from '@/services/img.service';
     GroupOptionCardComponent,
     MatDividerModule,
     TabHeaderComponent,
+    MatIcon,
+    MatButtonModule,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
@@ -35,12 +41,71 @@ export class SettingsComponent {
   authService = inject(AuthService);
   dialog = inject(MatDialog);
   imgService = inject(ImgService);
+  socketService = inject(SocketService);
+  messageService = inject(MessageService);
 
   private snackBar = inject(MatSnackBar);
 
   user = this.authService.user;
   username$ = this.authService.user$.pipe(map((u) => u?.username));
   mfaToggleEnabled: boolean = this.authService.user?.mfaEnabled || false;
+
+  @ViewChild('imageSelector') imageSelector?: HTMLInputElement;
+  img = '';
+  selectedFile: File | null = null;
+  imageInput = new FormControl();
+
+  public get imgUploaded(): boolean {
+    return !!this.img;
+  }
+
+  onImageUpload(event: any) {
+    const file = event.target.files[0] as File | null;
+    this.uploadFile(file);
+  }
+
+  async uploadFile(file: File | null) {
+    if (file && file.type.startsWith('image/')) {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 10,
+        useWebWorker: true,
+      });
+
+      this.selectedFile = compressed;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.img = e.target?.result as string;
+      };
+      reader.readAsDataURL(compressed);
+    }
+  }
+
+  async onProfileImageChange() {
+    const imgId = await this.imgService.createImage(this.img);
+
+    const res = await this.authService.updateUser({
+      imgId,
+    });
+
+    if (res?.result == 'Success') {
+      this.socketService.createPackage(
+        {
+          header: 'RefreshUser',
+          user: {
+            id: res.id,
+            imgId: imgId,
+          },
+        },
+        () => {
+          this.removeImage();
+        }
+      );
+    }
+  }
+
+  removeImage() {
+    this.img = '';
+  }
 
   onChangePassword() {
     this.dialog
@@ -269,10 +334,10 @@ class PasswordChangeDialog {
     if (this.oldPassword.invalid || this.newPassword.invalid) return;
 
     try {
-      const response = await this.authService.changePassword(
-        this.oldPassword.value!,
-        this.newPassword.value!
-      );
+      const response = await this.authService.updateUser({
+        oldPassword: this.oldPassword.value!,
+        newPassword: this.newPassword.value!,
+      });
 
       if (!response || response.result !== 'Success') {
         this.handleError('oldPassword');
