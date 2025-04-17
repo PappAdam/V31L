@@ -311,7 +311,7 @@ export class MessageService {
 
   scrollLoadMessages(chatId: string): Promise<boolean> {
     const chat = this._chats$.value.find((c) => c.id === chatId);
-    if (!chat) {
+    if (!chat || !chat.messages[0]) {
       return new Promise((resolve) => resolve(false));
     }
 

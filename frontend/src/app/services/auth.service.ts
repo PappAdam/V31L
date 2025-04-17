@@ -8,6 +8,8 @@ import {
   AuthErrorResponse,
   AuthNextResponse,
   AuthNextMfaSetupResponse,
+  stringToCharCodeArray,
+  arrayToString,
 } from '@common';
 
 @Injectable({

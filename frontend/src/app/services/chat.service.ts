@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { ChatSuccess } from '@common';
+import { arrayToString, ChatSuccess } from '@common';
 import { lastValueFrom } from 'rxjs';
 import { AuthService } from './auth.service';
 import { EncryptionService } from './encryption.service';
@@ -28,7 +28,7 @@ export class ChatService {
 
     const body = {
       name: chatName,
-      key: String.fromCharCode(...wrappedKey),
+      key: arrayToString(wrappedKey),
       chatImgId: imgID || 'groupImg',
     };
 

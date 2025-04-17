@@ -20,6 +20,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ChatService } from '@/services/chat.service';
 import { ImgService } from '@/services/img.service';
+import imageCompression from 'browser-image-compression';
 import {
   BehaviorSubject,
   combineLatest,
@@ -89,14 +90,19 @@ export class DetailsComponent {
     this.uploadFile(file);
   }
 
-  uploadFile(file: File | null): void {
+  async uploadFile(file: File | null) {
     if (file && file.type.startsWith('image/')) {
-      this.selectedFile = file;
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 10,
+        useWebWorker: true,
+      });
+
+      this.selectedFile = compressed;
       const reader = new FileReader();
       reader.onload = (e) => {
         this.img = e.target?.result as string;
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressed);
     }
   }
 
@@ -119,12 +125,12 @@ export class DetailsComponent {
     })
   );
 
-  invitation$: Observable<string> = this.messageService.selectedChat$.pipe(
+  invitation$: Observable<string> = this.messageService.selectedChatId$.pipe(
     filter((chat) => !!chat),
     switchMap((chat) =>
       concat(
         of(''),
-        from(this.inviteService.createInvitation(chat.id)).pipe(
+        from(this.inviteService.createInvitation(chat)).pipe(
           map((invitation) => invitation || '')
         )
       )

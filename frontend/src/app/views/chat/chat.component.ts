@@ -29,6 +29,7 @@ import {
   tap,
 } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import imageCompression from 'browser-image-compression';
 
 @Component({
   selector: 'app-chat',
@@ -69,19 +70,26 @@ export class ChatComponent {
 
   detailsState: 'open' | 'closed' = 'closed';
 
-  onImageUpload(event: any) {
+  async onImageUpload(event: any) {
     const file = event.target.files[0] as File | null;
-    this.uploadFile(file);
+    if (file) {
+      this.uploadFile(file);
+    }
   }
 
-  uploadFile(file: File | null): void {
+  async uploadFile(file: File | null) {
     if (file && file.type.startsWith('image/')) {
-      this.selectedFile = file;
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 10,
+        useWebWorker: true,
+      });
+
+      this.selectedFile = compressed;
       const reader = new FileReader();
       reader.onload = (e) => {
         this.imgs.push(e.target?.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressed);
     }
   }
 

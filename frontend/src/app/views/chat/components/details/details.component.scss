@@ -17,10 +17,6 @@
   overflow: scroll;
   flex-shrink: 0;
 
-  &.details-wrapper::-webkit-scrollbar {
-    display: none;
-  }
-
   .inner-wrapper {
     width: 100%;
     min-width: calc($mat-sys-side-width - 2 * $mat-sys-spacing-md);

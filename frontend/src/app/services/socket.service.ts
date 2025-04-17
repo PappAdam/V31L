@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import * as msgpack from '@msgpack/msgpack';
 import {
+  arrayToString,
   ClientPackage,
   ClientPackageDescription,
   PackageForHeader,
@@ -147,7 +148,7 @@ export class SocketService {
     dependsOn: string = ''
   ): PackageQueueItem {
     const rawid = crypto.getRandomValues(new Uint8Array(16));
-    const id = String.fromCharCode(...rawid);
+    const id = arrayToString(rawid);
     const pkg: ClientPackage = {
       id,
       ...packageDesc,

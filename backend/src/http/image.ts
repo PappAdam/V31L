@@ -42,10 +42,10 @@ export async function createImg(req: Request, res: Response) {
   try {
     const { img, type, id, iv } = req.body;
     const image = await createImage(
-      stringToCharCodeArray(img, Uint8Array),
+      stringToCharCodeArray(img),
       type,
       id,
-      iv ? stringToCharCodeArray(iv, Uint8Array) : undefined
+      iv ? stringToCharCodeArray(iv) : undefined
     );
 
     if (!image) {

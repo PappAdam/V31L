@@ -14,7 +14,7 @@
         />
         @if (imgUploaded) {
         <div class="image-selected">
-          <img [src]="img" alt="" />
+          <img #selectedImg [src]="img" alt="" />
           <mat-icon
             class="remove-btn"
             fontIcon="close"

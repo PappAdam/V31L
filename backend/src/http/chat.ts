@@ -43,7 +43,7 @@ async function createNewChat(req: Request, res: Response) {
       throw Error("Failed to create chat");
     }
 
-    const rawKey = stringToCharCodeArray(key, Uint8Array);
+    const rawKey = stringToCharCodeArray(key);
     const chatMember = await createChatMember(user.id, chat.id, rawKey);
     if (!chatMember) {
       throw Error("Failed to create chat member");

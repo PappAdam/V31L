@@ -48,6 +48,8 @@
 
       &.text {
         padding: $mat-sys-spacing-sm $mat-sys-spacing-md;
+        word-break: break-all;
+        white-space: preserve;
       }
 
       &.image {

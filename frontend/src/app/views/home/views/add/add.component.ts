@@ -15,6 +15,8 @@ import { EncryptionService } from '@/services/encryption.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChatService } from '@/services/chat.service';
 import { ImgService } from '@/services/img.service';
+import imageCompression from 'browser-image-compression';
+import Cropper from 'cropperjs';
 
 @Component({
   selector: 'app-add',
@@ -45,6 +47,7 @@ export class AddComponent {
   chatName = new FormControl('');
   connectionString = new FormControl('');
   @ViewChild('imageSelector') imageSelector?: HTMLInputElement;
+  @ViewChild('selectedImg') selectedImgElem?: HTMLImageElement;
   img = '';
   selectedFile: File | null = null;
 
@@ -57,14 +60,19 @@ export class AddComponent {
     this.uploadFile(file);
   }
 
-  uploadFile(file: File | null): void {
+  async uploadFile(file: File | null) {
     if (file && file.type.startsWith('image/')) {
-      this.selectedFile = file;
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 10,
+        useWebWorker: true,
+      });
+
+      this.selectedFile = compressed;
       const reader = new FileReader();
       reader.onload = (e) => {
         this.img = e.target?.result as string;
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressed);
     }
   }
 

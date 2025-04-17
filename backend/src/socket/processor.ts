@@ -77,7 +77,7 @@ async function processBasedOnHeader(
         if (!image) {
           return false;
         }
-        content = { data: stringToCharCodeArray(image.id, Uint8Array) };
+        content = { data: stringToCharCodeArray(image.id) };
       } else {
         content = incoming.messageContent;
       }

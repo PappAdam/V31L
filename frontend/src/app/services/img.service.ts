@@ -1,21 +1,10 @@
-import {
-  effect,
-  inject,
-  Injectable,
-  Signal,
-  signal,
-  WritableSignal,
-} from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import {
-  arrayToString,
-  EncryptedMessage,
-  ImageResponse,
-  stringToCharCodeArray,
-} from '@common';
+import { arrayToString, ImageResponse, stringToCharCodeArray } from '@common';
 import { EncryptionService } from './encryption.service';
+import imageCompression from 'browser-image-compression';
 
 export type Image = { data: string };
 
@@ -90,11 +79,11 @@ export class ImgService {
 
     let imgData = response.data;
     if (response.iv && chatKey) {
-      const rawData = stringToCharCodeArray(atob(response.data), Uint8Array);
+      const rawData = stringToCharCodeArray(atob(response.data));
       imgData = btoa(
         await this.encryptionService.decryptText(chatKey, {
           data: rawData,
-          iv: stringToCharCodeArray(response.iv, Uint8Array),
+          iv: stringToCharCodeArray(response.iv),
         })
       );
     }

@@ -8,6 +8,7 @@ import {
   ChatResponse,
   JoinSuccess,
   stringToCharCodeArray,
+  arrayToString,
 } from '@common';
 import { lastValueFrom } from 'rxjs';
 import { MessageService } from './message.service';
@@ -27,11 +28,11 @@ export class InviteService {
   constructor() {}
 
   async wrapInvitation(invId: string, chatKey: CryptoKey): Promise<string> {
-    const raw = Uint16Array.from(
+    const raw = arrayToString(
       new Uint8Array(await crypto.subtle.exportKey('raw', chatKey))
-    ).map((b) => b + 1);
+    );
 
-    const key = String.fromCharCode(...raw);
+    const key = btoa(raw);
     const inv = invId + key;
 
     return inv;
@@ -41,13 +42,7 @@ export class InviteService {
     wrapped: string
   ): Promise<{ id: string; key: string }> {
     const id = wrapped.slice(0, 36);
-    const key = String.fromCharCode(
-      ...stringToCharCodeArray(
-        wrapped.slice(36, wrapped.length),
-        Uint16Array
-      ).map((b) => b - 1)
-    );
-
+    const key = atob(wrapped.slice(36, wrapped.length));
     return {
       id,
       key,
@@ -95,7 +90,7 @@ export class InviteService {
       const invIdKeyPair = await this.unwrapInvitation(connectionString);
       const key = await crypto.subtle.importKey(
         'raw',
-        stringToCharCodeArray(invIdKeyPair.key, Uint8Array),
+        stringToCharCodeArray(invIdKeyPair.key),
         { name: 'AES-GCM' },
         true,
         ['encrypt', 'decrypt']
@@ -107,7 +102,7 @@ export class InviteService {
       );
 
       const body = {
-        key: String.fromCharCode(...wrapped),
+        key: arrayToString(wrapped),
         invId: invIdKeyPair.id,
       };
 
