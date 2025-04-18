@@ -14,7 +14,7 @@ import { DetailsComponent } from './components/details/details.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
-import { MessageService } from '@/services/message.service';
+import { Chat, MessageService } from '@/services/message.service';
 import { AuthService } from '@/services/auth.service';
 import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -127,6 +127,7 @@ export class ChatComponent {
   protected scrolledToBottom = true;
   // True if waiting for messages to arrive (request has been sent)
   protected loadingMessages = false;
+  private scrollPositions: Record<string, number> = {};
 
   // If the scroll is near the top (tolerance is given in px), load more messages.
   // This controls the `loadingMessages` boolean.
@@ -144,6 +145,9 @@ export class ChatComponent {
     this.scrolledToBottom =
       element.scrollTop + element.clientHeight >=
       element.scrollHeight - tolerance;
+
+    this.scrollPositions[this.messageService.selectedChatId] =
+      element.scrollTop;
   }
 
   // The height of the element before a redraw.
@@ -151,20 +155,34 @@ export class ChatComponent {
   ngAfterViewInit() {
     this.oldHeight = this.messagesWrapper.nativeElement.scrollHeight;
   }
-  // The height of the element after a redraw.
-  private newHeight$ = new Subject<number>();
+
+  private oldChat: Chat | null = null;
 
   // When a new message arrives (chat is unchanged, only messages update), update newHeight.
   private trackHeightSubscription = this.selectedChat$
     .pipe(
-      pairwise(),
-      filter(
-        ([oldChat, newChat]) =>
-          !!this.messagesWrapper && oldChat?.id === newChat?.id
-      ),
-      tap(() => {
+      filter((chat) => {
+        return (
+          !!chat && !!this.messagesWrapper && this.oldChat?.id === chat?.id
+        );
+      }),
+      tap((chat) => {
         requestAnimationFrame(() => {
-          this.newHeight$.next(this.messagesWrapper.nativeElement.scrollHeight);
+          const messagesArrivedOnTop = this.oldChat
+            ? this.oldChat.messages[0].id != chat!.messages[0].id
+            : false;
+
+          this.oldChat = { ...chat! };
+
+          const newHeight = this.messagesWrapper.nativeElement.scrollHeight;
+          const diff = newHeight - this.oldHeight;
+          this.oldHeight = newHeight;
+          if (messagesArrivedOnTop || this.scrolledToBottom) {
+            this.messagesWrapper.nativeElement.scrollTop += diff;
+            this.scrollPositions[chat!.id] =
+              this.messagesWrapper.nativeElement.scrollTop;
+            return;
+          }
         });
       })
     )
@@ -175,39 +193,32 @@ export class ChatComponent {
   // Trigger a scroll event to load more messages if the initially loaded ones don't fill the screen.
   private scrollToBottomOnNewChatSubscription = this.selectedChat$
     .pipe(
-      pairwise(),
-      filter(
-        ([oldChat, newChat]) =>
-          !!this.messagesWrapper && oldChat?.id != newChat?.id
-      ),
-      tap(() => {
+      filter((chat) => !!this.messagesWrapper && this.oldChat?.id != chat?.id),
+      tap((chat) => {
         setTimeout(() => {
-          this.messagesWrapper.nativeElement.scrollTop =
-            this.messagesWrapper.nativeElement.scrollHeight;
+          console.log(chat?.name, this.scrollPositions[chat!.id]);
+
+          if (this.scrollPositions[chat!.id] == undefined) {
+            this.messagesWrapper.nativeElement.scrollTop =
+              this.messagesWrapper.nativeElement.scrollHeight;
+            this.scrollPositions[chat!.id] =
+              this.messagesWrapper.nativeElement.scrollHeight;
+            this.messagesWrapper.nativeElement.dispatchEvent(
+              new Event('scroll')
+            );
+          } else {
+            this.messagesWrapper.nativeElement.scrollTop =
+              this.scrollPositions[chat!.id]!;
+          }
           this.oldHeight = this.messagesWrapper.nativeElement.scrollHeight;
-          this.scrolledToBottom = true;
-          this.messagesWrapper.nativeElement.dispatchEvent(new Event('scroll'));
+          this.oldChat = { ...chat } as Chat;
         }, 0);
       })
     )
     .subscribe();
 
-  // Whenever newHeight changes, adjust scrollTop to keep the view's position the same.
-  // This controls the oldHeight variable.
-  private maintainScrollSubscription = this.newHeight$
-    .pipe(
-      tap((newHeight) => {
-        const diff = newHeight - this.oldHeight;
-        this.oldHeight = newHeight;
-        this.messagesWrapper.nativeElement.scrollTop += diff;
-      })
-    )
-    .subscribe();
-  //#endregion Scrolling
-
   ngOnDestroy() {
     this.trackHeightSubscription.unsubscribe();
     this.scrollToBottomOnNewChatSubscription.unsubscribe();
-    this.maintainScrollSubscription.unsubscribe();
   }
 }
