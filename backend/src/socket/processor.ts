@@ -158,6 +158,7 @@ async function processBasedOnHeader(
       return true;
 
     case "GetChatMessages":
+      // await new Promise((r) => setTimeout(r, 2000));
       const messages: PublicMessage[] = (
         await findChatMessages(
           incoming.chatId,

@@ -17,7 +17,17 @@
         "
         [message]="message"
       ></app-message>
-      } } @else {
+      }
+      <div
+        class="scroll-down"
+        [style.bottom.px]="scrolledToBottom ? 0 : 76"
+        [style.width.px]="messagesWrapperWidth"
+      >
+        <div class="button" (click)="scrollToBottom()">
+          <mat-icon fontIcon="arrow_downward"></mat-icon>
+        </div>
+      </div>
+      } @else {
       <div class="no-chat-selected">
         <h3>No chat selected</h3>
       </div>

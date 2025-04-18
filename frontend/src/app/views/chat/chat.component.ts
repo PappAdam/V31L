@@ -4,6 +4,7 @@ import {
   ElementRef,
   inject,
   Input,
+  NgZone,
   Renderer2,
   ViewChild,
 } from '@angular/core';
@@ -53,6 +54,7 @@ export class ChatComponent {
   protected authService = inject(AuthService);
   protected imgService = inject(ImgService);
   protected renderer = inject(Renderer2);
+  private ngZone = inject(NgZone);
 
   protected platform: DeviceInfo | null = this.platformService.info;
   protected selectedChat$ = this.messageService.selectedChat$;
@@ -124,6 +126,7 @@ export class ChatComponent {
 
   //#region Scrolling
   @ViewChild('messagesWrapper') messagesWrapper!: ElementRef;
+
   protected scrolledToBottom = true;
   // True if waiting for messages to arrive (request has been sent)
   protected loadingMessages = false;
@@ -133,9 +136,8 @@ export class ChatComponent {
   // This controls the `loadingMessages` boolean.
   onScroll(event: Event) {
     const element = event.target as HTMLElement;
-    const tolerance = 1;
 
-    if (element.scrollTop <= tolerance && !this.loadingMessages) {
+    if (element.scrollTop == 0 && !this.loadingMessages) {
       this.loadingMessages = true;
       this.messageService
         .scrollLoadMessages(this.messageService.selectedChatId)
@@ -143,8 +145,7 @@ export class ChatComponent {
     }
 
     this.scrolledToBottom =
-      element.scrollTop + element.clientHeight >=
-      element.scrollHeight - tolerance;
+      element.scrollTop + element.clientHeight >= element.scrollHeight;
 
     this.scrollPositions[this.messageService.selectedChatId] =
       element.scrollTop;
@@ -154,12 +155,14 @@ export class ChatComponent {
   private oldHeight = 0;
   ngAfterViewInit() {
     this.oldHeight = this.messagesWrapper.nativeElement.scrollHeight;
+    this.messagesWrapperWidth = this.messagesWrapper.nativeElement.clientWidth;
+    this.resizeObserver.observe(this.messagesWrapper.nativeElement);
   }
 
   private oldChat: Chat | null = null;
 
   // When a new message arrives (chat is unchanged, only messages update), update newHeight.
-  private trackHeightSubscription = this.selectedChat$
+  private maintainScrollSubscription = this.selectedChat$
     .pipe(
       filter((chat) => {
         return (
@@ -196,8 +199,6 @@ export class ChatComponent {
       filter((chat) => !!this.messagesWrapper && this.oldChat?.id != chat?.id),
       tap((chat) => {
         setTimeout(() => {
-          console.log(chat?.name, this.scrollPositions[chat!.id]);
-
           if (this.scrollPositions[chat!.id] == undefined) {
             this.messagesWrapper.nativeElement.scrollTop =
               this.messagesWrapper.nativeElement.scrollHeight;
@@ -217,8 +218,26 @@ export class ChatComponent {
     )
     .subscribe();
 
+  protected scrollToBottom() {
+    this.messagesWrapper.nativeElement.scrollTop =
+      this.messagesWrapper.nativeElement.scrollHeight;
+
+    this.messagesWrapper.nativeElement.dispatchEvent(new Event('scroll'));
+  }
+
+  //#endregion
+
+  private resizeObserver: ResizeObserver = new ResizeObserver(() =>
+    this.ngZone.run(() => this.updateScrollDownWidth())
+  );
+  protected messagesWrapperWidth!: number;
+
+  updateScrollDownWidth() {
+    this.messagesWrapperWidth = this.messagesWrapper.nativeElement.clientWidth;
+  }
   ngOnDestroy() {
-    this.trackHeightSubscription.unsubscribe();
+    this.maintainScrollSubscription.unsubscribe();
     this.scrollToBottomOnNewChatSubscription.unsubscribe();
+    this.resizeObserver.disconnect();
   }
 }
