@@ -3,40 +3,46 @@
 .settings {
   height: 100%;
   background-color: $mat-sys-surface-container;
-  border-radius: $mat-sys-corner-medium;
-  padding: $mat-sys-spacing-md;
-
-  .profile {
-    display: flex;
-    margin-bottom: $mat-sys-spacing-md;
-
-    img {
-      width: $mat-sys-img-profile-large;
-      height: $mat-sys-img-profile-large;
-    }
-
-    .profile-info {
-      margin-left: $mat-sys-spacing-md;
+  border-radius: $mat-sys-corner-medium $mat-sys-corner-medium 0px 0px;
+  .settings-list {
+    height: 100%;
+    padding: $mat-sys-spacing-sm;
+    .profile {
       display: flex;
-      height: $mat-sys-img-profile-large;
-      flex-direction: column;
-      justify-content: space-between;
+      margin-bottom: $mat-sys-spacing-md;
+
+      img {
+        width: $mat-sys-img-profile-large;
+        height: $mat-sys-img-profile-large;
+      }
+
+      .profile-info {
+        margin-left: $mat-sys-spacing-md;
+        display: flex;
+        height: $mat-sys-img-profile-large;
+        flex-direction: column;
+        justify-content: space-between;
+      }
     }
-  }
 
-  .options {
-    margin-top: $mat-sys-spacing-md;
-    display: flex;
-    flex-direction: column;
-    gap: $mat-sys-spacing-md;
-
-    .edit-profile {
+    .options {
+      margin-top: $mat-sys-spacing-md;
       display: flex;
       flex-direction: column;
-      gap: $mat-sys-spacing-sm;
-      padding: $mat-sys-spacing-sm;
-      padding-left: $mat-sys-spacing-md;
-      justify-content: space-around;
+      gap: $mat-sys-spacing-md;
+
+      .edit-profile {
+        display: flex;
+        flex-direction: column;
+        gap: $mat-sys-spacing-sm;
+        padding: $mat-sys-spacing-sm;
+        padding-left: $mat-sys-spacing-md;
+        justify-content: space-around;
+      }
     }
   }
+}
+
+.mobile-rounding {
+  border-radius: 0px;
 }

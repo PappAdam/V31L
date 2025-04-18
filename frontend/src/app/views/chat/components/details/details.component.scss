@@ -1,6 +1,6 @@
 @use "../../../../../styles/styles.scss" as *;
 
-.details-wrapper[data-state="closed"] {
+.details-wrapper[data-state="false"] {
   width: 0px;
   transition: all 0.4 ease-in-out;
   margin-left: 0px;
@@ -100,4 +100,8 @@
       }
     }
   }
+}
+
+.details-wrapper-mobile {
+  border-radius: $mat-sys-corner-medium 0px 0px $mat-sys-corner-medium;
 }

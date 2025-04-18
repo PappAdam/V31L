@@ -1,7 +1,9 @@
 @if (this.platform?.platform == "web") {
 <div class="chat-outer-wrapper">
   <div class="chat-wrapper">
-    <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
+    <app-header
+      (detailsStateEvent)="updateDetailsState(this.detailsState ? false : true)"
+    ></app-header>
     <div class="messages-wrapper">
       @if (this.selectedChat$ | async; as selectedChat) { @for (message of
       selectedChat.messages; track $index) {
@@ -66,4 +68,78 @@
   <app-details [state]="detailsState"></app-details>
 </div>
 
-} @else { }
+} @else {
+
+<div class="chat-outer-wrapper">
+  <div class="chat-wrapper">
+    <app-header
+      (detailsStateEvent)="updateDetailsState(this.detailsState ? false : true)"
+    ></app-header>
+    <div class="messages-wrapper">
+      @if (this.selectedChat$ | async; as selectedChat) { @for (message of
+      selectedChat.messages; track $index) {
+      <app-message
+        [first]="
+          $index === 0 ||
+          selectedChat.messages[$index - 1].user !== message.user
+        "
+        [message]="message"
+      ></app-message>
+      } } @else {
+      <div class="no-chat-selected">
+        <h3>No chat selected</h3>
+      </div>
+      }
+    </div>
+    @if (imgUploaded) {
+    <div class="images-wrapper">
+      @for (img of imgs; track $index) {
+      <div class="image-preview">
+        <img [src]="img" alt="" />
+        <mat-icon
+          class="remove-btn"
+          fontIcon="close"
+          (click)="removeImage($index)"
+        ></mat-icon>
+      </div>
+      }
+    </div>
+    }
+    <div class="input-wrapper mobile-rounding">
+      <div class="text-input-box">
+        <div
+          (keydown.enter)="sendOnEnter($event)"
+          #textInput
+          class="text-input"
+          contenteditable="true"
+        ></div>
+      </div>
+      <button mat-mini-fab class="message-button" (click)="addFromGallery()">
+        <mat-icon fontIcon="image"></mat-icon>
+      </button>
+      <button mat-mini-fab class="message-button" (click)="addFromCamera()">
+        <mat-icon fontIcon="add_a_photo"></mat-icon>
+      </button>
+      <button mat-mini-fab (click)="sendMessage()">
+        <mat-icon fontIcon="send"></mat-icon>
+      </button>
+      <input
+        #imageSelector
+        type="file"
+        (change)="onImageUpload($event)"
+        accept="image/*"
+        hidden
+      />
+    </div>
+  </div>
+  <div [ngClass]="{ 'detail-mobile-wrapper': detailsState }" class="base">
+    <div
+      class="de-focus"
+      [ngClass]="{ 'de-focus-expanded': detailsState }"
+      (click)="updateDetailsState(this.detailsState ? false : true)"
+    ></div>
+    <app-details [state]="detailsState"></app-details>
+  </div>
+</div>
+
+}

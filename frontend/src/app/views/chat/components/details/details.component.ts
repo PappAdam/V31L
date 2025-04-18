@@ -14,6 +14,8 @@ import { MessageComponent } from '../message/message.component';
 import { PlatformService } from '@/services/platform.service';
 import { DeviceInfo } from '@capacitor/device';
 import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog.component';
+import { TabHeaderComponent } from '@/views/home/components/tab-header/tab-header.component';
+import { CommonModule } from '@angular/common';
 
 GroupMemberCardComponent;
 @Component({
@@ -22,6 +24,8 @@ GroupMemberCardComponent;
     MatIconModule,
     GroupOptionCardComponent,
     GroupMemberCardComponent,
+    CommonModule,
+    TabHeaderComponent,
     MatButtonModule,
     MatDividerModule,
     AsyncPipe,
@@ -37,7 +41,7 @@ export class DetailsComponent {
   constructor() {
     this.platform = this.platformService.info;
   }
-  @Input() state: string = 'closed';
+  @Input() state: boolean = false;
 
   messageService = inject(MessageService);
   inviteService = inject(InviteService);

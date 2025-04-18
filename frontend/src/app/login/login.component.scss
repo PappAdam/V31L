@@ -1,40 +1,87 @@
-#auth-card {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
+@use "../../styles/styles.scss" as *;
 
-mat-form-field {
+.card-wrapper {
   width: 100%;
+  height: 100%;
 
-  &#usernameField {
-    margin-bottom: 16px;
-  }
-}
-
-mat-checkbox {
-  padding-bottom: 16px;
-}
-
-.button-container {
   display: flex;
-  min-width: 0;
-  justify-content: space-between;
-  width: 100%;
-}
+  align-items: center;
+  justify-content: center;
 
-.button-container button {
-  width: auto;
-}
-
-@media (max-width: 600px) {
-  .button-container {
+  #auth-card {
+    display: flex;
     flex-direction: column;
-  }
+    gap: $mat-sys-spacing-sm;
+    border-radius: $mat-sys-corner-medium;
 
-  .button-container button {
+    width: 50%;
+
+    background-color: $mat-sys-surface-container;
+
+    .header-wrapper {
+      padding: $mat-sys-spacing-md;
+      background-color: $mat-sys-surface;
+      box-shadow: $mat-sys-shadow;
+      border-radius: $mat-sys-corner-medium $mat-sys-corner-medium 0 0;
+
+      .header {
+        color: $mat-sys-on-surface;
+      }
+    }
+
+    .form {
+      padding: $mat-sys-spacing-sm;
+      display: flex;
+      gap: $mat-sys-spacing-sm;
+      flex-direction: column;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      padding-top: $mat-sys-spacing-sm;
+    }
+  }
+}
+
+.card-wrapper-mobile {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  .header-wrapper-mobile {
+    padding: $mat-sys-spacing-md;
+    background-color: $mat-sys-surface;
+    box-shadow: $mat-sys-shadow;
+    position: absolute;
     width: 100%;
-    margin-bottom: 10px;
+
+    .header {
+      color: $mat-sys-on-surface;
+    }
+  }
+  .auth-card-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: $mat-sys-spacing-sm;
+
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+
+    background-color: $mat-sys-surface-container;
+
+    .form {
+      padding: $mat-sys-spacing-sm;
+      display: flex;
+      gap: $mat-sys-spacing-sm;
+      flex-direction: column;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      padding-top: $mat-sys-spacing-sm;
+    }
   }
 }

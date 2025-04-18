@@ -17,8 +17,7 @@ import {
   shareReplay,
   Subscription,
 } from 'rxjs';
-
-const URL: string = 'ws://localhost:8080';
+import { environment } from '../../environments/environment';
 
 /**
  * Represents an item in the package queue, which tracks the state and dependencies of a package to be sent to the server.
@@ -79,7 +78,7 @@ export class SocketService {
   }
 
   connect = () => {
-    this.ws = new WebSocket(URL);
+    this.ws = new WebSocket(environment.socketUrl);
     this.ws.onmessage = this.onIncomingPackage;
     this.ws.onclose = this.onClose;
     this.ws.onopen = this.onOpen;

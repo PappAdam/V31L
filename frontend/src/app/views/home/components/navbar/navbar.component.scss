@@ -31,13 +31,16 @@
     // Default styles
     .option-icon {
       width: $mat-sys-component-height-medium;
-      padding: 1.5px;
+      padding: 2px;
       display: flex;
       min-width: 0;
       align-items: center;
       justify-content: center;
 
       mat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: $mat-sys-on-surface;
         transform: $mat-sys-icon-scale-medium;
       }
@@ -53,6 +56,10 @@
       .option-icon {
         border-radius: $mat-sys-corner-full;
         background-color: $mat-sys-primary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $mat-sys-on-surface;
       }
 
       .option-label {
@@ -64,4 +71,8 @@
       }
     }
   }
+}
+
+.mobile-rounding {
+  border-radius: 0px;
 }

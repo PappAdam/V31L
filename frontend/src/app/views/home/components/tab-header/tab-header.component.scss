@@ -20,5 +20,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    color: $mat-sys-on-surface;
   }
+}
+
+.mobile-rounding {
+  border-radius: 0px;
 }

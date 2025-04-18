@@ -12,12 +12,13 @@ import {
 } from '@common';
 import { lastValueFrom } from 'rxjs';
 import { MessageService } from './message.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class InviteService {
-  baseUrl: string = 'http://localhost:3000/inv/';
+  baseUrl: string = `${environment.httpUrl}/inv/`;
   http = inject(HttpClient);
   encryptionService = inject(EncryptionService);
   authService = inject(AuthService);

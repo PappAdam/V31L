@@ -1,3 +1,9 @@
+@if (this.platform?.platform == "web") {
 <div class="header">
   <div class="title">{{ Title }}</div>
 </div>
+} @else {
+<div class="header mobile-rounding">
+  <div class="title">{{ Title }}</div>
+</div>
+}

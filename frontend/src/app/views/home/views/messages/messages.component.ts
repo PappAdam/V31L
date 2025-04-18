@@ -20,6 +20,7 @@ import { SearchBarComponent } from '@/components/search-bar/search-bar.component
 import { PlatformService } from '@/services/platform.service';
 import { Router } from '@angular/router';
 import { Chat } from '@/services/message.service';
+import { DeviceInfo } from '@capacitor/device';
 @Component({
   selector: 'app-messages',
   imports: [ChatCardComponent, SearchBarComponent, MatTabsModule, AsyncPipe],
@@ -28,7 +29,8 @@ import { Chat } from '@/services/message.service';
 })
 export class MessagesComponent {
   protected messageService = inject(MessageService);
-  protected platformService = inject(PlatformService);
+  protected platformService: PlatformService = inject(PlatformService);
+  platform: DeviceInfo | null = this.platformService.info;
 
   chats$ = this.messageService.chats$;
   selectedChatId$ = this.messageService.selectedChatId$;

@@ -11,7 +11,7 @@ import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { ImageResponse, stringToCharCodeArray } from '@common';
 import { EncryptionService } from './encryption.service';
-
+import { environment } from '../../environments/environment';
 export type Image = { data: string };
 
 @Injectable({
@@ -21,7 +21,7 @@ export class ImgService {
   authService = inject(AuthService);
   encryptionService = inject(EncryptionService);
   http = inject(HttpClient);
-  private baseURL = 'http://localhost:3000/img/';
+  private baseURL = `${environment.httpUrl}/img/`;
 
   images = new Map<string, Image>();
 

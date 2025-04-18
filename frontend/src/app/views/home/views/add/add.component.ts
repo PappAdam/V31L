@@ -13,6 +13,12 @@ import { TabHeaderComponent } from '../../components/tab-header/tab-header.compo
 import { MessageService } from '@/services/message.service';
 import { EncryptionService } from '@/services/encryption.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import {
+  CapacitorBarcodeScanner,
+  CapacitorBarcodeScannerAndroidScanningLibrary,
+  CapacitorBarcodeScannerTypeHint,
+} from '@capacitor/barcode-scanner';
+import { Camera, CameraResultType } from '@capacitor/camera';
 
 @Component({
   selector: 'app-add',
@@ -59,6 +65,7 @@ export class AddComponent {
       const reader = new FileReader();
       reader.onload = (e) => {
         this.img = e.target?.result as string;
+        console.log(this.img);
       };
       reader.readAsDataURL(file);
     }
@@ -95,6 +102,38 @@ export class AddComponent {
     );
 
     this.messageService.selectedChatId = chat.id;
+    this.router.navigate(['app', { outlets: { home: 'messages' } }]);
+  }
+
+  async addImageAndroid() {
+    const image = await Camera.getPhoto({
+      quality: 90,
+      allowEditing: true,
+      resultType: CameraResultType.DataUrl,
+    });
+    if (image.dataUrl) {
+      this.img = image.dataUrl;
+    }
+  }
+
+  async startScan() {
+    const result = await CapacitorBarcodeScanner.scanBarcode({
+      hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
+      android: {
+        scanningLibrary: CapacitorBarcodeScannerAndroidScanningLibrary.MLKIT,
+      },
+      cameraDirection: 1,
+    });
+
+    console.log(result.ScanResult);
+
+    if (!result.ScanResult) {
+      return;
+    }
+
+    const res = await this.inviteService.sendJoinRequest(result.ScanResult);
+
+    this.messageService.selectedChatId = res.chatId;
     this.router.navigate(['app', { outlets: { home: 'messages' } }]);
   }
 }

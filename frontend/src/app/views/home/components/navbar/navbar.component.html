@@ -1,13 +1,29 @@
+@if (this.platform?.platform == "web") {
 <div class="navbar-wrapper">
-  @for (tab of tabs; track $index) {
+  @for (tab of this.tabs_urls; track $index) {
   <div
     class="option-wrapper"
     [routerLink]="[{ outlets: { home: [tab] } }]"
     routerLinkActive="active"
   >
     <div class="option-icon">
-      <mat-icon fontIcon="{{ tab }}" class="nav-icon"></mat-icon>
+      <mat-icon class="nav-icon">{{ this.tabs_icons[$index] }}</mat-icon>
     </div>
   </div>
   }
 </div>
+}@else {
+<div class="navbar-wrapper mobile-rounding">
+  @for (tab of this.tabs_urls; track $index) {
+  <div
+    class="option-wrapper"
+    [routerLink]="[{ outlets: { home: [tab] } }]"
+    routerLinkActive="active"
+  >
+    <div class="option-icon">
+      <mat-icon class="nav-icon">{{ this.tabs_icons[$index] }}</mat-icon>
+    </div>
+  </div>
+  }
+</div>
+}

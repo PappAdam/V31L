@@ -54,7 +54,24 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
+            },
+            "mobile": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.mobile.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -67,6 +84,9 @@
             },
             "development": {
               "buildTarget": "message_app:build:development"
+            },
+            "mobile": {
+              "buildTarget": "message_app:build:mobile"
             }
           },
           "defaultConfiguration": "development"

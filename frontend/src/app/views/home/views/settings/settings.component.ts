@@ -19,6 +19,8 @@ import { passwordValidator } from '@/login/login.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TabHeaderComponent } from '../../components/tab-header/tab-header.component';
 import { ImgService } from '@/services/img.service';
+import { PlatformService } from '@/services/platform.service';
+import { DeviceInfo } from '@capacitor/device';
 
 @Component({
   selector: 'app-settings',
@@ -32,6 +34,8 @@ import { ImgService } from '@/services/img.service';
   styleUrl: './settings.component.scss',
 })
 export class SettingsComponent {
+  protected platformService: PlatformService = inject(PlatformService);
+  platform: DeviceInfo | null = this.platformService.info;
   authService = inject(AuthService);
   dialog = inject(MatDialog);
   imgService = inject(ImgService);

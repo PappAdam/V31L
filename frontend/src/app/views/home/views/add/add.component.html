@@ -1,3 +1,5 @@
+@if (this.platform?.platform == "web") {
+
 <div class="add">
   <app-tab-header Title="Add"></app-tab-header>
   <div class="forms">
@@ -40,7 +42,9 @@
     <div class="join-chat">
       <div class="card-header"><h3>Join existing chat</h3></div>
       <div class="description">
-        <mat-icon>warning</mat-icon>
+        <div class="warning-wrapper">
+          <mat-icon class="warning">warning</mat-icon>
+        </div>
         <span
           >Only join chats from trusted sources. Invalid links might expose you
           to harmful content.
@@ -63,44 +67,66 @@
       </form>
     </div>
   </div>
-  <!-- <app-tab-header Title="Add"></app-tab-header>
-  <div class="add-member">
-    <input
-      #imageSelector
-      type="file"
-      (change)="onImageUpload($event)"
-      accept="image/*"
-      hidden
-    />
-    @if (imgUploaded) {
-    <div class="image-container">
-      <img [src]="img" alt="" />
-      <mat-icon
-        class="remove-btn"
-        fontIcon="close"
-        (click)="removeImage()"
-      ></mat-icon>
-    </div>
-    } @else {
-    <mat-icon
-      fontIcon="add_photo_alternate"
-      (click)="imageSelector.click()"
-    ></mat-icon>
-    }
-    <form (ngSubmit)="onCreate()">
-      <label for="chatName">Chat Name: </label>
-      <input name="chatName" type="text" [formControl]="chatName" />
-      <button type="submit" mat-flat-button>Create</button>
-    </form>
-    <mat-divider></mat-divider>
-    <form (ngSubmit)="onJoin($event)">
-      <label for="connectionString">Connection String: </label>
-      <input
-        name="connectionString"
-        type="text"
-        [formControl]="connectionString"
-      />
-      <button type="submit" mat-flat-button>Join</button>
-    </form>
-  </div> -->
 </div>
+
+}@else {
+<div class="add">
+  <app-tab-header Title="Add"></app-tab-header>
+  <div class="forms">
+    <div class="new-chat">
+      <div class="card-header"><h3>Create your own chat</h3></div>
+      <div class="image-input-wrapper">
+        @if (imgUploaded) {
+        <div class="image-selected">
+          <img [src]="img" alt="" />
+          <mat-icon
+            class="remove-btn"
+            fontIcon="close"
+            (click)="removeImage()"
+          ></mat-icon>
+        </div>
+        } @else {
+        <div class="image-not-selected" (click)="addImageAndroid()">
+          Click here to upload an image
+        </div>
+        }
+      </div>
+      <form class="input-fields" (ngSubmit)="onCreate()">
+        <mat-form-field appearance="outline" class="input"
+          ><mat-label>Name of the chat</mat-label>
+          <input
+            class="new-chat-input"
+            matInput
+            placeholder="Best friends"
+            [formControl]="chatName"
+          />
+        </mat-form-field>
+        <button mat-fab type="submit">
+          <mat-icon>add</mat-icon>
+        </button>
+      </form>
+    </div>
+    <div class="join-chat">
+      <div class="card-header"><h3>Join existing chat</h3></div>
+      <div class="description">
+        <div class="warning-wrapper">
+          <mat-icon class="warning">warning</mat-icon>
+        </div>
+        <span
+          >Only join chats from trusted sources. Invalid links might expose you
+          to harmful content.
+          <br />
+          <br />
+          Make sure your <b>protect</b> your invite key, if any outsider get's
+          access to this your chat is no longer secure.
+        </span>
+      </div>
+      <form class="input-fields" (ngSubmit)="onJoin($event)">
+        <button mat-flat-button color="primary" (click)="startScan()">
+          Join Chat
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+}

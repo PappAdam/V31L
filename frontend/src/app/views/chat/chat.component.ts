@@ -13,6 +13,9 @@ import { AuthService } from '@/services/auth.service';
 import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ImgService } from '@/services/img.service';
+import { CommonModule } from '@angular/common';
+import { Camera, CameraResultType } from '@capacitor/camera';
+import { App } from '@capacitor/app';
 
 @Component({
   selector: 'app-chat',
@@ -21,6 +24,7 @@ import { ImgService } from '@/services/img.service';
     MatButtonModule,
     MessageComponent,
     DetailsComponent,
+    CommonModule,
     MatIconModule,
     AsyncPipe,
     MatInputModule,
@@ -52,7 +56,7 @@ export class ChatComponent {
 
   topScrollOffset = 0;
 
-  detailsState = 'closed';
+  detailsState = false;
 
   selectedChat$ = this.messageService.selectedChat$;
   message = '';
@@ -78,13 +82,28 @@ export class ChatComponent {
     this.imgs.splice(index, 1);
   }
 
-  updateDetailsState(event: string) {
+  updateDetailsState(event: boolean) {
     this.detailsState = event;
   }
 
   sendOnEnter(event: Event) {
     event.preventDefault();
     this.sendMessage();
+  }
+
+  async addFromCamera() {
+    const image = await Camera.getPhoto({
+      allowEditing: false,
+      resultType: CameraResultType.DataUrl,
+    });
+    if (image.dataUrl) {
+      this.imgs.push(image.dataUrl);
+    }
+  }
+
+  async addFromGallery() {
+    const image = await Camera.pickImages({});
+    this.imgs = [...this.imgs, ...image.photos.map((e) => e.webPath!)];
   }
 
   async sendMessage() {
