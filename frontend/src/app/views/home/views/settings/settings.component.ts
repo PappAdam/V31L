@@ -23,6 +23,8 @@ import { MatIcon } from '@angular/material/icon';
 import { HttpClient } from '@angular/common/http';
 import { SocketService } from '@/services/socket.service';
 import { MessageService } from '@/services/message.service';
+import { EncryptionService } from '@/services/encryption.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-settings',
@@ -39,6 +41,7 @@ import { MessageService } from '@/services/message.service';
 })
 export class SettingsComponent {
   authService = inject(AuthService);
+  encryptionService = inject(EncryptionService);
   dialog = inject(MatDialog);
   imgService = inject(ImgService);
   socketService = inject(SocketService);
@@ -272,11 +275,12 @@ class DisableMfaDialog {
     MatInputModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatIconModule,
   ],
   template: `
     <h3 mat-dialog-title>Change Password</h3>
     <mat-dialog-content>
-      <mat-form-field appearance="outline" [style.margin-top.px]="10">
+      <mat-form-field appearance="outline" [style.margin-top.px]="16">
         <mat-label>Old Password</mat-label>
         <input
           matInput
@@ -291,7 +295,7 @@ class DisableMfaDialog {
         }
       </mat-form-field>
       <br />
-      <mat-form-field appearance="outline" [style.margin-top.px]="10">
+      <mat-form-field appearance="outline" [style.margin-top.px]="16">
         <mat-label>New Password</mat-label>
         <input
           matInput
@@ -305,13 +309,40 @@ class DisableMfaDialog {
         <mat-error> Minimum 8 characters required </mat-error>
         }
       </mat-form-field>
+      <br />
+      <div
+        [style.width.px]="216"
+        [style.padding]="'0px 8px'"
+        [style.margin-top.px]="16"
+      >
+        <span
+          >You have to change your master key when changing your password.
+        </span>
+      </div>
+      <mat-form-field appearance="outline" [style.margin-top.px]="16">
+        <mat-label>Master key</mat-label>
+        <input
+          matInput
+          [formControl]="masterKey"
+          placeholder="6-digit master key"
+          type="tel"
+        />
+        @if (newPassword.hasError('required')) {
+        <mat-error> Master key is required </mat-error>
+        } @if (newPassword.hasError('minlength') ||
+        newPassword.hasError('maxlength')) {
+        <mat-error> Must be 6 characters long </mat-error>
+        }
+      </mat-form-field>
     </mat-dialog-content>
     <mat-dialog-actions>
       <button mat-button [mat-dialog-close]="false">Cancel</button>
       <button
         mat-flat-button
         color="primary"
-        [disabled]="oldPassword.invalid || newPassword.invalid"
+        [disabled]="
+          oldPassword.invalid || newPassword.invalid || masterKey.invalid
+        "
         (click)="submitChange()"
       >
         Change Password
@@ -322,6 +353,7 @@ class DisableMfaDialog {
 class PasswordChangeDialog {
   private authService = inject(AuthService);
   private dialogRef = inject(MatDialogRef<PasswordChangeDialog>);
+  encryptionService = inject(EncryptionService);
 
   oldPassword = new FormControl('', [Validators.required]);
   newPassword = new FormControl('', [
@@ -329,9 +361,32 @@ class PasswordChangeDialog {
     Validators.minLength(8),
     passwordValidator(),
   ]);
+  masterKey = new FormControl('', [
+    Validators.required,
+    Validators.minLength(6),
+    Validators.maxLength(6),
+  ]);
+
+  constructor() {
+    this.masterKey.valueChanges.subscribe((value) =>
+      this.sanitizeInput(value || '')
+    );
+  }
+
+  private sanitizeInput(value: string): void {
+    const sanitized = value.replace(/\D/g, '').slice(0, 6);
+    if (sanitized !== value) {
+      this.masterKey.setValue(sanitized, { emitEvent: false });
+    }
+  }
 
   async submitChange() {
-    if (this.oldPassword.invalid || this.newPassword.invalid) return;
+    if (
+      this.oldPassword.invalid ||
+      this.newPassword.invalid ||
+      this.masterKey.invalid
+    )
+      return;
 
     try {
       const response = await this.authService.updateUser({
@@ -342,6 +397,10 @@ class PasswordChangeDialog {
       if (!response || response.result !== 'Success') {
         this.handleError('oldPassword');
       } else {
+        await this.encryptionService.updateChatKeys(
+          this.newPassword.value!,
+          this.masterKey.value!
+        );
         this.dialogRef.close(true);
       }
     } catch (error) {

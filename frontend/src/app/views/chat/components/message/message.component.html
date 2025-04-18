@@ -33,9 +33,12 @@
     >
       @if (message.type == "IMAGE") {
       <img [src]="img.img(message.content)" alt="" />
+      } @else { @if(message.content.startsWith("https://") ||
+      message.content.startsWith("http://") ) {
+      <a href="{{ message.content }}" target="_blank">{{ message.content }}</a>
       } @else {
       {{ message.content }}
-      }
+      } }
     </div>
   </div>
   <div class="message-profile-wrapper">

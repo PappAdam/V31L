@@ -1,12 +1,19 @@
 import { Request, Response, Router } from "express";
 import {
+  arrayToString,
   chatCreationSuccessResponse,
-  PublicChat,
+  PublicChatMember,
   serverErrorResponse,
   stringToCharCodeArray,
   unauthorizedResponse,
+  UpdateChatMemberParams,
 } from "@common";
-import { createChatMember, findChatMembersByChat } from "@/db/chatMember";
+import {
+  createChatMember,
+  findChatMembersByChat,
+  findChatMembersByUser,
+  updateEncryptedChatKeys,
+} from "@/db/chatMember";
 import {
   extractUserFromTokenMiddleWare,
   validateRequiredFields,
@@ -29,6 +36,9 @@ chatRouter.put(
   validateRequiredFields(["chatId"]),
   updateChatH
 );
+
+chatRouter.get("/get", findChatMembers);
+chatRouter.put("/update", updateChatMemberKeys);
 
 export default chatRouter;
 
@@ -96,6 +106,46 @@ async function updateChatH(req: Request, res: Response) {
     res.status(200).json({ message: "Success" });
   } catch (error) {
     console.error("Error during chat update: \n", error);
+  }
+}
+
+async function findChatMembers(req: Request, res: Response) {
+  try {
+    const user = req.user!;
+    const chatMembers: PublicChatMember[] = (
+      await findChatMembersByUser(user.id)
+    ).map((c) => {
+      return {
+        id: c.id,
+        key: arrayToString(c.key),
+      };
+    });
+
+    res.status(200).json(chatMembers);
+    return;
+  } catch (error) {
+    console.error("Error during creating invitation: \n", error);
+    res.status(500).json(serverErrorResponse);
+  }
+}
+
+async function updateChatMemberKeys(
+  req: Request<UpdateChatMemberParams>,
+  res: Response
+) {
+  try {
+    const chatMembers = await updateEncryptedChatKeys(req.body);
+    if (!chatMembers.length) {
+      res
+        .status(400)
+        .json({ result: "Error", message: "No chat members were updated" });
+    }
+
+    res.status(200).json({ result: "Success" });
+
+    return;
+  } catch (error) {
+    console.error("Error during creating invitation: \n", error);
     res.status(500).json(serverErrorResponse);
   }
 }

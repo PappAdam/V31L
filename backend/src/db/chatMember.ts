@@ -1,5 +1,6 @@
 import { ChatMember, User } from "@prisma/client";
 import prisma from "./_db";
+import { stringToCharCodeArray, UpdateChatMemberParams } from "@common";
 
 /**
  * Adds a user to a chat if they are not already a member.
@@ -32,6 +33,30 @@ export async function createChatMember(
   }
 }
 
+export async function updateEncryptedChatKeys(
+  params: UpdateChatMemberParams
+): Promise<ChatMember[]> {
+  if (!params.chatMembers?.length) {
+    console.log(params.chatMembers?.length);
+    return [];
+  }
+
+  try {
+    const updateOperations = params.chatMembers.map((chatMember) =>
+      prisma.chatMember.update({
+        where: { id: chatMember.id },
+        data: { key: stringToCharCodeArray(chatMember.key, Uint8Array) },
+      })
+    );
+
+    const updatedMembers = await prisma.$transaction(updateOperations);
+    return updatedMembers;
+  } catch (error) {
+    console.error("Error updating chat member keys:\n", error);
+    return [];
+  }
+}
+
 /**
  * Removes a user from a chat if they are a member.
  *
@@ -46,7 +71,6 @@ export async function deleteChatMember(
   if (!userId || !chatId) {
     return null;
   }
-
   try {
     const removedChatMember = await prisma.chatMember.delete({
       where: {

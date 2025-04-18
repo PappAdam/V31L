@@ -28,3 +28,11 @@ export const chatUpdateSuccessResponse = (chat: PublicChat): ChatSuccess => {
     chat,
   };
 };
+export type PublicChatMember = {
+  id: string;
+  key: string;
+};
+
+export interface UpdateChatMemberParams {
+  chatMembers: PublicChatMember[];
+}

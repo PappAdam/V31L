@@ -22,12 +22,20 @@ export class AuthService {
 
   private _user$: BehaviorSubject<StoredUser | null> =
     new BehaviorSubject<StoredUser | null>(null);
+
+  _masterKey?: CryptoKey;
+
+  public get masterWrapKey() {
+    return this._masterKey;
+  }
+
   /**
    * Gets the plain value of the user
    */
   public get user(): StoredUser | null {
     return this._user$.getValue();
   }
+
   /**
    * Gets a user RxJS observable
    */
@@ -35,8 +43,42 @@ export class AuthService {
     return this._user$.asObservable();
   }
 
+  async importMasterWrapKey() {
+    this._masterKey = await crypto.subtle.importKey(
+      'raw',
+      stringToCharCodeArray(this._user$.value?.masterWrapKey!),
+      { name: 'AES-KW', length: 256 },
+      true,
+      ['wrapKey', 'unwrapKey']
+    );
+  }
+
+  async changeMasterWrapKey(newPassword: string): Promise<CryptoKey> {
+    const rawKey = new Uint8Array(
+      await crypto.subtle.digest(
+        { name: 'SHA-256' },
+        stringToCharCodeArray(this.user?.username + newPassword)
+      )
+    );
+
+    this._masterKey = await crypto.subtle.importKey(
+      'raw',
+      rawKey,
+      { name: 'AES-KW', length: 256 },
+      true,
+      ['wrapKey', 'unwrapKey']
+    );
+
+    this.saveUser({ ...this.user!, masterWrapKey: arrayToString(rawKey) });
+
+    return this._masterKey;
+  }
+
   constructor(private http: HttpClient, private router: Router) {
     const user = localStorage.getItem('user');
+    if (!localStorage.getItem('keys')) {
+      localStorage.setItem('keys', JSON.stringify([]));
+    }
     if (user) {
       this._user$.next(JSON.parse(user));
     }
@@ -70,7 +112,14 @@ export class AuthService {
       );
 
       if (response.result == 'Success') {
-        this.saveUser(response);
+        const rawKey = new Uint8Array(
+          await crypto.subtle.digest(
+            { name: 'SHA-256' },
+            stringToCharCodeArray(username + password)
+          )
+        );
+
+        this.saveUser({ ...response, masterWrapKey: arrayToString(rawKey) });
       }
 
       return response;
@@ -92,7 +141,14 @@ export class AuthService {
       );
 
       if (response.result == 'Success') {
-        this.saveUser(response);
+        const rawKey = new Uint8Array(
+          await crypto.subtle.digest(
+            { name: 'SHA-256' },
+            stringToCharCodeArray(username + password)
+          )
+        );
+
+        this.saveUser({ ...response, masterWrapKey: arrayToString(rawKey) });
       }
 
       return response;
@@ -121,7 +177,10 @@ export class AuthService {
 
     try {
       const response = await lastValueFrom(refreshRequest);
-      this.saveUser(response);
+      this.saveUser({
+        ...response,
+        masterWrapKey: this.user.masterWrapKey,
+      });
       return response.token;
     } catch {
       return null;
@@ -211,7 +270,6 @@ export class AuthService {
 
     try {
       const response = await lastValueFrom(refreshRequest);
-
       return response;
     } catch {
       return null;
@@ -225,4 +283,6 @@ export class AuthService {
   }
 }
 
-export type StoredUser = Omit<AuthSuccessResponse, 'result'>;
+export type StoredUser = Omit<AuthSuccessResponse, 'result'> & {
+  masterWrapKey: string;
+};

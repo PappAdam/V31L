@@ -18,6 +18,7 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { QRcodeComponent } from '../qrcode/qrcode.component';
+import { EncryptionService } from '@/services/encryption.service';
 
 @Component({
   selector: 'app-login',
@@ -93,7 +94,24 @@ export class LoginComponent {
 
     switch (response.result) {
       case 'Success':
-        this.router.navigate(['/app']);
+        const masterKeyStored = localStorage
+          .getItem('keys')
+          ?.includes(response.id);
+        if (masterKeyStored) {
+          this.router.navigate(['/app']);
+          return;
+        } else {
+          this.dialog
+            .open(MasterKeyDialog)
+            .afterClosed()
+            .subscribe((success) => {
+              if (success) {
+                this.router.navigate(['/app']);
+              } else {
+                this.router.navigate(['/login']);
+              }
+            });
+        }
         return;
 
       case 'Next':
@@ -316,6 +334,96 @@ class SetupDialog {
   }
 
   onNextClick() {
+    this.dialogRef.close(true);
+  }
+}
+
+@Component({
+  selector: 'master-key-dialog',
+  imports: [
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+  ],
+  template: `
+    <h3 mat-dialog-title>Enter your Master key</h3>
+    <mat-dialog-content>
+      <mat-form-field appearance="outline" [style.margin-top.px]="10">
+        <mat-label>Master key</mat-label>
+        <input
+          matInput
+          [formControl]="code"
+          placeholder="6-digit key"
+          maxlength="6"
+          type="tel"
+          inputmode="numeric"
+        />
+        @if (code.hasError('pattern')) {
+        <mat-error> Must be 6 digits </mat-error>
+        }
+      </mat-form-field>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+      <button mat-button [mat-dialog-close]="false">Cancel</button>
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="code.invalid"
+        (click)="submitCode()"
+      >
+        Verify
+      </button>
+    </mat-dialog-actions>
+  `,
+})
+class MasterKeyDialog {
+  private encryptionService = inject(EncryptionService);
+  private authService = inject(AuthService);
+  private dialogRef = inject(MatDialogRef<MasterKeyDialog>);
+
+  code = new FormControl('', [
+    Validators.required,
+    Validators.pattern(/^\d{6}$/),
+  ]);
+
+  constructor() {
+    this.code.valueChanges.subscribe((value) =>
+      this.sanitizeInput(value || '')
+    );
+  }
+
+  private sanitizeInput(value: string): void {
+    const sanitized = value.replace(/\D/g, '').slice(0, 6);
+    if (sanitized !== value) {
+      this.code.setValue(sanitized, { emitEvent: false });
+    }
+
+    if (sanitized.length === 6) {
+      this.submitCode();
+    }
+  }
+
+  async submitCode() {
+    if (this.code.invalid) return;
+    await this.encryptionService.storeMasterPassword(this.code.value!);
+
+    // const keysStr = localStorage.getItem('keys');
+    // if (keysStr) {
+    //   const keys: { id: string; encKey: string }[] = JSON.parse(keysStr);
+    //   const encKey = keys.find((k) => k.id == this.authService.user!.id)?.encKey;
+
+    //   if (encKey) {
+    //     this.encryptionService._privateKey$.next(
+    //       await this.encryptionService.unwrapKey(
+    //         stringToCharCodeArray(encKey, Uint8Array),
+    //         this.authService.masterWrapKey!,
+    //         'AES-KW'
+    //       )
+    //     );
+    //   }
+    // }
     this.dialogRef.close(true);
   }
 }

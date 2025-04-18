@@ -2,7 +2,7 @@ import { createChat } from "@/db/chat";
 import { createChatMember } from "@/db/chatMember";
 import { createMessage } from "@/db/message";
 import { createUser } from "@/db/user";
-import { EncryptedMessage } from "@common";
+import { EncryptedMessage, stringToCharCodeArray } from "@common";
 import testData from "./testData.json";
 import prisma from "@/db/_db";
 import { Chat, ChatMember, Message, User } from "@prisma/client";
@@ -34,25 +34,49 @@ async function encryptText(
   };
 }
 
-async function createUserMasterKey(chatKey: CryptoKey, username: string) {
-  const encoder = new TextEncoder();
-  const encodedUserName = encoder.encode(username);
+async function wrapKey(key: CryptoKey, wrapKey: CryptoKey) {
+  return new Uint8Array(
+    await crypto.subtle.wrapKey("raw", key, wrapKey, { name: "AES-KW" })
+  );
+}
 
-  const hash = await crypto.subtle.digest("SHA-256", encodedUserName);
+async function createUserMasterKey(username: string, password: string) {
+  const encoder = new TextEncoder();
+
+  const rawKey = new Uint8Array(
+    await crypto.subtle.digest(
+      { name: "SHA-256" },
+      stringToCharCodeArray(username + password, Uint8Array)
+    )
+  );
 
   const key = await crypto.subtle.importKey(
     "raw",
-    hash,
-    { name: "AES-KW" },
+    rawKey,
+    { name: "HKDF" },
+    false,
+    ["deriveKey"]
+  );
+
+  const master = await crypto.subtle.deriveKey(
+    {
+      name: "HKDF",
+      hash: "SHA-256",
+      salt: new Uint8Array(
+        await crypto.subtle.digest(
+          { name: "SHA-256" },
+          stringToCharCodeArray("000000", Uint8Array)
+        )
+      ),
+      info: encoder.encode("info"),
+    },
+    key,
+    { name: "AES-KW", length: 256 },
     true,
     ["wrapKey", "unwrapKey"]
   );
 
-  const wrappedKey = await crypto.subtle.wrapKey("raw", chatKey, key, {
-    name: "AES-KW",
-  });
-
-  return new Uint8Array(wrappedKey);
+  return master;
 }
 
 async function seedDatabase(): Promise<{
@@ -119,14 +143,16 @@ async function seedDatabase(): Promise<{
   for (const chat of testData.chats) {
     const newChatMembers = await Promise.all(
       chat.users.map(async (chatMemberIndex) => {
-        const wkey = await createUserMasterKey(
-          key,
-          users[chatMemberIndex]!.username
+        const user = users[chatMemberIndex]!;
+        const master = await createUserMasterKey(
+          user.username,
+          user.passwordNotHashed
         );
+
         const chatMember = await createChatMember(
-          users[chatMemberIndex]!.id,
+          user.id,
           chats.find((c) => c.name == chat.name)!.id,
-          wkey
+          await wrapKey(key, master)
         );
 
         return chatMember!;
