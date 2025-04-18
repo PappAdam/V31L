@@ -76,6 +76,8 @@
       aspect-ratio: 1 / 1;
       border-radius: $mat-sys-corner-full;
       background-color: $mat-sys-primary-container;
+      object-fit: cover;
+      object-position: center;
     }
   }
 
