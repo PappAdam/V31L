@@ -144,15 +144,13 @@ export class DetailsComponent {
     )
   );
 
-  async copyToClipboard() {
-    const invitation = await lastValueFrom(this.invitation$);
-
-    if (!invitation) {
+  async copyToClipboard(inv: string | null) {
+    if (!inv) {
       this.snackBar.open('There was no invitation to copy.', 'close');
       return;
     }
 
-    await navigator.clipboard.writeText(invitation);
+    await navigator.clipboard.writeText(inv);
     this.snackBar.open('Invitation copied to clipboard', 'close');
   }
 

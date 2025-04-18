@@ -27,6 +27,7 @@
     }
     <div
       class="message-bubble"
+      [class.own-message-bubble]="ownMessage && displayedIn == 'Chat'"
       [class.image]="message.type == 'IMAGE'"
       [class.text]="message.type == 'TEXT'"
     >

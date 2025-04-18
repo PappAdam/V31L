@@ -19,6 +19,11 @@
     justify-content: flex-start;
     min-width: 0;
 
+    .own-message-bubble {
+      background-color: $mat-sys-surface-variant !important;
+      color: $mat-sys-on-surface-variant !important;
+    }
+
     .profile-name {
       padding-left: $mat-sys-spacing-md;
       font: $mat-sys-label-large-font;
@@ -30,7 +35,8 @@
     }
 
     .message-bubble {
-      background-color: $mat-sys-surface-variant;
+      background-color: $mat-sys-surface-container-lowest;
+      color: $mat-sys-on-surface;
       border-radius: calc($mat-sys-img-profile-medium / 2);
       max-width: 580px;
       min-height: $mat-sys-img-profile-medium;
