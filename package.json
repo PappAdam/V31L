@@ -5,5 +5,11 @@
     "frontend",
     "backend",
     "common"
-  ]
+  ],
+  "scripts": {
+    "start": "concurrently -k -n frontend,backend -c cyan,green \"npm --workspace frontend start\" \"npm --workspace backend run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
 }

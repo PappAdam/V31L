@@ -47,5 +47,8 @@
   },
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
-  }
+  },
+  "codesnap.containerPadding": "10px 20px 30px 20px",
+  "codesnap.transparentBackground": true,
+  "codesnap.boxShadow": "rgba(0, 0, 0, 0.55) 0px 10px 20px",
 }
