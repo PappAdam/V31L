@@ -85,17 +85,17 @@ export class EncryptionService {
     const key = await crypto.subtle.importKey(
       'raw',
       rawKey,
-      { name: 'HKDF' },
+      { name: 'PBKDF2' },
       false,
       ['deriveKey']
     );
 
     const master = await crypto.subtle.deriveKey(
       {
-        name: 'HKDF',
+        name: 'PBKDF2',
         hash: 'SHA-256',
         salt: await this.rawKeyFrom(masterKey),
-        info: this.encoder.encode('info'),
+        iterations: 100000,
       },
       key,
       { name: 'AES-KW', length: 256 },

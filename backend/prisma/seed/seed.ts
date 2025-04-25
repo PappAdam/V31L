@@ -46,29 +46,29 @@ async function createUserMasterKey(username: string, password: string) {
   const rawKey = new Uint8Array(
     await crypto.subtle.digest(
       { name: "SHA-256" },
-      stringToCharCodeArray(username + password, Uint8Array)
+      stringToCharCodeArray(username + password)
     )
   );
 
   const key = await crypto.subtle.importKey(
     "raw",
     rawKey,
-    { name: "HKDF" },
+    { name: "PBKDF2" },
     false,
     ["deriveKey"]
   );
 
   const master = await crypto.subtle.deriveKey(
     {
-      name: "HKDF",
+      name: "PBKDF2",
       hash: "SHA-256",
       salt: new Uint8Array(
         await crypto.subtle.digest(
           { name: "SHA-256" },
-          stringToCharCodeArray("000000", Uint8Array)
+          stringToCharCodeArray("000000")
         )
       ),
-      info: encoder.encode("info"),
+      iterations: 100000,
     },
     key,
     { name: "AES-KW", length: 256 },

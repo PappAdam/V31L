@@ -24,6 +24,7 @@
     "@capacitor/core": "^7.2.0",
     "@capacitor/device": "^7.0.0",
     "@msgpack/msgpack": "^3.0.1",
+    "argon2-browser": "^1.18.0",
     "browser-image-compression": "^2.0.2",
     "cropperjs": "^2.0.0",
     "qrcode": "^1.5.4",
