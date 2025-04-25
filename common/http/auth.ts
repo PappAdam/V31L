@@ -16,6 +16,7 @@ export type AuthNextResponse =
 export type AuthSuccessResponse = {
   result: "Success";
   token: string;
+  mfaSuccess: string;
 } & AuthenticatedUser;
 
 export type AuthNextMfaSetupResponse = {
@@ -43,7 +44,8 @@ export type AuthErrorResponse = {
 // Used in both auth requests
 export const successResponse = (
   token: string,
-  user: PublicUser & { authKey?: Uint8Array | null }
+  user: PublicUser & { authKey?: Uint8Array | null },
+  mfaSuccess: string
 ): AuthSuccessResponse => {
   return {
     result: "Success",
@@ -52,6 +54,7 @@ export const successResponse = (
     username: user.username,
     mfaEnabled: !!user.authKey,
     profilePictureId: user.profilePictureId,
+    mfaSuccess,
   };
 };
 

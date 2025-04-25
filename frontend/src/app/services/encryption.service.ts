@@ -36,6 +36,12 @@ export class EncryptionService {
   _privateKey$ = new BehaviorSubject<CryptoKey | null>(null);
 
   // Do not remove, the subscription needs to run.
+  private changedMasterKey = this.authService.masterKey$.subscribe((m) => {
+    if (m) {
+      this.updateChatKeys(undefined, m);
+    }
+  });
+
   private changeKeyOnUserChange: Subscription = this.authService.user$
     .pipe(
       filter((user) => !!user),
@@ -219,7 +225,7 @@ export class EncryptionService {
     }
   }
 
-  async updateChatKeys(newPassword: string, masterKey: string) {
+  async updateChatKeys(newPassword: string | undefined, masterKey: string) {
     const chats = await lastValueFrom(
       this.http.get<PublicChatMember[]>('http://localhost:3000/chat/get', {
         headers: { Authorization: this.authService.user!.token },
@@ -227,7 +233,9 @@ export class EncryptionService {
     );
 
     const oldPrivateKey = this.privateKey!;
-    await this.authService.changeMasterWrapKey(newPassword);
+    if (newPassword) {
+      await this.authService.changeMasterWrapKey(newPassword);
+    }
     await this.storeMasterPassword(masterKey);
 
     const updateParams: PublicChatMember[] = await Promise.all(

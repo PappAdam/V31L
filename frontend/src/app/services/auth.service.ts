@@ -23,6 +23,10 @@ export class AuthService {
   private _user$: BehaviorSubject<StoredUser | null> =
     new BehaviorSubject<StoredUser | null>(null);
 
+  private _2faHash$: BehaviorSubject<string | null> = new BehaviorSubject<
+    string | null
+  >(null);
+
   _masterKey?: CryptoKey;
 
   public get masterWrapKey() {
@@ -41,6 +45,10 @@ export class AuthService {
    */
   public get user$(): Observable<StoredUser | null> {
     return this._user$.asObservable();
+  }
+
+  public get masterKey$(): Observable<string | null> {
+    return this._2faHash$.asObservable();
   }
 
   async importMasterWrapKey() {
@@ -223,8 +231,20 @@ export class AuthService {
 
     try {
       const response = await lastValueFrom(refreshRequest);
-      this._user$.next(null);
+      this._2faHash$.next(
+        arrayToString(
+          new Uint8Array(
+            await crypto.subtle.digest(
+              { name: 'SHA-256' },
+              stringToCharCodeArray(response.setupCode)
+            )
+          )
+        )
+      );
+
+      // this._user$.next(null);
       localStorage.removeItem('user');
+
       this.router.navigateByUrl('/login', {
         state: { setupCode: response.setupCode },
       });
@@ -247,6 +267,7 @@ export class AuthService {
 
     try {
       const response = await lastValueFrom(refreshRequest);
+      this._2faHash$.next(response.mfaSuccess);
       return response;
     } catch {
       return null;

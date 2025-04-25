@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { QRcodeComponent } from '../../../qrcode/qrcode.component';
+import { AuthService } from '@/services/auth.service';
 
 @Component({
   selector: 'app-setup',
@@ -11,6 +12,7 @@ import { QRcodeComponent } from '../../../qrcode/qrcode.component';
 })
 export class MfaSetupComponent {
   setupCode: string;
+  authService = inject(AuthService);
 
   constructor(private router: Router) {
     const setupCode =
@@ -26,6 +28,6 @@ export class MfaSetupComponent {
   }
 
   onNextClick() {
-    this.router.navigate([`/login`]);
+    this.authService.logout();
   }
 }

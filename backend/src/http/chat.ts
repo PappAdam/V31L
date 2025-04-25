@@ -124,7 +124,7 @@ async function findChatMembers(req: Request, res: Response) {
     res.status(200).json(chatMembers);
     return;
   } catch (error) {
-    console.error("Error during creating invitation: \n", error);
+    console.error("Error finding members: \n", error);
     res.status(500).json(serverErrorResponse);
   }
 }

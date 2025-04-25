@@ -55,3 +55,7 @@ export function decryptData(
 
   return decrypted;
 }
+
+export function hashText(input: string) {
+  return crypto.createHash("sha256").update(input).digest("hex");
+}

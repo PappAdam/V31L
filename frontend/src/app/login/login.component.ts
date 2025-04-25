@@ -37,6 +37,8 @@ import { EncryptionService } from '@/services/encryption.service';
 })
 export class LoginComponent {
   private authService = inject(AuthService);
+  private encryptionService = inject(EncryptionService);
+
   private router = inject(Router);
   private dialog = inject(MatDialog);
 
@@ -94,24 +96,8 @@ export class LoginComponent {
 
     switch (response.result) {
       case 'Success':
-        const masterKeyStored = localStorage
-          .getItem('keys')
-          ?.includes(response.id);
-        if (masterKeyStored) {
-          this.router.navigate(['/app']);
-          return;
-        } else {
-          this.dialog
-            .open(MasterKeyDialog)
-            .afterClosed()
-            .subscribe((success) => {
-              if (success) {
-                this.router.navigate(['/app']);
-              } else {
-                this.router.navigate(['/login']);
-              }
-            });
-        }
+        await this.encryptionService.storeMasterPassword(response.mfaSuccess);
+        this.router.navigate(['/app']);
         return;
 
       case 'Next':

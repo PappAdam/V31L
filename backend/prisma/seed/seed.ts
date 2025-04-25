@@ -8,6 +8,7 @@ import prisma from "@/db/_db";
 import { Chat, ChatMember, Message, User } from "@prisma/client";
 import { readFile } from "fs/promises";
 import { createImage } from "@/db/image";
+import { hashText } from "@/encryption";
 
 async function readImg(path: string) {
   return await readFile(path);
@@ -40,9 +41,11 @@ async function wrapKey(key: CryptoKey, wrapKey: CryptoKey) {
   );
 }
 
-async function createUserMasterKey(username: string, password: string) {
-  const encoder = new TextEncoder();
-
+async function createUserMasterKey(
+  username: string,
+  password: string,
+  userid: string
+) {
   const rawKey = new Uint8Array(
     await crypto.subtle.digest(
       { name: "SHA-256" },
@@ -65,7 +68,7 @@ async function createUserMasterKey(username: string, password: string) {
       salt: new Uint8Array(
         await crypto.subtle.digest(
           { name: "SHA-256" },
-          stringToCharCodeArray("000000")
+          Buffer.from(hashText(userid))
         )
       ),
       iterations: 100000,
@@ -146,7 +149,8 @@ async function seedDatabase(): Promise<{
         const user = users[chatMemberIndex]!;
         const master = await createUserMasterKey(
           user.username,
-          user.passwordNotHashed
+          user.passwordNotHashed,
+          user.id
         );
 
         const chatMember = await createChatMember(
