@@ -106,7 +106,6 @@ export class AddComponent {
     }
 
     const { chat } = await this.chatService.createChatRequest(v, key, image);
-
     this.messageService.sendMessage(
       chat.id,
       `This is the start of this conversation.`,

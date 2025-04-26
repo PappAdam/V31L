@@ -7,10 +7,9 @@ import {
   stringToCharCodeArray,
   UpdateChatMemberParams,
 } from '@common';
-import { AuthService } from './auth.service';
+import { AuthService, StoredUser } from './auth.service';
 import {
   BehaviorSubject,
-  catchError,
   filter,
   lastValueFrom,
   Observable,
@@ -38,7 +37,7 @@ export class EncryptionService {
   // Do not remove, the subscription needs to run.
   private changedMasterKey = this.authService.masterKey$.subscribe((m) => {
     if (m) {
-      this.updateChatKeys(undefined, m);
+      this.updateChatKeys(undefined, m.hash, m.user);
     }
   });
 
@@ -47,33 +46,30 @@ export class EncryptionService {
       filter((user) => !!user),
       switchMap(async (user) => {
         await this.authService.importMasterWrapKey();
+        await this.storeMasterPassword(user.mfaSuccess);
 
-        const keysStr = localStorage.getItem('keys');
-        if (keysStr) {
-          const keys: { id: string; encKey: string }[] = JSON.parse(keysStr);
-          const encKey = keys.find((k) => k.id == user.id)?.encKey;
+        // const keysStr = localStorage.getItem('keys');
+        // if (keysStr) {
+        //   const keys: { id: string; encKey: string }[] = JSON.parse(keysStr);
+        //   const encKey = keys.find((k) => k.id == user.id)?.encKey;
 
-          if (encKey) {
-            try {
-              const newKey = await this.unwrapKey(
-                stringToCharCodeArray(encKey),
-                this.authService.masterWrapKey!,
-                'AES-KW'
-              );
-              this._privateKey$.next(newKey);
-            } catch (error) {
-              // Do nothing!
-            }
-          }
-        }
+        //   if (encKey) {
+        //     try {
+        //       const newKey = await this.unwrapKey(
+        //         stringToCharCodeArray(encKey),
+        //         this.authService.masterWrapKey!,
+        //         'AES-KW'
+        //       );
+        //       this._privateKey$.next(newKey);
+        //     } catch (error) {
+        //       // Do nothing!
+        //     }
+        //   }
+        // }
       })
     )
     .subscribe();
 
-  /**
-   *
-   * @param masterKey 6 digit pin converted to string
-   */
   public async storeMasterPassword(masterKey: string = '000000') {
     const keys: { id: string; encKey: string }[] = JSON.parse(
       localStorage.getItem('keys')!
@@ -100,7 +96,7 @@ export class EncryptionService {
       {
         name: 'PBKDF2',
         hash: 'SHA-256',
-        salt: await this.rawKeyFrom(masterKey),
+        salt: await this.hashText(masterKey),
         iterations: 100000,
       },
       key,
@@ -151,7 +147,7 @@ export class EncryptionService {
     }
   }
 
-  async rawKeyFrom(str: string): Promise<Uint8Array<ArrayBufferLike>> {
+  async hashText(str: string): Promise<Uint8Array<ArrayBufferLike>> {
     return new Uint8Array(
       await crypto.subtle.digest(
         { name: 'SHA-256' },
@@ -160,7 +156,7 @@ export class EncryptionService {
     );
   }
 
-  async keyFrom(str: string) {
+  async wrapKeyFrom(str: string) {
     const raw = new Uint8Array(
       await crypto.subtle.digest(
         { name: 'SHA-256' },
@@ -196,11 +192,13 @@ export class EncryptionService {
     key: CryptoKey,
     masterKey: CryptoKey
   ): Promise<Uint8Array<ArrayBufferLike>> {
-    return new Uint8Array(
+    const wrapped = new Uint8Array(
       await crypto.subtle.wrapKey('raw', key, masterKey, {
         name: 'AES-KW',
       })
     );
+
+    return wrapped;
   }
 
   async unwrapKey(
@@ -225,14 +223,32 @@ export class EncryptionService {
     }
   }
 
-  async updateChatKeys(newPassword: string | undefined, masterKey: string) {
+  async updateChatKeys(
+    newPassword: string | undefined,
+    masterKey: string,
+    user?: StoredUser
+  ) {
+    let usr;
+    if (this.authService.user) {
+      usr = this.authService.user;
+    } else {
+      usr = user!;
+    }
+
     const chats = await lastValueFrom(
       this.http.get<PublicChatMember[]>('http://localhost:3000/chat/get', {
-        headers: { Authorization: this.authService.user!.token },
+        headers: { Authorization: usr.token },
       })
     );
 
-    const oldPrivateKey = this.privateKey!;
+    const oldPrivateKey = await crypto.subtle.importKey(
+      'raw',
+      await this.keyToRaw(this.privateKey!),
+      { name: 'AES-KW' },
+      true,
+      ['unwrapKey', 'wrapKey']
+    );
+
     if (newPassword) {
       await this.authService.changeMasterWrapKey(newPassword);
     }
@@ -242,7 +258,6 @@ export class EncryptionService {
       chats.map(async (c) => {
         const rawKey = stringToCharCodeArray(c.key);
         const chatKey = await this.unwrapKey(rawKey, oldPrivateKey);
-
         const newWrapped = await this.wrapKey(chatKey, this.privateKey!);
 
         return {
@@ -261,7 +276,7 @@ export class EncryptionService {
         'http://localhost:3000/chat/update',
         body,
         {
-          headers: { Authorization: this.authService.user!.token },
+          headers: { Authorization: usr.token },
         }
       )
     );
@@ -269,6 +284,10 @@ export class EncryptionService {
     if (res.result == 'Error') {
       console.warn(res);
     }
+  }
+
+  async keyToRaw(key: CryptoKey) {
+    return new Uint8Array(await crypto.subtle.exportKey('raw', key));
   }
 
   async generateChatKey() {

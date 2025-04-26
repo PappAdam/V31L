@@ -23,6 +23,7 @@ import {
   nextSetupMfaResponse,
   nextVerifyMfaResponse,
   missingFieldsResponse,
+  stringToCharCodeArray,
 } from "@common";
 import { User } from "@prisma/client";
 import { generateTotpUri, verifyToken } from "authenticator";
@@ -82,7 +83,7 @@ async function registerUser(req: Request, res: Response) {
       throw new Error("Error creating user in database");
     }
 
-    let code = hashText(newUser.id);
+    let code = await hashText(newUser.id);
 
     if (mfaEnabled) {
       const authKey = decryptData({
@@ -100,9 +101,9 @@ async function registerUser(req: Request, res: Response) {
         30
       );
 
-      code = createHash("sha256").update(setupCode).digest("hex");
+      code = await hashText(arrayToString(authKey));
 
-      res.status(201).json(nextSetupMfaResponse(setupCode));
+      res.status(201).json(nextSetupMfaResponse(setupCode, code));
       return;
     }
 
@@ -143,7 +144,7 @@ async function loginUser(req: Request, res: Response) {
       return;
     }
 
-    let decrypted2FA = hashText(user.id);
+    let decrypted2FA = await hashText(user.id);
 
     if (user.authKey) {
       if (!mfa) {
@@ -161,9 +162,7 @@ async function loginUser(req: Request, res: Response) {
         return;
       }
 
-      decrypted2FA = createHash("sha256")
-        .update(raw2FA.toString("ascii"))
-        .digest("hex");
+      decrypted2FA = await hashText(arrayToString(raw2FA));
     }
 
     const token = generateToken(user.id);
@@ -196,7 +195,7 @@ async function changeUser(req: Request, res: Response) {
       throw new Error("Error updating user");
     }
 
-    let code = hashText(updatedUser.id);
+    let code = await hashText(updatedUser.id);
 
     if (updatedUser.authKey) {
       const authKey = decryptData({
@@ -205,7 +204,7 @@ async function changeUser(req: Request, res: Response) {
         authTag: updatedUser.authTag!,
       });
 
-      code = hashText(authKey.toString("ascii"));
+      code = await hashText(authKey.toString("ascii"));
     }
 
     const token = generateToken(user.id);
@@ -227,7 +226,7 @@ async function refreshToken(req: Request, res: Response) {
   const user = req.user as User;
   const newToken = generateToken(user.id);
 
-  let code = hashText(user.id);
+  let code = await hashText(user.id);
 
   if (user.authKey) {
     const authKey = decryptData({
@@ -236,7 +235,7 @@ async function refreshToken(req: Request, res: Response) {
       authTag: user.authTag!,
     });
 
-    code = hashText(authKey.toString("ascii"));
+    code = await hashText(authKey.toString("ascii"));
   }
 
   res.json(successResponse(newToken, user, code));
@@ -273,7 +272,9 @@ async function enableMfa(req: Request, res: Response) {
       30
     );
 
-    res.status(201).json(nextSetupMfaResponse(setupCode));
+    let code = await hashText(arrayToString(authKey));
+
+    res.status(201).json(nextSetupMfaResponse(setupCode, code));
   } catch (error) {
     res.status(500).json(serverErrorResponse);
     console.error("Error during mfa enable: \n", error);
@@ -296,17 +297,7 @@ async function disableMfa(req: Request, res: Response) {
       return;
     }
 
-    let code = hashText(user.id);
-
-    if (user.authKey) {
-      const authKey = decryptData({
-        encrypted: user.authKey!,
-        iv: user.iv!,
-        authTag: user.authTag!,
-      });
-
-      code = hashText(authKey.toString("ascii"));
-    }
+    let code = await hashText(user.id);
 
     const updatedUser = await updateUserMfa(user.id, "disable");
     if (!updatedUser) throw new Error("Error updating user");

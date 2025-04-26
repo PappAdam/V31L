@@ -228,6 +228,7 @@ export class MessageService {
             rawChatContent.encryptedChatKey,
             this.encryptionService.privateKey!
           );
+
           const users: User[] = [];
           for (const nu of rawChatContent.users) {
             await this.img.storeImage(nu.profilePictureId, chatKey);
@@ -253,7 +254,7 @@ export class MessageService {
           };
           chats = [...chats, chat];
         } else {
-          throw new Error('Failed to fetch the chat key.');
+          return;
         }
 
         chatIndex = chats.length - 1;

@@ -23,9 +23,12 @@ export class AuthService {
   private _user$: BehaviorSubject<StoredUser | null> =
     new BehaviorSubject<StoredUser | null>(null);
 
-  private _2faHash$: BehaviorSubject<string | null> = new BehaviorSubject<
-    string | null
-  >(null);
+  private _2faHash$: BehaviorSubject<{
+    hash: string;
+    user: StoredUser;
+  } | null> = new BehaviorSubject<{ hash: string; user: StoredUser } | null>(
+    null
+  );
 
   _masterKey?: CryptoKey;
 
@@ -47,7 +50,10 @@ export class AuthService {
     return this._user$.asObservable();
   }
 
-  public get masterKey$(): Observable<string | null> {
+  public get masterKey$(): Observable<{
+    hash: string;
+    user: StoredUser;
+  } | null> {
     return this._2faHash$.asObservable();
   }
 
@@ -127,7 +133,10 @@ export class AuthService {
           )
         );
 
+        console.log('auth:', stringToCharCodeArray(response.mfaSuccess));
+
         this.saveUser({ ...response, masterWrapKey: arrayToString(rawKey) });
+        await this.importMasterWrapKey();
       }
 
       return response;
@@ -231,20 +240,14 @@ export class AuthService {
 
     try {
       const response = await lastValueFrom(refreshRequest);
-      this._2faHash$.next(
-        arrayToString(
-          new Uint8Array(
-            await crypto.subtle.digest(
-              { name: 'SHA-256' },
-              stringToCharCodeArray(response.setupCode)
-            )
-          )
-        )
-      );
 
-      // this._user$.next(null);
+      this._2faHash$.next({
+        hash: response.hashedToken,
+        user: this.user!,
+      });
+
+      this._user$.next(null);
       localStorage.removeItem('user');
-
       this.router.navigateByUrl('/login', {
         state: { setupCode: response.setupCode },
       });
@@ -267,7 +270,7 @@ export class AuthService {
 
     try {
       const response = await lastValueFrom(refreshRequest);
-      this._2faHash$.next(response.mfaSuccess);
+      this._2faHash$.next({ hash: response.mfaSuccess, user: this.user });
       return response;
     } catch {
       return null;

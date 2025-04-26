@@ -137,10 +137,12 @@ export class DetailsComponent {
     )
   );
 
-  @ViewChild('invBody') invBody!: ElementRef;
+  @ViewChild('invBody') invBody?: ElementRef;
   protected invHeight$: Observable<number | null> = this.invitation$.pipe(
     map((invitation) =>
-      invitation ? null : this.invBody.nativeElement.offsetHeight
+      invitation || !this.invBody
+        ? null
+        : this.invBody.nativeElement.offsetHeight
     )
   );
 

@@ -27,7 +27,5 @@ export class MfaSetupComponent {
     this.setupCode = setupCode;
   }
 
-  onNextClick() {
-    this.authService.logout();
-  }
+  onNextClick() {}
 }

@@ -45,7 +45,7 @@ export async function updateEncryptedChatKeys(
     const updateOperations = params.chatMembers.map((chatMember) =>
       prisma.chatMember.update({
         where: { id: chatMember.id },
-        data: { key: stringToCharCodeArray(chatMember.key, Uint8Array) },
+        data: { key: stringToCharCodeArray(chatMember.key) },
       })
     );
 

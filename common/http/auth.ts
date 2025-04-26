@@ -23,6 +23,7 @@ export type AuthNextMfaSetupResponse = {
   result: "Next";
   to: "Setup";
   setupCode: string;
+  hashedToken: string;
 };
 
 export type AuthNextMfaVerifyReponse = {
@@ -59,12 +60,14 @@ export const successResponse = (
 };
 
 export const nextSetupMfaResponse = (
-  setupCode: string
+  setupCode: string,
+  token: string
 ): AuthNextMfaSetupResponse => {
   return {
     result: "Next",
     to: "Setup",
     setupCode,
+    hashedToken: token,
   };
 };
 

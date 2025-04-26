@@ -171,6 +171,10 @@ export class ChatComponent {
       }),
       tap((chat) => {
         requestAnimationFrame(() => {
+          if (!this.oldChat?.messages[0]) {
+            return;
+          }
+
           const messagesArrivedOnTop = this.oldChat
             ? this.oldChat.messages[0].id != chat!.messages[0].id
             : false;
@@ -199,6 +203,9 @@ export class ChatComponent {
       filter((chat) => !!this.messagesWrapper && this.oldChat?.id != chat?.id),
       tap((chat) => {
         setTimeout(() => {
+          if (!chat) {
+            return;
+          }
           if (this.scrollPositions[chat!.id] == undefined) {
             this.messagesWrapper.nativeElement.scrollTop =
               this.messagesWrapper.nativeElement.scrollHeight;

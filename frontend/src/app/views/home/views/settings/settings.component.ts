@@ -309,40 +309,13 @@ class DisableMfaDialog {
         <mat-error> Minimum 8 characters required </mat-error>
         }
       </mat-form-field>
-      <br />
-      <div
-        [style.width.px]="216"
-        [style.padding]="'0px 8px'"
-        [style.margin-top.px]="16"
-      >
-        <span
-          >You have to change your master key when changing your password.
-        </span>
-      </div>
-      <mat-form-field appearance="outline" [style.margin-top.px]="16">
-        <mat-label>Master key</mat-label>
-        <input
-          matInput
-          [formControl]="masterKey"
-          placeholder="6-digit master key"
-          type="tel"
-        />
-        @if (newPassword.hasError('required')) {
-        <mat-error> Master key is required </mat-error>
-        } @if (newPassword.hasError('minlength') ||
-        newPassword.hasError('maxlength')) {
-        <mat-error> Must be 6 characters long </mat-error>
-        }
-      </mat-form-field>
     </mat-dialog-content>
     <mat-dialog-actions>
       <button mat-button [mat-dialog-close]="false">Cancel</button>
       <button
         mat-flat-button
         color="primary"
-        [disabled]="
-          oldPassword.invalid || newPassword.invalid || masterKey.invalid
-        "
+        [disabled]="oldPassword.invalid || newPassword.invalid"
         (click)="submitChange()"
       >
         Change Password
@@ -361,32 +334,11 @@ class PasswordChangeDialog {
     Validators.minLength(8),
     passwordValidator(),
   ]);
-  masterKey = new FormControl('', [
-    Validators.required,
-    Validators.minLength(6),
-    Validators.maxLength(6),
-  ]);
 
-  constructor() {
-    this.masterKey.valueChanges.subscribe((value) =>
-      this.sanitizeInput(value || '')
-    );
-  }
-
-  private sanitizeInput(value: string): void {
-    const sanitized = value.replace(/\D/g, '').slice(0, 6);
-    if (sanitized !== value) {
-      this.masterKey.setValue(sanitized, { emitEvent: false });
-    }
-  }
+  constructor() {}
 
   async submitChange() {
-    if (
-      this.oldPassword.invalid ||
-      this.newPassword.invalid ||
-      this.masterKey.invalid
-    )
-      return;
+    if (this.oldPassword.invalid || this.newPassword.invalid) return;
 
     try {
       const response = await this.authService.updateUser({
@@ -399,7 +351,7 @@ class PasswordChangeDialog {
       } else {
         await this.encryptionService.updateChatKeys(
           this.newPassword.value!,
-          this.masterKey.value!
+          this.authService.user?.mfaSuccess!
         );
         this.dialogRef.close(true);
       }

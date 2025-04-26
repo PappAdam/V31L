@@ -68,7 +68,7 @@ async function createUserMasterKey(
       salt: new Uint8Array(
         await crypto.subtle.digest(
           { name: "SHA-256" },
-          Buffer.from(hashText(userid))
+          stringToCharCodeArray(await hashText(userid))
         )
       ),
       iterations: 100000,
