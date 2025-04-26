@@ -16,7 +16,6 @@ export interface ActiveTab {
   selector: 'app-navbar',
   imports: [
     MatIconModule,
-    NgClass,
     RouterModule,
     MatButtonModule,
     MatMenuModule,

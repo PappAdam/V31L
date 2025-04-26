@@ -3,10 +3,15 @@ import {
   EncryptedMessage,
   PublicChat,
   PublicMessage,
+  PublicUser,
   ServerChatsPackage,
   stringToCharCodeArray,
 } from "@common";
-import { deleteChatMember, findChatMembersByChat } from "../db/chatMember";
+import {
+  deleteChatMember,
+  findChatMembersByChat,
+  findChatMembersByUser,
+} from "../db/chatMember";
 import {
   createMessage,
   findChatMessages,
@@ -17,8 +22,9 @@ import { Client } from "./client";
 import ServerPackageSender from "./server";
 import { getPublicChatsWithMessages, toPublicMessage } from "@/db/public";
 import { findUserById } from "@/db/user";
-import { createImage } from "@/db/image";
+import { createImage, findImageById } from "@/db/image";
 import { MessageType } from "@prisma/client";
+import { findChatById } from "@/db/chat";
 
 // Nothing here needs validation, since the package has been validated already
 async function processPackage(
@@ -71,12 +77,13 @@ async function processBasedOnHeader(
           undefined,
           incoming.messageContent.iv
         );
+
         msgType = "IMAGE";
 
         if (!image) {
           return false;
         }
-        content = { data: stringToCharCodeArray(image.id, Uint8Array) };
+        content = { data: stringToCharCodeArray(image.id) };
       } else {
         content = incoming.messageContent;
       }
@@ -151,6 +158,7 @@ async function processBasedOnHeader(
       return true;
 
     case "GetChatMessages":
+      // await new Promise((r) => setTimeout(r, 2000));
       const messages: PublicMessage[] = (
         await findChatMessages(
           incoming.chatId,
@@ -200,6 +208,45 @@ async function processBasedOnHeader(
       });
 
       return !!deletedChatMember;
+
+    case "RefreshChat":
+      const chatToRefresh: PublicChat = {
+        ...incoming.chat,
+        users: [],
+        encryptedMessages: [],
+      };
+
+      const users = (await findChatMembersByChat(incoming.chat.id)).map(
+        (m) => m.userId
+      );
+
+      ServerPackageSender.send(users, {
+        header: "Chats",
+        chats: [chatToRefresh!],
+      });
+
+      return true;
+
+    case "RefreshUser":
+      const userToRefresh = await findUserById(incoming.user.id);
+      const userChats = await findChatMembersByUser(incoming.user.id);
+
+      const usersToRefresh: string[] = [];
+      for (let cm of userChats) {
+        const members = await findChatMembersByChat(cm.chatId);
+        members.forEach((m) => {
+          if (!usersToRefresh.includes(m.userId)) {
+            usersToRefresh.push(m.userId);
+          }
+        });
+      }
+
+      ServerPackageSender.send(usersToRefresh, {
+        header: "Users",
+        users: [{ ...userToRefresh! }],
+      });
+
+      return true;
 
     default:
       console.error(

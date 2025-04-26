@@ -2,6 +2,7 @@ import { Message, MessageType } from "@prisma/client";
 import prisma from "./_db";
 import { EncryptedMessage, PublicUser } from "@common";
 import { encryptData } from "@/encryption";
+
 /**
  * Retrieves a specified number of messages from a chat, ordered by timestamp.
  * On limit = -1 returns all the messages.

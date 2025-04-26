@@ -27,14 +27,18 @@
     }
     <div
       class="message-bubble"
+      [class.own-message-bubble]="ownMessage && displayedIn == 'Chat'"
       [class.image]="message.type == 'IMAGE'"
       [class.text]="message.type == 'TEXT'"
     >
       @if (message.type == "IMAGE") {
-      <img [src]="img.images.get(message.content)?.data" alt="" />
+      <img [src]="img.img(message.content)" alt="" />
+      } @else { @if(message.content.startsWith("https://") ||
+      message.content.startsWith("http://") ) {
+      <a href="{{ message.content }}" target="_blank">{{ message.content }}</a>
       } @else {
       {{ message.content }}
-      }
+      } }
     </div>
   </div>
   <div class="message-profile-wrapper">

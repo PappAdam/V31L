@@ -3,25 +3,86 @@
 .settings {
   height: 100%;
   background-color: $mat-sys-surface-container;
-  border-radius: $mat-sys-corner-medium $mat-sys-corner-medium 0px 0px;
-  .settings-list {
-    height: 100%;
+  border-radius: $mat-sys-corner-medium $mat-sys-corner-medium 0 0;
+
+  .settings-container {
     padding: $mat-sys-spacing-sm;
+
     .profile {
       display: flex;
       margin-bottom: $mat-sys-spacing-md;
+      gap: $mat-sys-spacing-sm;
 
-      img {
-        width: $mat-sys-img-profile-large;
-        height: $mat-sys-img-profile-large;
+      .image-input-wrapper {
+        height: 100%;
+        width: 40%;
+        aspect-ratio: 1/1;
+        display: block;
+
+        img {
+          background-color: $mat-sys-primary-container;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+        }
+
+        .image-selected {
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          font-size: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: $mat-sys-corner-medium;
+          background-color: $mat-sys-surface-container-highest;
+          position: relative;
+
+          .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+
+            &:hover {
+              background-color: rgba(0, 0, 0, 0.8);
+            }
+          }
+        }
       }
 
-      .profile-info {
-        margin-left: $mat-sys-spacing-md;
+      .profile-info-form {
         display: flex;
-        height: $mat-sys-img-profile-large;
         flex-direction: column;
-        justify-content: space-between;
+        flex-grow: 1;
+        gap: $mat-sys-spacing-sm;
+
+        .profile-info {
+          height: 50%;
+          width: 100%;
+          flex-grow: 1;
+          margin-left: $mat-sys-spacing-md;
+          display: flex;
+          height: $mat-sys-img-profile-large;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        button {
+          height: 50%;
+          flex-grow: 1;
+          width: 100%;
+        }
       }
     }
 

@@ -23,11 +23,13 @@ import {
   nextSetupMfaResponse,
   nextVerifyMfaResponse,
   missingFieldsResponse,
+  stringToCharCodeArray,
 } from "@common";
 import { User } from "@prisma/client";
 import { generateTotpUri, verifyToken } from "authenticator";
-import { decryptData } from "@/encryption";
+import { decryptData, hashText } from "@/encryption";
 import { arrayToString } from "@common";
+import { createHash, hash } from "crypto";
 
 const authRouter = Router();
 authRouter.post(
@@ -49,12 +51,8 @@ authRouter.post(
   disableMfa
 );
 
-authRouter.put(
-  "/",
-  validateRequiredFields(["oldPassword", "newPassword"]),
-  extractUserFromTokenMiddleWare,
-  changePassword
-);
+authRouter.put("/", extractUserFromTokenMiddleWare, changeUser);
+
 authRouter.delete("/", extractUserFromTokenMiddleWare, deleteProfile);
 export default authRouter;
 
@@ -85,6 +83,8 @@ async function registerUser(req: Request, res: Response) {
       throw new Error("Error creating user in database");
     }
 
+    let code = await hashText(newUser.id);
+
     if (mfaEnabled) {
       const authKey = decryptData({
         encrypted: newUser.authKey!,
@@ -101,12 +101,14 @@ async function registerUser(req: Request, res: Response) {
         30
       );
 
-      res.status(201).json(nextSetupMfaResponse(setupCode));
+      code = await hashText(arrayToString(authKey));
+
+      res.status(201).json(nextSetupMfaResponse(setupCode, code));
       return;
     }
 
     const token = generateToken(newUser.id);
-    res.status(201).json(successResponse(token, newUser));
+    res.status(201).json(successResponse(token, newUser, code));
   } catch (error) {
     console.error("Error during register: \n", error);
     res.status(500).json(serverErrorResponse);
@@ -142,55 +144,74 @@ async function loginUser(req: Request, res: Response) {
       return;
     }
 
+    let decrypted2FA = await hashText(user.id);
+
     if (user.authKey) {
       if (!mfa) {
         res.json(nextVerifyMfaResponse);
         return;
       }
-      const decrypted2FA = decryptData({
+      const raw2FA = decryptData({
         encrypted: user.authKey!,
         iv: user.iv!,
         authTag: user.authTag!,
       });
-      const verifyResult = verifyToken(arrayToString(decrypted2FA), mfa);
+      const verifyResult = verifyToken(arrayToString(raw2FA), mfa);
       if (!verifyResult) {
         res.status(400).json(invalidCredentialsResponse);
         return;
       }
+
+      decrypted2FA = await hashText(arrayToString(raw2FA));
     }
 
     const token = generateToken(user.id);
-    res.json(successResponse(token, user));
+    res.json(successResponse(token, user, decrypted2FA));
   } catch (error) {
     res.status(500).json(serverErrorResponse);
     console.error("Error during login: \n", error);
   }
 }
 
-async function changePassword(req: Request, res: Response) {
+async function changeUser(req: Request, res: Response) {
   try {
     const user = req.user as User;
-    const { oldPassword, newPassword } = req.body;
-
-    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isPasswordMatch) {
-      res.status(400).json(invalidCredentialsResponse);
-      return;
+    const { oldPassword, newPassword, imgId } = req.body;
+    if (oldPassword && newPassword) {
+      const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isPasswordMatch) {
+        res.status(400).json(invalidCredentialsResponse);
+        return;
+      }
     }
 
     const updatedUser = await updateUser({
       id: user.id,
       password: newPassword,
+      profilePictureId: imgId,
     });
+
     if (!updatedUser) {
       throw new Error("Error updating user");
     }
 
+    let code = await hashText(updatedUser.id);
+
+    if (updatedUser.authKey) {
+      const authKey = decryptData({
+        encrypted: updatedUser.authKey!,
+        iv: updatedUser.iv!,
+        authTag: updatedUser.authTag!,
+      });
+
+      code = await hashText(authKey.toString("ascii"));
+    }
+
     const token = generateToken(user.id);
-    res.json(successResponse(token, updatedUser));
+    res.json(successResponse(token, updatedUser, code));
   } catch (error) {
     res.status(500).json(serverErrorResponse);
-    console.error("Error during password change: \n", error);
+    console.error("Error during user change: \n", error);
   }
 }
 
@@ -204,7 +225,20 @@ async function changePassword(req: Request, res: Response) {
 async function refreshToken(req: Request, res: Response) {
   const user = req.user as User;
   const newToken = generateToken(user.id);
-  res.json(successResponse(newToken, user));
+
+  let code = await hashText(user.id);
+
+  if (user.authKey) {
+    const authKey = decryptData({
+      encrypted: user.authKey!,
+      iv: user.iv!,
+      authTag: user.authTag!,
+    });
+
+    code = await hashText(authKey.toString("ascii"));
+  }
+
+  res.json(successResponse(newToken, user, code));
 }
 
 /**
@@ -238,7 +272,9 @@ async function enableMfa(req: Request, res: Response) {
       30
     );
 
-    res.status(201).json(nextSetupMfaResponse(setupCode));
+    let code = await hashText(arrayToString(authKey));
+
+    res.status(201).json(nextSetupMfaResponse(setupCode, code));
   } catch (error) {
     res.status(500).json(serverErrorResponse);
     console.error("Error during mfa enable: \n", error);
@@ -261,11 +297,13 @@ async function disableMfa(req: Request, res: Response) {
       return;
     }
 
+    let code = await hashText(user.id);
+
     const updatedUser = await updateUserMfa(user.id, "disable");
     if (!updatedUser) throw new Error("Error updating user");
 
     const token = generateToken(user.id);
-    res.json(successResponse(token, updatedUser));
+    res.json(successResponse(token, updatedUser, code));
   } catch (error) {
     res.status(500).json(serverErrorResponse);
     console.error("Error during mfa disable: \n", error);

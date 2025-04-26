@@ -90,8 +90,46 @@
       height: 100%;
       background-color: $mat-sys-surface-container;
       overflow-y: scroll;
-      scroll-behavior: smooth;
       padding-bottom: $mat-sys-spacing-sm;
+      scroll-behavior: auto;
+
+      .spinner {
+        // Diameter of the spinner. These values have to be in sync.
+        height: 32px;
+        margin-top: $mat-sys-spacing-md;
+        mat-spinner {
+          margin: auto;
+        }
+      }
+
+      .scroll-down {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        transition: bottom 0.2s ease;
+        height: $mat-sys-img-profile-medium;
+        left: 0;
+        right: 0;
+
+        .button {
+          width: $mat-sys-img-profile-medium;
+          height: $mat-sys-img-profile-medium;
+          border-radius: 100%;
+          background-color: $mat-sys-background;
+          color: $mat-sys-on-primary-container;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          box-shadow: $mat-sys-level2;
+          transition: 0.1s ease;
+          cursor: pointer;
+
+          &:hover {
+            background-color: $mat-sys-surface-container-lowest;
+            box-shadow: $mat-sys-level4;
+          }
+        }
+      }
 
       img {
         height: 100px;
@@ -123,6 +161,7 @@
       background-color: $mat-sys-surface-container-low;
       border-radius: 0px 0px $mat-sys-corner-medium $mat-sys-corner-medium;
       padding: $mat-sys-spacing-sm;
+      position: relative;
 
       button {
         width: 35px;

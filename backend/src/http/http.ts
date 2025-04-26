@@ -12,6 +12,8 @@ import chatRouter from "./chat";
 import imgRouter from "./image";
 
 const httpServer = express();
+httpServer.use(express.json({ limit: "50mb" }));
+httpServer.use(express.urlencoded({ limit: "50mb", extended: true }));
 httpServer.use(cors());
 
 const swaggerDocument = YAML.load(path.join(__dirname, "./_doc.yml"));
@@ -30,7 +32,6 @@ httpServer.get("/tests", (req, res) => {
 httpServer.use(bodyParser.json());
 httpServer.use("/auth", authRouter);
 
-// You can use req.user after this middleware runs
 const protectedRoutes = httpServer.use(extractUserFromTokenMiddleWare);
 
 protectedRoutes.use("/log", logRouter);

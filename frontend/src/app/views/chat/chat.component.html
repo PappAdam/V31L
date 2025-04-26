@@ -1,12 +1,15 @@
 @if (this.platform?.platform == "web") {
 <div class="chat-outer-wrapper">
   <div class="chat-wrapper">
-    <app-header
-      (detailsStateEvent)="updateDetailsState(this.detailsState ? false : true)"
-    ></app-header>
-    <div class="messages-wrapper">
-      @if (this.selectedChat$ | async; as selectedChat) { @for (message of
-      selectedChat.messages; track $index) {
+    <app-header (detailsStateEvent)="updateDetailsState($event)"></app-header>
+    <div class="messages-wrapper" #messagesWrapper (scroll)="onScroll($event)">
+      @if (this.selectedChat$ | async; as selectedChat) {
+      <div class="spinner">
+        @if (loadingMessages) {
+        <mat-spinner diameter="32"></mat-spinner>
+        }
+      </div>
+      @for (message of selectedChat.messages; track $index) {
       <app-message
         [first]="
           $index === 0 ||
@@ -14,7 +17,17 @@
         "
         [message]="message"
       ></app-message>
-      } } @else {
+      }
+      <div
+        class="scroll-down"
+        [style.bottom.px]="scrolledToBottom ? 0 : 76"
+        [style.width.px]="messagesWrapperWidth"
+      >
+        <div class="button" (click)="scrollToBottom()">
+          <mat-icon fontIcon="arrow_downward"></mat-icon>
+        </div>
+      </div>
+      } @else {
       <div class="no-chat-selected">
         <h3>No chat selected</h3>
       </div>
@@ -65,7 +78,7 @@
       </button>
     </div>
   </div>
-  <app-details [state]="detailsState"></app-details>
+  <app-details [detailsStatePreference]="detailsState"></app-details>
 </div>
 
 } @else {
@@ -73,7 +86,9 @@
 <div class="chat-outer-wrapper">
   <div class="chat-wrapper">
     <app-header
-      (detailsStateEvent)="updateDetailsState(this.detailsState ? false : true)"
+      (detailsStateEvent)="
+        updateDetailsState(this.detailsState ? 'closed' : 'open')
+      "
     ></app-header>
     <div class="messages-wrapper">
       @if (this.selectedChat$ | async; as selectedChat) { @for (message of
@@ -136,7 +151,7 @@
     <div
       class="de-focus"
       [ngClass]="{ 'de-focus-expanded': detailsState }"
-      (click)="updateDetailsState(this.detailsState ? false : true)"
+      (click)="updateDetailsState(this.detailsState ? 'closed' : 'open')"
     ></div>
     <app-details [state]="detailsState"></app-details>
   </div>

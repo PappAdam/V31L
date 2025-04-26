@@ -3,6 +3,7 @@ import { SocketService } from './socket.service';
 import {
   BehaviorSubject,
   combineLatest,
+  filter,
   map,
   merge,
   Observable,
@@ -16,10 +17,12 @@ import {
   PublicMessage,
   PublicUser,
   ServerChatsPackage,
+  ServerUsersPackage,
 } from '@common';
 import { EncryptionService, Message } from './encryption.service';
 import { Image, ImgService } from './img.service';
 import { FalseEncryptionService } from './false-encryption.service';
+import { AuthService } from './auth.service';
 
 export type User = PublicUser & { img: Image };
 export type Chat = Omit<
@@ -37,13 +40,21 @@ export type Chat = Omit<
 })
 export class MessageService {
   socketService = inject(SocketService);
-  encryptionService = inject(FalseEncryptionService);
+  encryptionService = inject(EncryptionService);
+  authService = inject(AuthService);
   img = inject(ImgService);
   users: User[] = [];
+
+  get currentUser() {
+    return this.users.find((u) => u.id == this.authService.user?.id);
+  }
 
   private _chats$ = new BehaviorSubject<Chat[]>([]);
   get chats$(): Observable<Chat[]> {
     return this._chats$.asObservable();
+  }
+  get chats(): Chat[] {
+    return this._chats$.value;
   }
 
   private _selectedChatId$ = new BehaviorSubject<string>('');
@@ -62,7 +73,7 @@ export class MessageService {
         this.socketService.createPackage({
           header: 'GetChats',
           chatCount: 10,
-          messageCount: 20,
+          messageCount: 25,
         });
       }
     }
@@ -71,6 +82,10 @@ export class MessageService {
   private chatsPackageSubscription = this.socketService
     .addPackageListener('Chats')
     .subscribe((p) => this.onChatsPackageRecieved(p));
+
+  private usersPackageSubscription = this.socketService
+    .addPackageListener('Users')
+    .subscribe((p) => this.onUsersPackageRecieved(p));
 
   private removeChatSubscription = this.socketService
     .addPackageListener('LeaveChat')
@@ -86,11 +101,11 @@ export class MessageService {
   }
 
   selectedChat$ = combineLatest([this.chats$, this.selectedChatId$]).pipe(
-    map(([chats, id]) => chats.find((chat) => chat.id === id)!)
+    map(([chats, id]) => chats.find((chat) => chat.id === id))
   );
 
   get selectedChat() {
-    return this._chats$.value.find((chat) => chat.id === this.selectedChatId)!;
+    return this._chats$.value.find((chat) => chat.id === this.selectedChatId);
   }
 
   pinnedMessages$: Observable<Message[]> = merge(
@@ -104,9 +119,9 @@ export class MessageService {
         return messages;
       })
     ),
-    this.selectedChat$.pipe(
-      tap((chat) => {
-        if (chat) this.getPinnedMessages(chat.id);
+    this.selectedChatId$.pipe(
+      tap((chatId) => {
+        if (chatId) this.getPinnedMessages(chatId);
       }),
       map(() => [])
     )
@@ -131,6 +146,8 @@ export class MessageService {
   }
 
   async sendImage(chatId: string, img: string, after?: () => void) {
+    if (!this.selectedChat) return;
+
     const [imgtype, imgdata] = img.split(',');
     if (!imgdata) {
       console.error('Failed to send img. Sending its plain text data instead.');
@@ -140,7 +157,7 @@ export class MessageService {
 
     const encrypted = await this.encryptionService.encryptText(
       this.selectedChat.chatKey,
-      imgdata
+      atob(imgdata)
     );
 
     this.socketService.createPackage(
@@ -156,6 +173,8 @@ export class MessageService {
   }
 
   pinMessage(messageId: string, pinState: boolean) {
+    if (!this.selectedChat) return;
+
     const chatId = this.selectedChat.id;
     this.socketService.createPackage(
       { header: 'PinMessage', messageId, pinState },
@@ -175,9 +194,21 @@ export class MessageService {
     });
   }
 
+  onUsersPackageRecieved(p: ServerUsersPackage): void {
+    p.users.forEach((ru) => {
+      const userIndex = this.users.findIndex((u) => ru.id == u.id);
+
+      if (userIndex != -1) {
+        this.users[userIndex].profilePictureId = ru.profilePictureId;
+        this.users[userIndex].img = this.img.imgRef(ru.profilePictureId)!;
+      }
+    });
+  }
+
   leaveChat(chatId: string) {
     this.socketService.createPackage({ header: 'LeaveChat', chatId }, () => {
-      this._selectedChatId$.next('');
+      const nextChat = this._chats$.value.find((c) => c.id != chatId);
+      this._selectedChatId$.next(nextChat?.id || '');
     });
   }
 
@@ -198,18 +229,21 @@ export class MessageService {
             rawChatContent.encryptedChatKey,
             this.encryptionService.privateKey!
           );
+
           const users: User[] = [];
           for (const nu of rawChatContent.users) {
             await this.img.storeImage(nu.profilePictureId, chatKey);
             const user = {
               ...nu,
-              img: this.img.images.get(nu.profilePictureId)!,
+              img: this.img.imgRef(nu.profilePictureId)!,
             };
-            const exsistingUser = this.users.find((u) => u.id == nu.id);
+            let exsistingUser = this.users.find((u) => u.id == nu.id);
             if (!exsistingUser) {
-              this.users.push(user);
+              let i = this.users.push(user);
+              exsistingUser = this.users[i - 1];
             }
-            users.push(user);
+
+            users.push(exsistingUser);
           }
           await this.img.storeImage(rawChatContent.imgID!, chatKey);
           const chat = {
@@ -217,14 +251,23 @@ export class MessageService {
             chatKey,
             messages: [],
             users,
-            img: this.img.images.get(rawChatContent.imgID!)!,
+            img: this.img.imgRef(rawChatContent.imgID!)!,
           };
           chats = [...chats, chat];
         } else {
-          throw new Error('Failed to fetch the chat key.');
+          return;
         }
+
         chatIndex = chats.length - 1;
       }
+
+      // On chat update request, we get back a chats package with the modified name.
+      if (rawChatContent.name) chats[chatIndex].name = rawChatContent.name;
+      if (rawChatContent.imgID) {
+        chats[chatIndex].imgID = rawChatContent.imgID;
+        chats[chatIndex].img = this.img.imgRef(rawChatContent.imgID)!;
+      }
+
       if (rawChatContent.encryptedMessages.length != 0) {
         const chatMessages = await this.decryptAndParseMessages(
           rawChatContent.encryptedMessages,
@@ -292,17 +335,22 @@ export class MessageService {
     return chat?.messages[chat.messages.length - 1] || null;
   }
 
-  scrollLoadMessages(chatId: string) {
+  scrollLoadMessages(chatId: string): Promise<boolean> {
     const chat = this._chats$.value.find((c) => c.id === chatId);
-    if (!chat) {
-      return;
+    if (!chat || !chat.messages[0]) {
+      return new Promise((resolve) => resolve(false));
     }
 
-    this.socketService.createPackage({
-      header: 'GetChatMessages',
-      chatId: chat.id,
-      messageCount: 10,
-      fromId: chat.messages[0].id,
+    return new Promise((resolve) => {
+      this.socketService.createPackage(
+        {
+          header: 'GetChatMessages',
+          chatId: chat.id,
+          messageCount: 10,
+          fromId: chat.messages[0].id,
+        },
+        () => resolve(true)
+      );
     });
   }
 }

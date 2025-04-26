@@ -144,3 +144,21 @@ export async function findChatsByUser(
     return [];
   }
 }
+
+export async function updateChat(
+  chat: Partial<Chat> & { id: string }
+): Promise<Chat | null> {
+  try {
+    const updatedChat = await prisma.chat.update({
+      where: {
+        id: chat.id,
+      },
+      data: chat,
+    });
+
+    return updatedChat;
+  } catch (error) {
+    console.error("Error updating chat:\n", error);
+    return null;
+  }
+}

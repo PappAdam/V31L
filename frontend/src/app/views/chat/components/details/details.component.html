@@ -1,31 +1,72 @@
 <div
   class="details-wrapper"
-  [attr.data-state]="state"
+  [attr.data-state]="detailsState$ | async"
   [ngClass]="{
     'details-wrapper-mobile': this.platform?.platform !== 'web'
   }"
 >
-  <app-tab-header Title="asdasd"></app-tab-header>
+  <app-tab-header Title="Chat details"></app-tab-header>
   <div class="inner-wrapper">
-    <div class="group-action-wrapper">
-      <app-group-option-card fontIcon="group" label="Members" type="expand">
-        <div class="group-members-wrapper">
-          @for (chatMember of (messageService.selectedChat$ | async)?.users;
-          track $index) {
-          <app-group-member-card
-            [name]="chatMember.username"
-          ></app-group-member-card>
+    <div class="chat-edit-wrapper">
+      <div class="image-input-wrapper">
+        <input
+          #imageSelector
+          type="file"
+          (change)="onImageUpload($event)"
+          accept="image/*"
+          hidden
+          class="image-input"
+          [formControl]="imageInput"
+        />
+        <div class="image-selected">
+          @if (imgUploaded) {
+          <img [src]="img" alt="" />
+          <mat-icon
+            class="remove-btn"
+            fontIcon="close"
+            (click)="removeImage()"
+          ></mat-icon>
+          } @else {
+          <img [src]="this.chat?.img?.data || null" alt="" />
+          <mat-icon
+            class="remove-btn"
+            fontIcon="edit"
+            (click)="imageSelector.click()"
+          ></mat-icon>
           }
         </div>
-      </app-group-option-card>
-      <app-group-option-card
-        fontIcon="add"
-        label="Add member"
-        type="expand"
-        (expanded)="onAddMemberExpand()"
-      >
-        <div class="inv-body">
-          <app-qrcode class="inv-qr-code" [from]="this.invitation" />
+      </div>
+      <div class="edit-form">
+        <mat-form-field
+          appearance="outline"
+          [style.width]="'100%'"
+          [style.height]="'50%'"
+        >
+          <mat-label>{{ this.chat?.name }}</mat-label>
+          <input
+            matInput
+            [formControl]="newChatName"
+            placeholder="Enter chat name"
+            maxlength="30"
+            type="text"
+            name="chatName"
+          />
+        </mat-form-field>
+        <div class="buttons">
+          <button mat-fab type="submit" class="reset-btn" (click)="onReset()">
+            <mat-icon>undo</mat-icon>
+          </button>
+          <button mat-fab type="submit" (click)="onEditChat()">
+            <mat-icon>save</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="group-action-wrapper">
+      <app-group-option-card fontIcon="add" label="Add member" type="expand">
+        <div class="inv-body" #invBody [style.height.px]="invHeight$ | async">
+          @if (invitation$ |async; as invitation) {
+          <app-qrcode class="inv-qr-code" [from]="invitation" />
           <mat-divider></mat-divider>
           <div class="inv-string-container">
             <p>
@@ -34,9 +75,12 @@
               }}
             </p>
           </div>
-          <button mat-flat-button (click)="copyToClipboard()">
+          <button mat-flat-button (click)="copyToClipboard(invitation)">
             Copy to clipboard
           </button>
+          } @else {
+          <mat-spinner diameter="40"></mat-spinner>
+          }
         </div>
       </app-group-option-card>
       <app-group-option-card
@@ -60,6 +104,15 @@
         (click)="onLeaveChat()"
       >
       </app-group-option-card>
+    </div>
+    <div class="group-members-wrapper">
+      @for (chatMember of (messageService.selectedChat$ | async)?.users; track
+      $index) {
+      <app-group-member-card
+        [name]="chatMember.username"
+        [img]="chatMember.img.data"
+      ></app-group-member-card>
+      }
     </div>
   </div>
 </div>

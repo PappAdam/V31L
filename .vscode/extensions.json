@@ -16,6 +16,7 @@
     "mhutchie.git-graph", // Git Graph for visualization of git history and branch management
 
     // For handling non-issue worthy TODO-s
-    "Gruntfuggly.todo-tree"
+    "Gruntfuggly.todo-tree",
+    "adpyke.codesnap"
   ]
 }

@@ -1,17 +1,12 @@
-import {
-  effect,
-  inject,
-  Injectable,
-  Signal,
-  signal,
-  WritableSignal,
-} from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import { ImageResponse, stringToCharCodeArray } from '@common';
+import { arrayToString, ImageResponse, stringToCharCodeArray } from '@common';
 import { EncryptionService } from './encryption.service';
 import { environment } from '../../environments/environment';
+import imageCompression from 'browser-image-compression';
+
 export type Image = { data: string };
 
 @Injectable({
@@ -23,9 +18,48 @@ export class ImgService {
   http = inject(HttpClient);
   private baseURL = `${environment.httpUrl}/img/`;
 
-  images = new Map<string, Image>();
+  private images = new Map<string, Image>();
 
-  async storeImage(id: string, chatKey: CryptoKey): Promise<void> {
+  img(id: string) {
+    return this.images.get(id)?.data;
+  }
+
+  imgRef(id: string) {
+    return this.images.get(id);
+  }
+
+  async createImage(img: string, key?: CryptoKey) {
+    let [imgtype, imgdata] = img.split(',');
+    let iv: string | undefined;
+
+    imgdata = atob(imgdata);
+    if (key) {
+      const encrypted = await this.encryptionService.encryptText(key, imgdata);
+      imgdata = arrayToString(encrypted.data);
+      iv = arrayToString(encrypted.iv!);
+    }
+
+    const body = {
+      img: imgdata,
+      type: imgtype,
+      id: undefined,
+      iv,
+    };
+
+    const res = await lastValueFrom(
+      this.http.post<string | undefined>(this.baseURL + 'create', body, {
+        headers: { Authorization: this.authService.user!.token },
+      })
+    );
+
+    if (res) {
+      await this.storeImage(res, key);
+    }
+
+    return res;
+  }
+
+  async storeImage(id: string, chatKey?: CryptoKey): Promise<void> {
     if (!this.authService.user) {
       return;
     }
@@ -44,17 +78,16 @@ export class ImgService {
       return;
     }
 
-    let imgData = '';
+    let imgData = response.data;
     if (response.iv && chatKey) {
-      const rawData = stringToCharCodeArray(atob(response.data), Uint8Array);
-      imgData = await this.encryptionService.decryptText(chatKey, {
-        data: rawData,
-        iv: stringToCharCodeArray(response.iv, Uint8Array),
-      });
-    } else {
-      imgData = response.data;
+      const rawData = stringToCharCodeArray(atob(response.data));
+      imgData = btoa(
+        await this.encryptionService.decryptText(chatKey, {
+          data: rawData,
+          iv: stringToCharCodeArray(response.iv),
+        })
+      );
     }
-
     const img = `${response.type},${imgData}`;
     this.images.set(id, { data: img });
   }

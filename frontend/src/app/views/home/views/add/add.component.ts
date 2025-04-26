@@ -19,6 +19,10 @@ import {
   CapacitorBarcodeScannerTypeHint,
 } from '@capacitor/barcode-scanner';
 import { Camera, CameraResultType } from '@capacitor/camera';
+import { ChatService } from '@/services/chat.service';
+import { ImgService } from '@/services/img.service';
+import imageCompression from 'browser-image-compression';
+import Cropper from 'cropperjs';
 
 @Component({
   selector: 'app-add',
@@ -39,6 +43,8 @@ export class AddComponent {
   platformService: PlatformService = inject(PlatformService);
   platform: DeviceInfo | null = this.platformService.info;
   inviteService = inject(InviteService);
+  chatService = inject(ChatService);
+  imgService = inject(ImgService);
   messageService = inject(MessageService);
   encryptionService = inject(EncryptionService);
   router = inject(Router);
@@ -47,6 +53,7 @@ export class AddComponent {
   chatName = new FormControl('');
   connectionString = new FormControl('');
   @ViewChild('imageSelector') imageSelector?: HTMLInputElement;
+  @ViewChild('selectedImg') selectedImgElem?: HTMLImageElement;
   img = '';
   selectedFile: File | null = null;
 
@@ -59,15 +66,19 @@ export class AddComponent {
     this.uploadFile(file);
   }
 
-  uploadFile(file: File | null): void {
+  async uploadFile(file: File | null) {
     if (file && file.type.startsWith('image/')) {
-      this.selectedFile = file;
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 10,
+        useWebWorker: true,
+      });
+
+      this.selectedFile = compressed;
       const reader = new FileReader();
       reader.onload = (e) => {
         this.img = e.target?.result as string;
-        console.log(this.img);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressed);
     }
   }
 
@@ -93,8 +104,14 @@ export class AddComponent {
       return;
     }
 
-    const { chat, key } = await this.inviteService.createChatRequest(v);
+    const key = await this.encryptionService.generateChatKey();
 
+    let image: string | undefined = undefined;
+    if (this.img) {
+      image = await this.imgService.createImage(this.img, key);
+    }
+
+    const { chat } = await this.chatService.createChatRequest(v, key, image);
     this.messageService.sendMessage(
       chat.id,
       `This is the start of this conversation.`,
@@ -124,8 +141,6 @@ export class AddComponent {
       },
       cameraDirection: 1,
     });
-
-    console.log(result.ScanResult);
 
     if (!result.ScanResult) {
       return;

@@ -93,7 +93,7 @@ async function joinChat(req: Request, res: Response) {
       return;
     }
 
-    const rawKey = stringToCharCodeArray(key, Uint8Array);
+    const rawKey = stringToCharCodeArray(key);
 
     if (!rawKey) {
       res.status(400).json("Bad key");

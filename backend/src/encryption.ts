@@ -1,3 +1,4 @@
+import { arrayToString, stringToCharCodeArray } from "@common";
 import * as crypto from "crypto";
 
 const AUTH_LENGHT = 16;
@@ -54,4 +55,15 @@ export function decryptData(
   ]);
 
   return decrypted;
+}
+
+export async function hashText(input: string) {
+  return arrayToString(
+    new Uint8Array(
+      await crypto.subtle.digest(
+        { name: "SHA-256" },
+        stringToCharCodeArray(input)
+      )
+    )
+  );
 }

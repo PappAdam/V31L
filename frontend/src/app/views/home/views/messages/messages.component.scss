@@ -11,9 +11,15 @@
   flex-direction: column;
   flex-grow: 0;
   position: relative;
+  padding: $mat-sys-spacing-sm;
+  gap: $mat-sys-spacing-sm;
 
+  @include mat.tabs-overrides(
+    (
+      container-height: $mat-sys-component-height-medium,
+    )
+  );
   .cards {
-    margin-top: $mat-sys-component-height-medium;
     overflow-y: scroll;
     &::-webkit-scrollbar {
       display: none;

@@ -34,11 +34,15 @@ describe(`POST ${registerRoute}`, () => {
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual(
-      successResponse(response.body.token, {
-        id: response.body.id,
-        username: "newUser",
-        profilePictureId: response.body.profilePictureId,
-      })
+      successResponse(
+        response.body.token,
+        {
+          id: response.body.id,
+          username: "newUser",
+          profilePictureId: response.body.profilePictureId,
+        },
+        ""
+      )
     );
     expect(prisma.user.create).toHaveBeenCalled();
     expect(jwt.sign).toHaveBeenCalled();
@@ -102,7 +106,7 @@ describe(`POST ${loginRoute}`, () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(
-      successResponse(response.body.token, existingUserNoMfa)
+      successResponse(response.body.token, existingUserNoMfa, "")
     );
     expect(prisma.user.findUnique).toHaveBeenCalled();
     expect(bcrypt.compare).toHaveBeenCalled();
@@ -141,7 +145,7 @@ describe(`POST ${loginRoute}`, () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(
-      successResponse(response.body.token, existingUserWithMfa)
+      successResponse(response.body.token, existingUserWithMfa, "")
     );
     expect(prisma.user.findUnique).toHaveBeenCalled();
     expect(bcrypt.compare).toHaveBeenCalled();
