@@ -41,6 +41,10 @@ export async function updateEncryptedChatKeys(
   }
 
   try {
+    if (params.chatMembers.length == 0) {
+      return [];
+    }
+
     const updateOperations = params.chatMembers.map((chatMember) =>
       prisma.chatMember.update({
         where: { id: chatMember.id },

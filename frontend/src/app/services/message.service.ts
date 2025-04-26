@@ -79,6 +79,16 @@ export class MessageService {
     }
   );
 
+  private loadUserData = this.authService.user$.subscribe(async (u) => {
+    if (!this.users.find(async (lu) => lu.id == u?.id)) {
+      await this.img.storeImage(u!.profilePictureId);
+      this.users.push({
+        ...u!,
+        img: this.img.imgRef(u!.profilePictureId)!,
+      });
+    }
+  });
+
   private chatsPackageSubscription = this.socketService
     .addPackageListener('Chats')
     .subscribe((p) => this.onChatsPackageRecieved(p));

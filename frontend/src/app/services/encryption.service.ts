@@ -272,7 +272,7 @@ export class EncryptionService {
     };
 
     const res = await lastValueFrom(
-      this.http.put<{ result: string }>(
+      this.http.put<{ result: string; message: string }>(
         'http://localhost:3000/chat/update',
         body,
         {
@@ -280,10 +280,6 @@ export class EncryptionService {
         }
       )
     );
-
-    if (res.result == 'Error') {
-      console.warn(res);
-    }
   }
 
   async keyToRaw(key: CryptoKey) {

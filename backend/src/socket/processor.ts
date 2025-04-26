@@ -231,7 +231,7 @@ async function processBasedOnHeader(
       const userToRefresh = await findUserById(incoming.user.id);
       const userChats = await findChatMembersByUser(incoming.user.id);
 
-      const usersToRefresh: string[] = [];
+      const usersToRefresh: string[] = [incoming.user.id];
       for (let cm of userChats) {
         const members = await findChatMembersByChat(cm.chatId);
         members.forEach((m) => {

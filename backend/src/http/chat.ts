@@ -77,7 +77,7 @@ async function createNewChat(req: Request, res: Response) {
     res.json(chatCreationSuccessResponse(publicChat));
     return;
   } catch (error) {
-    console.error("Error during creating invitation: \n", error);
+    console.error("cannot create chat: \n", error);
     res.status(500).json(serverErrorResponse);
   }
 }
@@ -134,18 +134,11 @@ async function updateChatMemberKeys(
   res: Response
 ) {
   try {
-    const chatMembers = await updateEncryptedChatKeys(req.body);
-    if (!chatMembers.length) {
-      res
-        .status(400)
-        .json({ result: "Error", message: "No chat members were updated" });
-    }
-
+    await updateEncryptedChatKeys(req.body);
     res.status(200).json({ result: "Success" });
-
     return;
   } catch (error) {
-    console.error("Error during creating invitation: \n", error);
+    console.error("Error updating member keys: \n", error);
     res.status(500).json(serverErrorResponse);
   }
 }
