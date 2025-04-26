@@ -29,6 +29,10 @@ export class ImgService {
   }
 
   async createImage(img: string, key?: CryptoKey) {
+    if (!img) {
+      return;
+    }
+
     let [imgtype, imgdata] = img.split(',');
     let iv: string | undefined;
 
