@@ -8,6 +8,10 @@
   align-items: center;
   justify-content: center;
 
+  .auth-card-limiter {
+    max-width: 500px;
+  }
+
   #auth-card {
     display: flex;
     flex-direction: column;

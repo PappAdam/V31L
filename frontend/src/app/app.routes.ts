@@ -12,7 +12,7 @@ import { ChatComponent } from './views/chat/chat.component';
 
 export const routes: Routes = [
   // Primary outlet routes (unnamed)
-  { path: 'login', component: LoginComponent },
+  { path: 'login', component: LoginComponent, canActivate: [platformGuard] },
   { path: 'chat', component: ChatComponent, canActivate: [androidGuard] },
   { path: '', redirectTo: 'app', pathMatch: 'full' },
   {

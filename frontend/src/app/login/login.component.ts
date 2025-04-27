@@ -43,8 +43,8 @@ export class LoginComponent {
 
   private router = inject(Router);
   private dialog = inject(MatDialog);
-  platform: DeviceInfo | null = null;
-  platformService: PlatformService = inject(PlatformService);
+  protected platformService: PlatformService = inject(PlatformService);
+  platform: DeviceInfo | null = this.platformService.info;
 
   protected loginForm = new FormGroup({
     username: new FormControl('', [
@@ -77,8 +77,6 @@ export class LoginComponent {
     if (setupCode) {
       this.openSetupDialog(setupCode);
     }
-
-    this.platform = this.platformService.info;
   }
 
   async onSubmit(): Promise<void> {
