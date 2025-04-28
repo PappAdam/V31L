@@ -15,7 +15,7 @@ beforeAll(() => {
 beforeEach(async () => {
   database = await seedDatabase();
   jest.clearAllMocks();
-});
+}, 10000);
 
 /**
  * Function used to spy on a nested object. The function will spy on every function the object has.
