@@ -21,6 +21,7 @@ import { QRcodeComponent } from '../qrcode/qrcode.component';
 import { PlatformService } from '@/services/platform.service';
 import { DeviceInfo } from '@capacitor/device';
 import { EncryptionService } from '@/services/encryption.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login',
@@ -40,23 +41,23 @@ import { EncryptionService } from '@/services/encryption.service';
 export class LoginComponent {
   private authService = inject(AuthService);
   private encryptionService = inject(EncryptionService);
-
+  private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private dialog = inject(MatDialog);
   protected platformService: PlatformService = inject(PlatformService);
-  platform: DeviceInfo | null = this.platformService.info;
+  protected platform: DeviceInfo | null = this.platformService.info;
 
   protected loginForm = new FormGroup({
     username: new FormControl('', [
       Validators.required,
-      // Validators.minLength(8),
-      // Validators.pattern('^[a-zA-Z0-9_-]+$'),
+      Validators.minLength(8),
+      Validators.pattern('^[a-zA-Z0-9_-]+$'),
       // Allows only letters, numbers, underscores, and dashes
     ]),
     password: new FormControl('', [
       Validators.required, // Field is required
-      // Validators.minLength(8), // At least 8 characters
-      // passwordValidator(),
+      Validators.minLength(8), // At least 8 characters
+      passwordValidator(),
       // Ensures at least one uppercase letter, one lowercase letter, and one digit
     ]),
   });
@@ -114,10 +115,7 @@ export class LoginComponent {
             return;
         }
       case 'Error':
-        console.warn(
-          'Add this error message to login form: ',
-          response.message
-        );
+        this.snackBar.open(response.message, 'Ok', { duration: 5000 });
         break;
     }
   }

@@ -1,16 +1,16 @@
 {
   "users": [
-    { "username": "alice92", "password": "pass1234" },
+    { "username": "alice92", "password": "Pass1234" },
     { "username": "bob_the_dev", "password": "securePass!" },
     { "username": "charlieAI", "password": "aiRocks99" },
-    { "username": "daveCoder", "password": "pythonMaster" },
-    { "username": "eveQuantum", "password": "quantumSafe" },
+    { "username": "daveCoder", "password": "pythonMaster1" },
+    { "username": "eveQuantum", "password": "quantumS4fe" },
     { "username": "gamerTom", "password": "fragMaster3000" },
     { "username": "noobSlayer", "password": "proGamer007" },
-    { "username": "securityGuru", "password": "encryptMe" },
+    { "username": "securityGuru", "password": "encryptMe444" },
     {
       "username": "movieFanatic",
-      "password": "cinemaLover",
+      "password": "cinemaLover69",
       "mfaEnabled": true
     }
   ],
